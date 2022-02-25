@@ -6,7 +6,7 @@ set OperatingDirectory=%~dp0
 
 :: Setting settings Variables
 
-set CompilerFlags=/W3 /Z7 /EHsc /D "_CRT_SECURE_NO_WARNINGS" /c /MDd /std:c++latest
+set CompilerFlags=/W4 /Z7 /D "_CRT_SECURE_NO_WARNINGS" /c /MDd /std:c++latest /EHsc
 
 set LuxLibPath=%OperatingDirectory%/LuxEngine/lib
 

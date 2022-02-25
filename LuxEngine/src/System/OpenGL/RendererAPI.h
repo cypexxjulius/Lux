@@ -22,8 +22,6 @@ public:
 
     virtual void set_viewport(u32 width, u32 height) override;
 
-    virtual double get_delta_time() override;
-
 };
 
 

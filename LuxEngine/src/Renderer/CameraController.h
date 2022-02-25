@@ -2,8 +2,8 @@
 
 #include <initializer_list>
 
+#include "Core/Event.h"
 #include "Camera2D.h"
-#include "Event/Event.h"
 
 namespace Lux
 {
@@ -36,7 +36,7 @@ public:
 
     ~Camera2DController();
     
-    bool OnEvent(const Event& event);
+    bool on_event(const Event& event);
 
     constexpr const Camera2D& camera() const
     { return *m_Camera; }

@@ -88,9 +88,9 @@ public:
 
     static void shutdown();
 
-    static void begin_scene(const Camera2D& camera, const Shader* shader, const Font* font = nullptr);
+    static void begin_scene(const Camera2D& camera, Shader* shader, const Font* font = nullptr);
 
-    static void draw_quad(Quad2D&& quad);
+    static void draw_quad(Quad2D& quad);
 
     static void draw_text(std::string_view string, float scale, v3 color, v2 position, float zIndex = 0.0f);
 

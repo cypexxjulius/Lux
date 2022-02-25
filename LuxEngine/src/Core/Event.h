@@ -2,6 +2,8 @@
 #include "Utils/Assert.h"
 #include "Utils/Types.h"
 
+#include "Keycode.h"
+
 namespace Lux
 {
 
@@ -16,7 +18,12 @@ enum class EventType : u8
     MouseButtonPressed,
 };
 
-
+enum class KeyState
+{
+    Released,
+    Pressed,
+    Repeated
+};
 
 struct Event
 {    
@@ -24,11 +31,17 @@ struct Event
     
     // Event Props
     u8 mod;
-    u8 action;
-    i16 width;
-    i16 height;
-    int key_code;
-    v2 position, delta;
+    float width, height;
+    KeyState action;
+    union 
+    {   
+        MouseKey mouse;
+        Key keyboard;
+    } keycode;
+
+    v2 position;
+    v2 delta;
+    float delta_time;
 
 private:
 
@@ -42,16 +55,16 @@ public:
     {
     }
 
-    inline void reset() 
+    inline void reset(float time) 
     { 
         valid = false; 
         mod = 0;
-        action = 0;
+        action = KeyState::Released;
         width = 0;
         height = 0;
-        key_code = 0;
         position = { 0, 0};
         delta = { 0, 0};
+        delta_time = time;
     }
 
     inline EventType type() const 

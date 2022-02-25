@@ -49,7 +49,7 @@ VertexArray::~VertexArray()
 
 static inline void vertex_array_bind(u32 id)
 {
-    static i32 bound_adress = 0;
+    static u32 bound_adress = 0;
     
     if(id == bound_adress)
         return;
@@ -92,7 +92,7 @@ void VertexArray::bind()
 
 void VertexArray::set_index_buffer(IndexBuffer* ib)
 {
-    Assert(ib != nullptr, "IndexBuffer already set");
+    assert(ib != nullptr);
     bind();
     ib->bind();
     m_IndexBuffer = ib;

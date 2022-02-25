@@ -1,10 +1,10 @@
 #include "Renderer2D.h"
 #include "Renderer/RendererAPI.h"
 
+#pragma warning(disable: 4201)
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-
-#include "Utils/Debug.h"
+#pragma warning(default: 4201)
 
 namespace Lux
 {
@@ -77,7 +77,7 @@ void Renderer2D::shutdown()
     s_IdentityTexture = nullptr;
 }
 
-void Renderer2D::begin_scene(const Camera2D& camera, const Shader* shader, const Font* font)
+void Renderer2D::begin_scene(const Camera2D& camera, Shader* shader, const Font* font)
 {
     s_UsedFont = font;
 
@@ -140,7 +140,7 @@ constexpr void Renderer2D::push_vertices(const v3 position[4], const v4 color, c
 }
 
 
-void Renderer2D::draw_quad(Quad2D&& quad)
+void Renderer2D::draw_quad(Quad2D& quad)
 {
     if((s_QuadIndexCount + 6 >= MAX_INDICES) || (quad.texture != nullptr && s_TextureSlotIndex == 31))
         upload_batch();
@@ -182,7 +182,7 @@ void Renderer2D::draw_quad(Quad2D&& quad)
 
 void Renderer2D::draw_text(std::string_view string, float scale, v3 color, v2 position, float zIndex)
 {
-    Assert(s_UsedFont != nullptr, "Font must be set");
+    assert(s_UsedFont != nullptr);
 
     if(string.empty())
         return;
@@ -214,7 +214,7 @@ void Renderer2D::draw_text(std::string_view string, float scale, v3 color, v2 po
         float posx = position.x + lineLength;
         float posy = position.y + charData.baseline * scale;
         
-        const v3 position[4] = {
+        const v3 vertex_position[4] = {
                 { posx,            posy,          zIndex },
                 { posx + width,    posy,          zIndex },
                 { posx + width,    posy + height, zIndex },
@@ -224,7 +224,7 @@ void Renderer2D::draw_text(std::string_view string, float scale, v3 color, v2 po
         if(string[i] != ' ')
         {
             push_vertices(
-                position, 
+                vertex_position, 
                 { color.x, color.y, color.z, 1.0f }, 
                 textureCoords, 
                 1, 

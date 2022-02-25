@@ -18,24 +18,24 @@ struct RawShader
     ShaderType type;
     std::string data;
 
-    RawShader(u32 a_id, ShaderType a_type, std::string& a_data)
-        : id(a_id)
-        , type(a_type)
-        , data(a_data)
+    RawShader(u32 shader_id, ShaderType shader_type, std::string& shader_data)
+        : id(shader_id)
+        , type(shader_type)
+        , data(shader_data)
     {
     }
 
-    RawShader(ShaderType a_type, std::string_view a_data)
+    RawShader(ShaderType shader_type, std::string_view shader_data)
         : id(0)
-        , type(a_type)
-        , data(a_data)
+        , type(shader_type)
+        , data(shader_data)
     {
     }
     
-    RawShader(u32 a_id, ShaderType a_type, std::string_view a_data)
-        : id(a_id)
-        , type(a_type)
-        , data(a_data)
+    RawShader(u32 shader_id, ShaderType shader_type, std::string_view shader_data)
+        : id(shader_id)
+        , type(shader_type)
+        , data(shader_data)
     {
     }
 };
@@ -52,15 +52,15 @@ public:
 
     virtual void bind() const = 0;
 
-    virtual void set_mat4(std::string_view name, mat4 matrix) const = 0;
+    virtual void set_mat4(std::string_view name, mat4 matrix) = 0;
 
-    virtual void set_float(std::string_view name, float float0) const = 0;
+    virtual void set_float(std::string_view name, float float0) = 0;
 
-    virtual void set_int(std::string_view name, int number) const = 0;
+    virtual void set_int(std::string_view name, int number) = 0;
 
-    virtual void set_float4(std::string_view name, v4 vec4) const = 0;
+    virtual void set_float4(std::string_view name, v4 vec4) = 0;
 
-    virtual void set_int_array(std::string_view name, int* values, u32 count) const = 0;
+    virtual void set_int_array(std::string_view name, int* values, u32 count) = 0;
 
 
     static Shader* create(std::string_view shaderName, std::initializer_list<RawShader> init_list);

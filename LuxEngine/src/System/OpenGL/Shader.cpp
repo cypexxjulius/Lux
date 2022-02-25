@@ -1,44 +1,48 @@
 #include "System/OpenGL/Shader.h"
 
 #include <string_view>
-#include <glad/glad.h>
-#include <glm/gtc/type_ptr.hpp>
 #include <vector>
 #include <fstream>
+#include <glad/glad.h>
+
+#pragma warning(disable: 4201)
+#include <glm/gtc/type_ptr.hpp>
+#pragma warning(default: 4201)
 
 #include "Utils/Assert.h"
 #include "Utils/Logger.h"
 
 #include "Core/IO.h"
+
 namespace Lux::OpenGL
 {
 
-int Shader::pre_process_shader_file(std::string& File, std::vector<RawShader>& shaders)
+int Shader::pre_process_shader_file(std::string& shader_file, std::vector<RawShader>& shaders)
 {
 
-    Assert(!File.empty(), "Failed to preprocess empty file");
+    assert(!shader_file.empty());
 
 
     int count = 0;
-    size_t nPos = File.find("#type"); // first occurrence
+    size_t nPos = shader_file.find("#type"); // first occurrence
     while(nPos != std::string::npos)
     {
         count++;
-        nPos = File.find("#type", nPos + 1);
+        nPos = shader_file.find("#type", nPos + 1);
     }
 
     shaders.reserve(count);
 
-    size_t StartPosition = File.find_first_of("#type") + 5; // Get first #type in file; 5 for strlen("#type")
+    size_t StartPosition = shader_file.find_first_of("#type") + 5; // Get first #type in file; 5 for strlen("#type")
 
     if (StartPosition == std::string::npos) // Return Error Code if no #type definition is found
         return 0;
 
     while (StartPosition != std::string::npos)
     {
-        File = File.substr(StartPosition);
+        shader_file = shader_file.substr(StartPosition);
 
-        size_t lineLength = File.find_first_of('\n');
+        size_t lineLength = shader_file.find_first_of('\n');
 
         if (lineLength == std::string::npos)
             return 0;
@@ -46,20 +50,20 @@ int Shader::pre_process_shader_file(std::string& File, std::vector<RawShader>& s
         unsigned int i = 0;
         ShaderType typeOfShader;
 
-        while (File[i] != '\0' || File[i] != '\n') // Iterate through the rest of the line
+        while (shader_file[i] != '\0' || shader_file[i] != '\n') // Iterate through the rest of the line
         {
-            if (File[i] == ' ') // dont care about white spaces
+            if (shader_file[i] == ' ') // dont care about white spaces
             {
                 i++;
                 continue;
             }
-            if(File.substr(i, sizeof("vertex") - 1) == "vertex")
+            if(shader_file.substr(i, sizeof("vertex") - 1) == "vertex")
             {
                 typeOfShader = ShaderType::Vertex;
                 break;
             }
 
-            if (File.substr(i, sizeof("fragment") - 1) == "fragment")
+            if (shader_file.substr(i, sizeof("fragment") - 1) == "fragment")
             {
                 typeOfShader = ShaderType::Fragment;
                 break;
@@ -69,21 +73,21 @@ int Shader::pre_process_shader_file(std::string& File, std::vector<RawShader>& s
         }
        
         // We have found the ShaderType
-        File = File.substr(lineLength + 1); // Set the "Cursor" to the beginning of the Shader
+        shader_file = shader_file.substr(lineLength + 1); // Set the "Cursor" to the beginning of the Shader
 
-        size_t ShaderStringLength = File.find("#type");
+        size_t ShaderStringLength = shader_file.find("#type");
 
         if (ShaderStringLength == std::string::npos)
         {
-            shaders.emplace_back(0, typeOfShader, File);
+            shaders.emplace_back(0, typeOfShader, shader_file);
             break;
         }
 
         ShaderStringLength--; // Setting the length one char before the '#' of "#type"
 
-        shaders.emplace_back(0, typeOfShader, File.substr(0, ShaderStringLength));
+        shaders.emplace_back(0, typeOfShader, shader_file.substr(0, ShaderStringLength));
 
-        File = File.substr(ShaderStringLength);
+        shader_file = shader_file.substr(ShaderStringLength);
 
         StartPosition = 1 + sizeof("#type");
     }
@@ -94,7 +98,7 @@ int Shader::pre_process_shader_file(std::string& File, std::vector<RawShader>& s
 
 int Shader::compile(std::vector<RawShader>& shaders)
 {
-    const GLenum TO_GL_TYPE[2] = {
+    constexpr GLenum TO_GL_TYPE[2] = {
         GL_VERTEX_SHADER,
         GL_FRAGMENT_SHADER
     };
@@ -132,7 +136,7 @@ int Shader::compile(std::vector<RawShader>& shaders)
 
             shader.id = 0;
         
-            Assert(0, "Failed to compile shader");
+            TODO();
 
             return 0;
         }
@@ -144,56 +148,55 @@ int Shader::compile(std::vector<RawShader>& shaders)
 
 Shader::~Shader()
 {
-    glDeleteProgram(m_ID);
+    glDeleteProgram(m_id);
 }
 
 void Shader::create_shader(std::vector<RawShader>& raw_shaders)
 {
-    int isValid = 0;
-    m_ID = glCreateProgram();
+    m_id = glCreateProgram();
 
-    size_t status = compile(raw_shaders);
+    assert(compile(raw_shaders));
         
     for(RawShader& shader : raw_shaders)
-        glAttachShader(m_ID, shader.id);   
+        glAttachShader(m_id, shader.id);   
 
-    glLinkProgram(m_ID);
+    glLinkProgram(m_id);
 
     int isLinked = 0;
-    glGetProgramiv(m_ID, GL_LINK_STATUS, &isLinked);
+    glGetProgramiv(m_id, GL_LINK_STATUS, &isLinked);
 
     if(!isLinked)
     {
         int errorMessageLength = 0;
-        glGetProgramiv(m_ID, GL_INFO_LOG_LENGTH, &errorMessageLength);
+        glGetProgramiv(m_id, GL_INFO_LOG_LENGTH, &errorMessageLength);
 
         char *errorMessage = new char[errorMessageLength];
 
-        glGetProgramInfoLog(m_ID, errorMessageLength, &errorMessageLength, errorMessage);
+        glGetProgramInfoLog(m_id, errorMessageLength, &errorMessageLength, errorMessage);
 
         for(RawShader& shader : raw_shaders)
             glDeleteShader(shader.id);
 
-        LOG("Failed to compile shader", m_Name,"\n", errorMessage);
+        LOG("Failed to compile shader", m_name,"\n", errorMessage);
     
         delete[] errorMessage;
 
-        m_ID = 0;
+        m_id = 0;
     }
     
     for(RawShader& shader : raw_shaders)
     {
-        glDetachShader(m_ID, shader.id);
+        glDetachShader(m_id, shader.id);
         glDeleteShader(shader.id);
     }
 
-    glValidateProgram(m_ID);
+    glValidateProgram(m_id);
 }
 
 Shader::Shader(std::string_view shaderName, std::string_view shaderPath)
-    : m_Name(shaderName)
+    : m_name(shaderName)
 {
-    auto file_content = IO::read_file(shaderPath);
+    auto file_content = IO::read_file(std::string(shaderPath));
     
 
 
@@ -205,7 +208,7 @@ Shader::Shader(std::string_view shaderName, std::string_view shaderPath)
 }
 
 Shader::Shader(std::string_view shaderName, std::initializer_list<RawShader>& shaders)
-    : m_Name(shaderName)
+    : m_name(shaderName)
 {
     std::vector<RawShader> raw_shaders = shaders;
 
@@ -225,19 +228,19 @@ static inline void shader_bind(u32 id)
 
 void Shader::bind() const
 {
-    shader_bind(m_ID);
+    shader_bind(m_id);
 }
 
 i32 Shader::get_uniform(std::string_view uniformName)
 {
-    if(m_Uniforms.find(uniformName) != m_Uniforms.end())
-        return m_Uniforms[uniformName];
+    if(m_uniforms.find(uniformName) != m_uniforms.end())
+        return m_uniforms[uniformName];
 
-    i32 location = glGetUniformLocation(m_ID, uniformName.data());
+    i32 location = glGetUniformLocation(m_id, uniformName.data());
 
-    Assert(location != -1, "Uniform not found");
+    assert(location != -1);
 
-    m_Uniforms[uniformName] = location;
+    m_uniforms[uniformName] = location;
 
     return location;
 }

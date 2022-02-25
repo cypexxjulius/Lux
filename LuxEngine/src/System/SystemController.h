@@ -1,6 +1,7 @@
 #pragma once 
 
 #include "Utils/Types.h"
+#include "Core/Keycode.h"
 
 namespace Lux
 {
@@ -47,14 +48,14 @@ public:
     static constexpr int MaxMouseKeys()
     {
         if constexpr(OS() == SystemOS::Windows)
-            return 7; // GLFW_KEY_LAST
+            return (static_cast<int>(MouseKey::MAX) - 4);
     }
 
 
     static constexpr int MaxKeyboardKeys()
     {
         if constexpr(OS() == SystemOS::Windows)
-            return 348; //GLFW_MOUSE_BUTTON_LAST
+            return static_cast<int>(Key::MAX);
     }
 
 

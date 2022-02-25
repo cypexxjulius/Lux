@@ -29,6 +29,8 @@ public:
 
     bool is_vsync_set();
 
+    float delta_time();
+
 };
 
 

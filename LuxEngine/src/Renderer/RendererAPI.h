@@ -30,8 +30,6 @@ public:
 
     virtual void set_viewport(u32 width, u32 height) = 0;
 
-    virtual double get_delta_time() = 0;
-
     static RendererAPI* create();
 
     static constexpr RendererAPI* Get()  

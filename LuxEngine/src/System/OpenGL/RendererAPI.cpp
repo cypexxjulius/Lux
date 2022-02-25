@@ -75,16 +75,4 @@ void RendererAPI::set_viewport(u32 width, u32 height)
     glViewport(0, 0, width, height);
 }
 
-
-
-double RendererAPI::get_delta_time()
-{
-    static double lastTime = 0.0;
-
-    double time = (float)glfwGetTime(); 
-    double deltaTime = time - lastTime;
-    lastTime = time;
-    return deltaTime;
-}
-
 }

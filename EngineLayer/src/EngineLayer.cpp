@@ -36,5 +36,5 @@ public:
 
 void lux_start()
 {
-    Lux::Application::Get().push_layer<EngineLayer>();
+    Lux::Application::PushLayer<EngineLayer>();
 }

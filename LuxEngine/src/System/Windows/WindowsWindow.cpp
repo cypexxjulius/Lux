@@ -1,6 +1,8 @@
 #include "Core/Application.h"
+#include "Core/Keycode.h"
 #include "Core/Window.h"
 #include "Core/Event.h"
+
 #include "Utils/Assert.h"
 
 #include <glad/glad.h>
@@ -9,6 +11,14 @@
 namespace Lux
 {
 
+constexpr KeyState gl_to_lux_keystate[] = {
+    KeyState::Released,
+    KeyState::Pressed,
+    KeyState::Repeated
+};
+
+Key OpenGL_to_Lux_KeyCode(GLenum gl_key);
+MouseKey OpenGL_to_Lux_MouseKey(GLenum gl_key); 
 
 Window::Window(const std::string& title, u32 width, u32 height)
     : m_width(width), m_height(height), m_title(title)
@@ -35,12 +45,14 @@ Window::Window(const std::string& title, u32 width, u32 height)
 
     GLFWwindow* m_Handle = (GLFWwindow*)m_handle;
 
+#pragma warning(disable: 4100)
     glfwSetFramebufferSizeCallback(m_Handle, [](GLFWwindow* glWindow, int width, int height)
     {
+
         auto& app = Application::Get_private();
         auto& buffer = app.m_event_buffer; 
-        app.m_width  = buffer.window_resize.width  = width;
-        app.m_height = buffer.window_resize.height = height;
+        app.m_width  = buffer.window_resize.width  = static_cast<float>(width);
+        app.m_height = buffer.window_resize.height = static_cast<float>(height);
 
         buffer.window_resize.valid = true;
 
@@ -66,9 +78,9 @@ Window::Window(const std::string& title, u32 width, u32 height)
         auto& app = Application::Get_private();
         auto& buffer = app.m_event_buffer; 
         Event event(EventType::KeyPressed);
-        event.action = action;
-        event.key_code = key;
-        event.mod = mods;
+        event.action = gl_to_lux_keystate[static_cast<u8>(action)];
+        event.keycode.keyboard = OpenGL_to_Lux_KeyCode(key);
+        event.mod = static_cast<u8>(mods);
         
         buffer.key_events.emplace_back(std::move(event));    
 
@@ -82,9 +94,9 @@ Window::Window(const std::string& title, u32 width, u32 height)
         auto& buffer = app.m_event_buffer; 
         
         Event event(EventType::MouseButtonPressed);
-        event.key_code = button;
-        event.mod = mods;
-        event.action = action;
+        event.keycode.mouse = OpenGL_to_Lux_MouseKey(button);
+        event.mod = static_cast<u8>(mods);
+        event.action = gl_to_lux_keystate[static_cast<u8>(action)];
         event.position = app.m_iostate.mouse_position;
 
         buffer.mouse_button.emplace_back(std::move(event));
@@ -115,6 +127,7 @@ Window::Window(const std::string& title, u32 width, u32 height)
         xOldPos = x;
         yOldPos = y;
     });
+#pragma warning(default: 4100)
 
 }
 
@@ -140,5 +153,14 @@ Window::~Window()
     glfwTerminate();
 }
 
+float Window::delta_time()
+{
+    static double lastTime = 0.0;
+
+    double time = (float)glfwGetTime(); 
+    double deltaTime = time - lastTime;
+    lastTime = time;
+    return (float)deltaTime;
+}
 
 };

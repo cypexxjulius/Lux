@@ -1,8 +1,8 @@
 #pragma once 
 #include "Renderer/Shader.h"
 
-#include <string_view>
 #include <vector>
+#include <string_view>
 #include <unordered_map>
 #include "Utils/Types.h"
 
@@ -13,14 +13,14 @@ namespace Lux::OpenGL
 class Shader final : public ::Lux::Shader
 {
 private:
-    u32 m_ID;
-    std::string m_Name;
-    std::unordered_map<std::string_view, i32> m_Uniforms;
+    u32 m_id;
+    std::string m_name;
+    std::unordered_map<std::string_view, i32> m_uniforms;
 
 
     int compile(std::vector<RawShader>& shaders);
 
-    int pre_process_shader_file(std::string& File, std::vector<RawShader>& shaders);
+    int pre_process_shader_file(std::string& shader_file, std::vector<RawShader>& shaders);
 
     void create_shader(std::vector<RawShader>& shaders);
 

@@ -7,7 +7,7 @@ namespace Lux
 {
 Camera2DController::Camera2DController(std::initializer_list<Camera2DControll> init_list)
 {
-    m_AspectRatio = (float)Application::Get()->state().width / (float)Application::Get()->state().height;
+    m_AspectRatio = (float)Application::Width() / (float)Application::Height();
     
     m_Camera = new Camera2D(
         -m_AspectRatio * m_ZoomLevel,
@@ -28,7 +28,7 @@ Camera2DController::~Camera2DController()
     m_Camera = nullptr;
 }
     
-bool Camera2DController::OnEvent(const Event& event)
+bool Camera2DController::on_event(const Event& event)
 {
     switch(event.type())
     {
@@ -40,9 +40,9 @@ bool Camera2DController::OnEvent(const Event& event)
                 return false;
             
             if(scrollDistance < 0)
-                m_ZoomLevel *=  (-scrollDistance) * m_ZoomIntensity;
+                m_ZoomLevel *=  (-scrollDistance) * m_ZoomIntensity * event.delta_time;
             else 
-                m_ZoomLevel /= scrollDistance * m_ZoomIntensity; 
+                m_ZoomLevel /= scrollDistance * m_ZoomIntensity * event.delta_time; 
 
             m_ZoomLevel = std::max(m_ZoomLevel, 0.0001f);
 
@@ -69,12 +69,12 @@ bool Camera2DController::OnEvent(const Event& event)
 
         case EventType::MouseMoved:
 
-            if(!((m_Controlls & static_cast<u32>(Camera2DControll::DRAG)) * Application::Get()->state().mouse.buttons[0]))
+            if(!((m_Controlls & static_cast<u32>(Camera2DControll::DRAG)) * Application::IOState().mouse_buttons[0]))
                 return false;
             
             m_Camera->add_position({
-                -event.delta.x * (m_Camera->width() / Application::Get()->state().width), 
-                -event.delta.y * (m_Camera->height() / Application::Get()->state().height), 
+                -event.delta.x * (m_Camera->width() / Application::Width()) * event.delta_time, 
+                -event.delta.y * (m_Camera->height() / Application::Height()) * event.delta_time, 
                 0.0f
             });
 

@@ -85,7 +85,7 @@ Bitmap::Bitmap(u32 width, u32 height, ImageType type)
 
 void Bitmap::set_data(void* data, u32 size)
 {
-    Assert(size == (m_Width * m_Height * m_Channels), "Invalid buffer size specified");
+    assert(size == (m_Width * m_Height * m_Channels));
     glTextureSubImage2D(m_ID, 0, 0, 0, m_Width, m_Height, to_gl_data_format(m_DataFormat), GL_UNSIGNED_BYTE, data);
 }
 

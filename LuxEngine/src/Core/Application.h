@@ -2,12 +2,14 @@
 
 #include <vector>
 #include <string>
+#include <memory>
 
 #include "Layer.h"
 #include "Window.h"
 #include "Utils/Types.h"
 #include "Event.h"
 
+#include "Renderer/RendererAPI.h"
 #include "System/SystemController.h"
 
 namespace Lux
@@ -45,8 +47,9 @@ class Application
 private:
     bool m_minimized = false;
     bool m_running = true;
-    u16 m_width = 1280; 
-    u16 m_height = 720;
+    float m_width = 1280; 
+    float m_height = 720;
+    float m_frame_time;
 
     std::string m_title;
     static Application* s_Instance;
@@ -57,6 +60,7 @@ private:
 
 
     Window m_window;
+    std::unique_ptr<RendererAPI> m_renderer;
     
     EventBuffer m_event_buffer;
     VirtualIO m_iostate;
@@ -79,27 +83,33 @@ private:
     inline void close_application()
     { m_running = false; }
 
+
 public:
 
     friend class Window;
 
     Application(const std::string& title);
 
-    static inline const Application& Get() 
-    { return *s_Instance; } 
-
-
     void loop();
 
+
     template<class T>
-    inline void push_layer() const
+    static inline void PushLayer()
     { 
         static_assert(std::is_base_of<Layer, T>::value, "Class has to inherit from the Layer class");
-        m_layerstack.emplace_back(new T);  
-        m_layerstack.back()->on_attach();
+        Application::Get_private().m_layerstack.emplace_back(new T);  
+        Application::Get_private().m_layerstack.back()->on_attach();
 
     }
 
+    static inline float Width()
+    { return Application::Get_private().m_width; }
+
+    static inline float Height()
+    { return Application::Get_private().m_height; }
+
+    static inline VirtualIO IOState()
+    { return Application::Get_private().m_iostate; }
 
 };
 
