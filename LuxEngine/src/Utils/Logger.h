@@ -1,7 +1,7 @@
 #pragma once 
 #include <iostream>
 
-namespace Crystal
+namespace Lux
 {
 
 template<typename T>

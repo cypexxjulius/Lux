@@ -13,7 +13,7 @@ set LuxLibPath=%OperatingDirectory%/LuxEngine/lib
 set LuxIncludePath=-I%LuxLibPath%/stb/ -I%LuxLibPath%/glad/include/  -I%LuxLibPath%/glfw/include/ -I%LuxLibPath%/glm/ -I%OperatingDirectory%/LuxEngine/src/ -I%OperatingDirectory%/LuxEngine/pch/
 
 
-call "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvarsall.bat" x64 >nul 2> nul
+call vcvarsall.bat x64 >nul 2> nul
 echo --- Environment Configured
 
 IF NOT EXIST "LuxEngine\lib\glfw\build\src\Release\glfw3.lib" (
@@ -24,7 +24,7 @@ IF NOT EXIST "LuxEngine\lib\glfw\build\src\Release\glfw3.lib" (
 
     popd
 
-    echo --- glfw3.lib build
+    echo --- glfw3.lib build 
 )
 
 IF NOT EXIST "LuxEngine\lib\glm\build\glm\Release\glm_static.lib" (

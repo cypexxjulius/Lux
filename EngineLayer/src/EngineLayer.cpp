@@ -11,7 +11,7 @@ public:
 
     void on_attach() override
     {
-        std::cout << "Hello World" << std::endl;
+        
     }
 
     void on_detach() override
@@ -19,15 +19,15 @@ public:
 
     }
 
-    void on_event() override
+    bool on_event(const Lux::Event& event) override
     {
 
-
+        return false;
     }
 
     void on_update() override
     {
-
+        std::cout << "I'am a loop hero" << std::endl;
     }
 
 };

@@ -1,5 +1,6 @@
 #pragma once 
 
+#include "Event.h"
 
 namespace Lux 
 {
@@ -18,7 +19,7 @@ public:
 
     virtual void on_update() = 0;
 
-    virtual void on_event() = 0;
+    virtual bool on_event(const Event& event) = 0;
 
 
 };
