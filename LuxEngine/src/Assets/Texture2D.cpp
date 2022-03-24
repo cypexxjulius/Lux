@@ -39,7 +39,7 @@ Texture2D::Texture2D(std::string_view filepath)
 
     }
 
-    m_Bitmap = Bitmap::create(width, height, m_Type);
+    m_Bitmap = std::make_unique<Bitmap>(Bitmap::Create(width, height, m_Type));
 
     m_Bitmap->set_data(data, width * height * channels);
 
@@ -49,7 +49,7 @@ Texture2D::Texture2D(std::string_view filepath)
 Texture2D::Texture2D(ImageType type, u32 width, u32 height, void* data)
 {
     m_Type = type;
-    m_Bitmap = Bitmap::create(width, height, m_Type);
+    m_Bitmap = std::make_unique<Bitmap>(Bitmap::Create(width, height, m_Type));
 
     if(data != nullptr)
         m_Bitmap->set_data(data, width * height * static_cast<int>(m_Type));

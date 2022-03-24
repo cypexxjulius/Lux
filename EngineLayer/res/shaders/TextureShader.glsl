@@ -75,6 +75,8 @@ void main()
         case 30: color *= texture2D(u_Textures[30], v_texCoord * v_TilingFactor); break;
         case 31: color *= texture2D(u_Textures[31], v_texCoord * v_TilingFactor); break;
     }
-
+    if(color.a < 0.1)
+        discard;
+        
     GLcolor = color;
 }

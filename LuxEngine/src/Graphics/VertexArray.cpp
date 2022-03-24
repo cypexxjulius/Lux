@@ -9,9 +9,9 @@
 namespace Lux 
 {
 
-VertexArray* VertexArray::create()
+Ref<VertexArray> VertexArray::Create()
 {
-    return new OpenGL::VertexArray();
+    return std::make_shared<OpenGL::VertexArray>();
 }   
 
 }

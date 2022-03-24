@@ -9,7 +9,7 @@
 #include "Utils/Types.h"
 #include "Event.h"
 
-#include "Renderer/RendererAPI.h"
+#include "Graphics/Renderer.h"
 #include "System/SystemController.h"
 
 namespace Lux
@@ -60,7 +60,6 @@ private:
 
 
     Window m_window;
-    std::unique_ptr<RendererAPI> m_renderer;
     
     EventBuffer m_event_buffer;
     VirtualIO m_iostate;

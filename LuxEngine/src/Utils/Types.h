@@ -1,9 +1,16 @@
 #pragma once 
 
 #include <glm/glm.hpp>
+#include <memory>
+#include <array>
 
 namespace Lux
 {
+template<typename T>
+using Ref = std::shared_ptr<T>;
+
+template<typename T, int count>
+using Array = std::array<T, count>;
 
 using u64 = uint64_t;
 using u32 = uint32_t;

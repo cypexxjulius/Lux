@@ -1,28 +1,87 @@
-#include "Renderer/RendererAPI.h"
+#include "Graphics/Renderer.h"
 
+
+#include <glad/glad.h>
+#include <glfw/glfw3.h>
+
+#include "Utils/Logger.h"
 
 namespace Lux::OpenGL
 {
 
-class RendererAPI final : public ::Lux::RendererAPI
+inline void RendererInit()
 {
-public:
-    RendererAPI();
+    glEnable(GL_DEBUG_OUTPUT);
+	glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
 
-    ~RendererAPI();
+	glDebugMessageCallback(
+        [](GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message, const void *userParam)
+        {
+            if(severity <= GL_DEBUG_SEVERITY_MEDIUM)
+                return;
 
+            (void)source;
+            (void)length;
+            (void)userParam;
+            (void)id;
+            
+            ERROR("[OPENGL ERROR]:\n" 
+                    "Source     : {}\n"
+                    "Type       : {}\n"
+                    "Severity   : {}\n"
+                    "Text:     \n"
+                    "{}\n", source, type, severity, message);
+        }, NULL
+    );
+		
+	glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_NOTIFICATION, 0, NULL, GL_FALSE);
+
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    glEnable(GL_DEPTH_TEST);
+}
+
+inline void RendererShutdown()
+{
+
+}
+
+inline void RendererClear()
+{
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+}
+
+inline void RendererSetClearColor(const v4& color)
+{
+    glClearColor(color.x, color.y, color.z, color.w);
+}
+
+
+inline void RendererDrawIndexed(Ref<VertexArray> va, u32 indexCount)
+{
+    u32 count = (indexCount) ? indexCount : va->indexbuffer()->count();
     
-    virtual void init() override;
+    // Draw Elements
+    va->bind();
+    glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, nullptr);
+} 
 
-    virtual void shutdown() override;
+inline void RendererSetViewport(u32 width, u32 height) 
+{
+    glViewport(0, 0, width, height);
+}
 
-    virtual void clear(const v4& color = { 0.8f, 0.0f, 0.0f, 1.0f } ) override;
 
-    virtual void draw_indexed(VertexArray* va, u32 indexCount = 0) override;
+RendererFunctions RendererAPIFunctions 
+{
+    .Init = RendererInit,
+    .Shutdown = RendererShutdown,
 
-    virtual void set_viewport(u32 width, u32 height) override;
-
+    .Clear = RendererClear,
+    .SetClearColor = RendererSetClearColor,
+    .SetViewport = RendererSetViewport,
+    .DrawIndexed = RendererDrawIndexed,
 };
-
 
 }

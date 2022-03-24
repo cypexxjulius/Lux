@@ -53,9 +53,9 @@ public:
     
     virtual inline u32 offset() const = 0;
  
-    static VertexBuffer* create(void* data, u32 size);
+    static VertexBuffer* Create(void* data, u32 size);
 
-    static VertexBuffer* create(u32 size);
+    static VertexBuffer* Create(u32 size);
     
 
 };
@@ -73,7 +73,7 @@ public:
 
     virtual u32 count() const = 0;
 
-    static IndexBuffer* create(unsigned int* data, u32 count);
+    static IndexBuffer* Create(unsigned int* data, u32 count);
 
 
 };

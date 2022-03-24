@@ -110,7 +110,8 @@
         "xmemory": "cpp",
         "xstddef": "cpp",
         "xtree": "cpp",
-        "hash_map": "cpp"
+        "hash_map": "cpp",
+        "variant": "cpp"
     },
     "files.exclude": {
         "**/.gitmodules": true,

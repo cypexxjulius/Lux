@@ -139,7 +139,6 @@ MouseKey OpenGL_to_Lux_MouseKey(GLenum key)
         case GLFW_MOUSE_BUTTON_8: return MouseKey::EIGHT;
         default: TODO();
     };
-
     return MouseKey::MAX;
 }
 

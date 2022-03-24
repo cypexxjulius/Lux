@@ -1,13 +1,19 @@
 #include <Lux.h>
 #include <iostream>
+#include <memory>
+
+using namespace Lux;
 
 class EngineLayer final : public Lux::Layer
 {
-private:
-
 public:
 
-    EngineLayer() {}
+    EngineLayer() 
+    {
+
+
+
+    }
 
     void on_attach() override
     {

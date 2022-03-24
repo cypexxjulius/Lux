@@ -2,7 +2,7 @@
 
 #include "Utils/Types.h"
 
-#include "Renderer/Buffer.h"
+#include "Graphics/Buffer.h"
 
 
 namespace Lux
@@ -28,7 +28,7 @@ public:
 
     virtual IndexBuffer* indexbuffer() = 0;
 
-    static VertexArray* create();
+    static Ref<VertexArray> Create();
 
 };
 

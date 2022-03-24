@@ -8,7 +8,7 @@
 namespace Lux
 {
 
-VertexBuffer* VertexBuffer::create(void* data, u32 size)
+VertexBuffer* VertexBuffer::Create(void* data, u32 size)
 {
     if(SystemController::Renderer() == SystemRenderer::OpenGL)
         return new OpenGL::VertexBuffer(data, size);
@@ -18,7 +18,7 @@ VertexBuffer* VertexBuffer::create(void* data, u32 size)
     return nullptr;
 }
 
-VertexBuffer* VertexBuffer::create(u32 size)
+VertexBuffer* VertexBuffer::Create(u32 size)
 {
     if(SystemController::Renderer() == SystemRenderer::OpenGL)
         return new OpenGL::VertexBuffer(size);
@@ -29,7 +29,7 @@ VertexBuffer* VertexBuffer::create(u32 size)
     return nullptr;
 }
 
-IndexBuffer* IndexBuffer::create(unsigned int* data, u32 count)
+IndexBuffer* IndexBuffer::Create(unsigned int* data, u32 count)
 {
     if(SystemController::Renderer() == SystemRenderer::OpenGL)
         return new OpenGL::IndexBuffer(data, count);

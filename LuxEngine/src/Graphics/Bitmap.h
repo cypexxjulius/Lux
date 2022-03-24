@@ -51,7 +51,7 @@ public:
 
     virtual DataFormat data_format() const = 0;
 
-    static Bitmap* create(u32 width, u32 height, ImageType type); 
+    static Bitmap* Create(u32 width, u32 height, ImageType type); 
 
 };
 

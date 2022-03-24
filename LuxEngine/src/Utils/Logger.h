@@ -1,22 +1,21 @@
 #pragma once 
+
+#include <format>
 #include <iostream>
 
 namespace Lux
 {
 
-template<typename T>
-void LOG(T element)
+template<class... Arguments>
+void ERROR(const std::string& fmt, Arguments&&... args)
 {
-    std::cout << element << std::endl;
+    std::cout << "[ERROR] " << std::vformat(fmt, std::make_format_args(args...)) << "\n";
 }
 
-
-
-template<typename T,typename... Types>
-void LOG(const T& firstElement, const Types&... params)
+template<class... Arguments>
+void INFO(const std::string&fmt, Arguments&&... args)
 {
-    std::cout << firstElement;
-    LOG(params...);
+    std::cout << "[INFO] " << std::vformat(fmt, std::make_format_args(args...)) << "\n";
 }
 
 }

@@ -1,51 +1,64 @@
 #pragma once 
-#include "Renderer/Shader.h"
+#include "Graphics/Shader.h"
 
 #include <vector>
-#include <string_view>
-#include <unordered_map>
-#include "Utils/Types.h"
+#include <fstream>
+#include <optional>
 
+#include "Utils/Types.h"
+#include "Utils/Assert.h"
+
+
+
+#include <glad/glad.h>
+#include <glm/gtc/type_ptr.hpp>
 
 namespace Lux::OpenGL
 {
 
-class Shader final : public ::Lux::Shader
+std::pair<ShaderError, std::string> CreateShader(Shader& shader, std::fstream& file);
+
+void DestroyShader(Shader& shader);
+
+void ShaderBind(Shader& shader);
+
+
+void ShaderUploadMat4(u32 uniform_id, mat4 matrix)
 {
-private:
-    u32 m_id;
-    std::string m_name;
-    std::unordered_map<std::string_view, i32> m_uniforms;
+    glUniformMatrix4fv(uniform_id, 1, GL_FALSE, glm::value_ptr(matrix));
+}
 
+void ShaderUploadFloat(u32 uniform_id, float float_val)
+{
+    glUniform1f(uniform_id, float_val);
+}
 
-    int compile(std::vector<RawShader>& shaders);
+void ShaderUploadInt(u32 uniform_id, int number)
+{
+    glUniform1i(uniform_id, number);
+}
 
-    int pre_process_shader_file(std::string& shader_file, std::vector<RawShader>& shaders);
+void ShaderUploadV4(u32 uniform_id, v4 vec4)
+{
+    glUniform4f(uniform_id, vec4.x, vec4.y, vec4.z, vec4.w);
+}
 
-    void create_shader(std::vector<RawShader>& shaders);
+void ShaderUploadIntArray(u32 uniform_id, std::vector<int> array) 
+{
+    glUniform1iv(uniform_id, array.size(), array.data());
+}
 
-    i32 get_uniform(std::string_view uniformName);
+Lux::ShaderFunctions ShaderFunctions
+{
+    .Create = CreateShader,
+    .Destroy = DestroyShader,
 
-public:
-    Shader(std::string_view shaderName, std::initializer_list<RawShader>& init_list);
-
-    Shader(std::string_view shaderName, std::string_view shaderPath);
-
-    ~Shader();
-
-    virtual void bind() const override;
-
-    virtual void set_mat4(std::string_view name, mat4 matrix) override;
-
-    virtual void set_float(std::string_view name, float float0) override;
-
-    virtual void set_int(std::string_view name, int number) override;
-
-    virtual void set_float4(std::string_view name, v4 vec4) override;
-
-    virtual void set_int_array(std::string_view name, int* values, u32 count) override;
-
-
+    .Bind = ShaderBind,
+    .UploadMat4 = ShaderUploadMat4,
+    .UploadFloat = ShaderUploadFloat,
+    .UploadInt = ShaderUploadInt,
+    .UploadV4 = ShaderUploadV4,
+    .UploadIntArray = ShaderUploadIntArray,
 
 };
 

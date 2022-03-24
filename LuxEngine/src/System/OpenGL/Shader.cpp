@@ -3,11 +3,9 @@
 #include <string_view>
 #include <vector>
 #include <fstream>
-#include <glad/glad.h>
-
-#pragma warning(disable: 4201)
-#include <glm/gtc/type_ptr.hpp>
-#pragma warning(default: 4201)
+#include <sstream>
+#include <variant>
+#include <optional>
 
 #include "Utils/Assert.h"
 #include "Utils/Logger.h"
@@ -16,96 +14,67 @@
 
 namespace Lux::OpenGL
 {
-
-int Shader::pre_process_shader_file(std::string& shader_file, std::vector<RawShader>& shaders)
+    
+struct RawShader
 {
+    ShaderType type;
+    std::string data;
+    std::string file_path;
+    u32 id = 0;
 
-    assert(!shader_file.empty());
+    RawShader() {}
 
-
-    int count = 0;
-    size_t nPos = shader_file.find("#type"); // first occurrence
-    while(nPos != std::string::npos)
+    RawShader(ShaderType shader_type)
     {
-        count++;
-        nPos = shader_file.find("#type", nPos + 1);
+        type = shader_type;
     }
+};
 
-    shaders.reserve(count);
+static std::variant<std::array<RawShader, 2>, ShaderError> pre_process_shader_file(std::fstream& shader_file, bool& has_failed)
+{
+    has_failed = true;
+    std::array<RawShader, 2> shaders = { ShaderType::Vertex, ShaderType::Fragment };
+    i8 active_shader_slot = -1;
 
-    size_t StartPosition = shader_file.find_first_of("#type") + 5; // Get first #type in file; 5 for strlen("#type")
-
-    if (StartPosition == std::string::npos) // Return Error Code if no #type definition is found
-        return 0;
-
-    while (StartPosition != std::string::npos)
+    for(std::string line; std::getline(shader_file, line, '\n');)
     {
-        shader_file = shader_file.substr(StartPosition);
-
-        size_t lineLength = shader_file.find_first_of('\n');
-
-        if (lineLength == std::string::npos)
-            return 0;
-
-        unsigned int i = 0;
-        ShaderType typeOfShader;
-
-        while (shader_file[i] != '\0' || shader_file[i] != '\n') // Iterate through the rest of the line
+        if(line.contains("#type"))
         {
-            if (shader_file[i] == ' ') // dont care about white spaces
-            {
-                i++;
+            if(line.contains("vertex"))
+                active_shader_slot = static_cast<int>(ShaderType::Vertex);
+            else if (line.contains("fragment"))
+                active_shader_slot = static_cast<int>(ShaderType::Fragment);
+            else 
+                return ShaderError::InvalidShaderType;
+        } 
+        else 
+        {
+            if(active_shader_slot == -1)
                 continue;
-            }
-            if(shader_file.substr(i, sizeof("vertex") - 1) == "vertex")
-            {
-                typeOfShader = ShaderType::Vertex;
-                break;
-            }
 
-            if (shader_file.substr(i, sizeof("fragment") - 1) == "fragment")
-            {
-                typeOfShader = ShaderType::Fragment;
-                break;
-            }
-
-            return 0;
+            line.append("\n");
+            shaders[active_shader_slot].data.append(line);
         }
-       
-        // We have found the ShaderType
-        shader_file = shader_file.substr(lineLength + 1); // Set the "Cursor" to the beginning of the Shader
-
-        size_t ShaderStringLength = shader_file.find("#type");
-
-        if (ShaderStringLength == std::string::npos)
-        {
-            shaders.emplace_back(0, typeOfShader, shader_file);
-            break;
-        }
-
-        ShaderStringLength--; // Setting the length one char before the '#' of "#type"
-
-        shaders.emplace_back(0, typeOfShader, shader_file.substr(0, ShaderStringLength));
-
-        shader_file = shader_file.substr(ShaderStringLength);
-
-        StartPosition = 1 + sizeof("#type");
     }
 
-    // Success return point
-    return 1; 
+    if(shaders[0].data.empty() || shaders[1].data.empty())
+        return ShaderError::InvalidAmountOfShaders;
+    
+    has_failed = false;
+    return shaders;
 }
 
-int Shader::compile(std::vector<RawShader>& shaders)
-{
-    constexpr GLenum TO_GL_TYPE[2] = {
+constexpr GLenum TO_GL_TYPE[] = {
         GL_VERTEX_SHADER,
-        GL_FRAGMENT_SHADER
-    };
+        GL_FRAGMENT_SHADER,
+        GL_COMPUTE_SHADER,
+};
 
+static std::pair<ShaderError, std::string> compile_shader(std::array<RawShader, 2>& shaders)
+{
     for(RawShader& shader : shaders)
     {
-        GLenum glType = TO_GL_TYPE[static_cast<u8>(shader.type)];
+        GLenum glType = TO_GL_TYPE[static_cast<int>(shader.type)];
         shader.id = glCreateShader(glType);
         
         const char* source = shader.data.c_str();
@@ -113,7 +82,6 @@ int Shader::compile(std::vector<RawShader>& shaders)
 
         
         glShaderSource(shader.id, 1, &source, &length);
-
         glCompileShader(shader.id);
 
         int result = 0;
@@ -125,149 +93,110 @@ int Shader::compile(std::vector<RawShader>& shaders)
             glGetShaderiv(shader.id, GL_INFO_LOG_LENGTH, &error_message_length);
 
             char* errorMessage = new char[error_message_length + 1];
-
             glGetShaderInfoLog(shader.id, error_message_length, &error_message_length, errorMessage);
 
 
             errorMessage[error_message_length] = '\0';
-            printf("Failed to compile shader \n%s\n", errorMessage);
+            std::string error_message = errorMessage;
         
             delete[] errorMessage;
 
             shader.id = 0;
-        
-            TODO();
-
-            return 0;
+            return  { ShaderError::CompilationFailed, error_message };
         }
 
     }
 
-    return 1;
+    return { ShaderError::NoError, {} };
 }
 
-Shader::~Shader()
+static inline std::pair<ShaderError, std::string> link_shader(Shader& shader, std::array<RawShader, 2> raw_shaders)
 {
-    glDeleteProgram(m_id);
-}
+    for(RawShader& raw_shader : raw_shaders)
+        glAttachShader(shader.id, raw_shader.id);  
 
-void Shader::create_shader(std::vector<RawShader>& raw_shaders)
-{
-    m_id = glCreateProgram();
+    glLinkProgram(shader.id);
 
-    assert(compile(raw_shaders));
-        
-    for(RawShader& shader : raw_shaders)
-        glAttachShader(m_id, shader.id);   
+    for(RawShader& raw_shader : raw_shaders)
+    {
+        glDetachShader(shader.id, raw_shader.id);
+        glDeleteShader(raw_shader.id);
+    }
 
-    glLinkProgram(m_id);
-
+    // Error checking
     int isLinked = 0;
-    glGetProgramiv(m_id, GL_LINK_STATUS, &isLinked);
+    glGetProgramiv(shader.id, GL_LINK_STATUS, &isLinked);
 
-    if(!isLinked)
+    if(isLinked)
+        return { ShaderError::NoError, {} };
+
+    
+    int errorMessageLength = 0;
+    glGetProgramiv(shader.id, GL_INFO_LOG_LENGTH, &errorMessageLength);
+
+    char *errorMessage = new char[errorMessageLength];
+
+    glGetProgramInfoLog(shader.id, errorMessageLength, &errorMessageLength, errorMessage);
+
+    for(RawShader& raw_shader : raw_shaders)
+        glDeleteShader(raw_shader.id);
+
+    std::string error_message = errorMessage;
+
+    
+    delete[] errorMessage;
+
+    
+    return { ShaderError::LinkingFailed, error_message };
+
+}
+
+std::pair<ShaderError, std::string> CreateShader(Shader& shader, std::fstream& file)
+{
+    shader.id = glCreateProgram();
+    
+    
+    bool pre_process_failed;
+    std::array<RawShader, 2> shaders;
+    auto pre_process_result = pre_process_shader_file(file, pre_process_failed);
+    
+
+    // TODO set file.path
+
+    if(pre_process_failed)
+        return { std::get<ShaderError>(pre_process_result), {} };
+    
+    auto& raw_shaders = std::get<std::array<RawShader, 2>>(pre_process_result);
+
+    
+    // Compilation
     {
-        int errorMessageLength = 0;
-        glGetProgramiv(m_id, GL_INFO_LOG_LENGTH, &errorMessageLength);
-
-        char *errorMessage = new char[errorMessageLength];
-
-        glGetProgramInfoLog(m_id, errorMessageLength, &errorMessageLength, errorMessage);
-
-        for(RawShader& shader : raw_shaders)
-            glDeleteShader(shader.id);
-
-        LOG("Failed to compile shader", m_name,"\n", errorMessage);
+        auto [ compile_result, error_string ] = compile_shader(raw_shaders);
     
-        delete[] errorMessage;
-
-        m_id = 0;
+        if(compile_result == ShaderError::CompilationFailed)
+            return { compile_result, error_string };
     }
-    
-    for(RawShader& shader : raw_shaders)
+
+    // Linking 
     {
-        glDetachShader(m_id, shader.id);
-        glDeleteShader(shader.id);
+        auto [link_result, error_string] = link_shader(shader, raw_shaders);
+
+        if(link_result == ShaderError::LinkingFailed)
+            return { link_result, error_string };
+
     }
 
-    glValidateProgram(m_id);
+    glValidateProgram(shader.id);
 }
 
-Shader::Shader(std::string_view shaderName, std::string_view shaderPath)
-    : m_name(shaderName)
+void DestroyShader(Shader& shader)
 {
-    auto file_content = IO::read_file(std::string(shaderPath));
-    
-
-
-    std::vector<RawShader> shaders;
-    Verify(pre_process_shader_file(file_content, shaders))
-    
-    create_shader(shaders);
-
+    glDeleteProgram(shader.id);
 }
 
-Shader::Shader(std::string_view shaderName, std::initializer_list<RawShader>& shaders)
-    : m_name(shaderName)
+void ShaderBind(Shader& shader)
 {
-    std::vector<RawShader> raw_shaders = shaders;
-
-    create_shader(raw_shaders);
-}
-
-static inline void shader_bind(u32 id)
-{
-    static u32 bound_shader_id = 0;
-
-    if(id == bound_shader_id)
-        return
-
-    glUseProgram(id);
-    bound_shader_id = id;
-}
-
-void Shader::bind() const
-{
-    shader_bind(m_id);
-}
-
-i32 Shader::get_uniform(std::string_view uniformName)
-{
-    if(m_uniforms.find(uniformName) != m_uniforms.end())
-        return m_uniforms[uniformName];
-
-    i32 location = glGetUniformLocation(m_id, uniformName.data());
-
-    assert(location != -1);
-
-    m_uniforms[uniformName] = location;
-
-    return location;
-}
-
-void Shader::set_mat4(std::string_view name, mat4 matrix)
-{
-    glUniformMatrix4fv(get_uniform(name), 1, GL_FALSE, glm::value_ptr(matrix));
-}
-
-void Shader::set_float(std::string_view name, float float0)
-{
-    glUniform1f(get_uniform(name), float0);
-}
-
-void Shader::set_int(std::string_view name, int number)
-{
-    glUniform1i(get_uniform(name), number);
-}
-
-void Shader::set_float4(std::string_view name, v4 vec4)
-{
-    glUniform4f(get_uniform(name), vec4.x, vec4.y, vec4.z, vec4.w);
-}
-
-void Shader::set_int_array(std::string_view name, int* values, u32 count) 
-{
-    glUniform1iv(get_uniform(name), count, values);
+    glUseProgram(shader.id);
 }
 
 }

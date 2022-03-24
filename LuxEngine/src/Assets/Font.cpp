@@ -46,12 +46,20 @@ void Font::make_self(const std::string& filepath)
     stbtt_pack_context packContext;
     stbtt_packedchar charData[CHAR_COUNT];
 
-    Verify(stbtt_PackBegin(&packContext, bitmap, BITMAP_WIDTH, BITMAP_HEIGHT, BITMAP_WIDTH, 0, nullptr));
+    if(stbtt_PackBegin(&packContext, bitmap, BITMAP_WIDTH, BITMAP_HEIGHT, BITMAP_WIDTH, 0, nullptr))
+    {
+        m_error_code = 1;
+        return;
+    }
 
 
     stbtt_PackSetOversampling(&packContext, 4, 4);
 
-    Verify(stbtt_PackFontRange(&packContext, fileContentPtr, 0, fontHeight, FIRST_CHAR, CHAR_COUNT, charData)); // !ERROR bitmap size to small
+    if(stbtt_PackFontRange(&packContext, fileContentPtr, 0, fontHeight, FIRST_CHAR, CHAR_COUNT, charData)) // !ERROR bitmap size to small
+    {
+        m_error_code = 2;
+        return;
+    }
 
     stbtt_PackEnd(&packContext);
 
@@ -95,7 +103,7 @@ void Font::make_self(const std::string& filepath)
     m_LineHeight =  m_Ascent - m_Descent;
     m_LineGap = static_cast<float>(unscaled_linegap) * scale;
 
-    m_Bitmap = Bitmap::create(BITMAP_WIDTH, BITMAP_HEIGHT, ImageType::ALPHA);
+    m_Bitmap = std::make_unique<Bitmap>(Bitmap::Create(BITMAP_WIDTH, BITMAP_HEIGHT, ImageType::ALPHA));
     m_Bitmap->set_data(bitmap, BITMAP_WIDTH * BITMAP_HEIGHT);
 
     delete[] bitmap;

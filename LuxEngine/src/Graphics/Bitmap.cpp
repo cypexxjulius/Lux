@@ -7,7 +7,7 @@ namespace Lux
 {
 
 
-Bitmap* Bitmap::create(u32 width, u32 height, ImageType type)
+Bitmap* Bitmap::Create(u32 width, u32 height, ImageType type)
 {
     return new OpenGL::Bitmap(width, height, type);
 }

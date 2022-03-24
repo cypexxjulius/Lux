@@ -13,21 +13,11 @@ enum class SystemOS
     MacOS
 };
 
-enum class SystemRenderer
-{
-    OpenGL,
-    Vulcan,
-    DirectX12,
-    Metal
-};
-
 class SystemController
 {
 public:
 
-    static SystemRenderer Renderer();
-
-
+  
     static constexpr SystemOS OS()
     {
     #ifdef _WIN32

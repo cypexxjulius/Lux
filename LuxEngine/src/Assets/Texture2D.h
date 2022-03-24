@@ -1,8 +1,10 @@
 #pragma once
 
-#include "Renderer/Bitmap.h"
-
+#include <memory>
 #include <string_view>
+
+#include "Graphics/Bitmap.h"
+#include "Resources/Manager.h"
 
 namespace Lux
 {
@@ -10,33 +12,15 @@ namespace Lux
 class Texture2D
 {
 private:
-    Bitmap* m_Bitmap = nullptr;
+    friend ResourceManager;
+
+    std::unique_ptr<Bitmap> m_Bitmap;
     ImageType m_Type;
 
+    Texture2D(std::string_view filepath);
 public:
 
-    Texture2D(std::string_view filepath);
-
-    Texture2D() {}
-
-    Texture2D(Texture2D& temp)
-    : m_Bitmap(std::move(temp.m_Bitmap))
-    , m_Type(temp.m_Type)
-    {
-        temp.m_Bitmap = nullptr;
-    }
-
-
-    Texture2D(ImageType type, u32 width, u32 height, void* data);
-
-    ~Texture2D()
-    { 
-        if(valid())
-        {
-            delete m_Bitmap;
-            m_Bitmap = nullptr;
-        }     
-    }  
+    Texture2D(ImageType type, u32 width, u32 height, void* data); 
 
     inline void bind(u8 slot)
     { m_Bitmap->bind(slot); }
