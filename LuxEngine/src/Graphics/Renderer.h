@@ -34,7 +34,8 @@ class Renderer
 {
 private:
     static RendererFunctions s_functions;
-    static RendererAPI s_current_api;
+    static bool s_initialized;
+    static RendererAPI m_api;
 
 public: 
 
@@ -42,7 +43,10 @@ public:
 
     static void Shutdown();
 
-    static void SetRenderingAPI(RendererAPI api);
+    static inline RendererAPI GetRendererAPI()
+    {
+        return m_api;
+    }
 
     static inline void Clear()
     {

@@ -8,6 +8,7 @@
 #pragma warning(default: 4201)
 
 
+#include "Assets/Manager.h"
 
 
 namespace Lux
@@ -45,27 +46,26 @@ constexpr const v2 RectTextureCoords[4] = {
 struct Renderer2DData
 {
     
-
     Ref<VertexArray>    rect_vertex_array;
     Ref<VertexBuffer>   rect_vertex_buffer;
-    Ref<Shader>         texture_shader;
-    Ref<Texture2D>      white_texture;
 
-    u32         rect_index_count = 0;
-    RectVertex* rect_vertex_buffer_base;
-    RectVertex* rect_vertex_buffer_ptr;
+    u32 rect_index_count = 0;
 
-    Array<Ref<Texture2D>, MaxTextureSlots> texture_slots;
-    // 0 is reserved 
-    u32 texture_slots_index = 1; 
+    std::vector<RectVertex> rect_vertexes;
+    std::vector<Ref<Texture>> texture_slots;
 
 };
 
-static Renderer2DData* RendererData;
+static Renderer2DData* RendererData = nullptr;
 
 void Renderer2D::Init()
 {
+    Verify(RendererData == nullptr);
+    
     RendererData = new Renderer2DData;
+    RendererData->rect_vertexes.reserve(MaxRectVertices);
+    RendererData->texture_slots.reserve(MaxTextureSlots - 1);
+    
     RendererData->rect_vertex_array = VertexArray::Create();
 
     VertexBuffer* vb = VertexBuffer::Create(MaxRects * sizeof(MaxRectVertices));
@@ -103,37 +103,35 @@ void Renderer2D::Init()
     delete[] QuadIndices;
 
     u32 WhiteTextureData = UINT32_MAX;
-    RendererData->white_texture = std::make_shared<Texture2D>(ImageType::RGBA, 1, 1, (void*)&WhiteTextureData);
+    
+    ResourceManager::CreateTexture("IdentityTexture", { ImageType::RGBA, 1, 1, (void*)&WhiteTextureData });
 
-    u32* samplers = new u32[MaxTextureSlots];
+    std::vector<int> samplers;
+    samplers.reserve(MaxTextureSlots);
 
     for(u32 i = 0; i < MaxTextureSlots; i++)
         samplers[i] = i;
 
-    delete[] samplers;
-
-    RendererData->texture_shader = Shader::Create("TextureShader", "res/shaders/TextureShader.glsl");
-    
-
+    auto shader = ResourceManager::CreateShader("TextureShader", { "res/shaders/TextureShader.glsl" });
+    shader->upload_int_array("u_Textures", samplers);
 }
 
 void Renderer2D::Shutdown()
 {
+    Verify(RendererData != nullptr);
     delete RendererData;
 }
 
 void Renderer2D::BeginScene(const Camera2D& camera)
 {
-
-    RendererData->texture_shader->bind();
-    RendererData->texture_shader->set_mat4("u_ViewProj", camera.view_proj_mat());
-    RendererData->texture_shader->set_int_array("u_Textures", (int*)&RendererData->texture_slots, MaxTextureSlots);
+    auto shader = ResourceManager::GetShader("TextureShader");
+    shader->bind();
+    shader->upload_mat4("u_ViewProj", camera.view_proj_mat());
 
 
     RendererData->rect_index_count = 0;
-    RendererData->rect_vertex_buffer_ptr = RendererData->rect_vertex_buffer_base;
-
-    RendererData->texture_slots_index = 1;
+    RendererData->rect_vertexes.clear();
+    RendererData->texture_slots.clear();
 }
 void Renderer2D::EndScene()
 {
@@ -143,76 +141,81 @@ void Renderer2D::EndScene()
 
 inline void Renderer2D::UploadBatch()
 {
-    RendererData->white_texture->bind(0);
+    ResourceManager::GetShader("TextureShader")->bind();
 
-    for(u8 i = 0; i < RendererData->texture_slots_index; i++)
-        RendererData->texture_slots[i]->bind(i);
+    u8 bound_texture_slot = 0;
+    ResourceManager::GetTexture("IdentityTexture")->bind(bound_texture_slot++);
+    for(auto& texture : RendererData->texture_slots)
+        texture->bind(bound_texture_slot++);
 
-    u32 vertexBufferSize = (u32)((u8*)RendererData->rect_vertex_buffer_ptr - (u8*)RendererData->rect_vertex_buffer_base);
     RendererData->rect_vertex_array->vertexbuffer(0)->set_data(
-        RendererData->rect_vertex_buffer_base,
-        vertexBufferSize
+        RendererData->rect_vertexes.data(),
+        static_cast<u32>(RendererData->rect_vertexes.size() *  sizeof(RectVertex))
     );  
 
     Renderer::DrawIndexed(RendererData->rect_vertex_array, (u32)RendererData->rect_index_count);
 
     RendererData->rect_index_count = 0;
-    RendererData->rect_vertex_buffer_ptr = RendererData->rect_vertex_buffer_base;
-
-    RendererData->texture_slots_index = 1;
+    RendererData->rect_vertexes.clear();
+    RendererData->texture_slots.clear();
 }
 
-inline void PushVertices(const v3 position[4], const v4 color, const v2 textureCoords[4], const float textureID, const float tiling)
+inline void PushVertices(v3 position[4], v4 color, const v2 textureCoords[4], float textureID, float tiling)
 {
     for(u8 i = 0; i < 4; i++)
     {
-        RendererData->rect_vertex_buffer_ptr->Position = position[i];                               
-        RendererData->rect_vertex_buffer_ptr->Color = color;                                         
-        RendererData->rect_vertex_buffer_ptr->TexCoord = textureCoords[i];                           
-        RendererData->rect_vertex_buffer_ptr->TextureSlot = textureID;        
-        RendererData->rect_vertex_buffer_ptr->Tiling = tiling;                         
-        RendererData->rect_vertex_buffer_ptr++;                                                     
+        RendererData->rect_vertexes.emplace_back(
+            position[i],
+            color,
+            textureCoords[i],
+            textureID,
+            tiling
+        );                                                  
     }
+
     RendererData->rect_index_count += 6; 
 }
 
 
 void Renderer2D::DrawRect(Rect2D& quad)
 {
-    if((RendererData->rect_index_count + 6 >= MaxRectIndices) || (quad.texture != nullptr && RendererData->texture_slots_index == 31))
+    if((RendererData->rect_index_count + 6 >= MaxRectIndices) || (quad.texture != nullptr && RendererData->texture_slots.capacity() == RendererData->texture_slots.size()))
         UploadBatch();
 
     float TextureID = 0;
     if(quad.texture != nullptr)
     {
-        for(u8 i = 1; i < RendererData->texture_slots_index; i++)
+        float count = 0;
+        for(auto& texture : RendererData->texture_slots)
         {
-            if(RendererData->texture_slots[i]->id() == quad.texture->id())
-                TextureID = (float)i;
+            if(texture->id() == quad.texture->id())
+            {
+                TextureID = count;
                 break;
+            }
+            count++;
         }
 
-        TextureID = (float)RendererData->texture_slots_index;
-        RendererData->texture_slots[RendererData->texture_slots_index++] = quad.texture;
+        RendererData->texture_slots.push_back(quad.texture);
+        TextureID = count;
     }
 
-    const float const_TextureID = TextureID;
     const v4 color = quad.color;
     const float tiling = quad.tiling ? quad.tiling : 1.0f; 
 
 
     const mat4 transform = glm::translate(glm::mat4(1.0f), { quad.position.x, quad.position.y, 1.0f })
-			* glm::rotate(glm::mat4(1.0f), glm::radians(quad.rotation), { 0.0f, 0.0f, 1.0f })
-			* glm::scale(glm::mat4(1.0f), { quad.width, quad.height, 1.0f });
+			                * glm::rotate(glm::mat4(1.0f), glm::radians(quad.rotation), { 0.0f, 0.0f, 1.0f })
+			                * glm::scale(glm::mat4(1.0f), { quad.width, quad.height, 1.0f });
     
-    const v3 positions[4] = {
+    v3 positions[4] = {
             transform * RectVertexPositions[0],
             transform * RectVertexPositions[1],
             transform * RectVertexPositions[2],
             transform * RectVertexPositions[3],
     };
 
-    PushVertices(positions, color, RectTextureCoords, const_TextureID, tiling);
+    PushVertices(positions, color, RectTextureCoords, TextureID, tiling);
 }
 
 

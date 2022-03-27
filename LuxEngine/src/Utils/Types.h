@@ -3,11 +3,16 @@
 #include <glm/glm.hpp>
 #include <memory>
 #include <array>
+#include <unordered_map>
 
 namespace Lux
 {
+
 template<typename T>
 using Ref = std::shared_ptr<T>;
+
+template<typename T>
+using Scope = std::unique_ptr<T>;
 
 template<typename T, int count>
 using Array = std::array<T, count>;
@@ -36,11 +41,22 @@ using v4 = glm::vec4;
 
 enum class DataType
 {
+    INVALID,
     FLOAT,
     INT,
     BYTE,
     CHAR,
-    BOOL
+    BOOL,
+    V2,
+    V3,
+    V4,
+    MAT2,
+    MAT3,
+    MAT4,
 };
+
+template<typename T>
+inline bool is_contained(std::unordered_map<std::string_view, Ref<T>> map, std::string_view name)
+{ return map.find(name) != map.end(); }
 
 }

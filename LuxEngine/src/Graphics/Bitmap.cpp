@@ -7,9 +7,9 @@ namespace Lux
 {
 
 
-Bitmap* Bitmap::Create(u32 width, u32 height, ImageType type)
+std::unique_ptr<Bitmap> Bitmap::Create(u32 width, u32 height, ImageType type)
 {
-    return new OpenGL::Bitmap(width, height, type);
+    return std::make_unique<OpenGL::Bitmap>(width, height, type);
 }
 
 }

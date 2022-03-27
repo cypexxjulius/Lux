@@ -15,31 +15,33 @@ namespace Lux
 
 
 RendererFunctions Renderer::s_functions;
-RendererAPI Renderer::s_current_api = RendererAPI::NA;
+bool Renderer::s_initialized = false;
+RendererAPI Renderer::m_api = RendererAPI::NA;
 
 void Renderer::Init(RendererAPI api)
 {
-    SetRenderingAPI(api);
+    m_api = api;
+
+    switch (api)
+    {
+    case RendererAPI::OpenGL:
+        s_functions = OpenGL::RendererAPIFunctions;
+        s_functions.Init(); 
+
+        s_initialized = true;
+        break;
+    
+    default:
+        TODO();
+        break;
+    }
+    
 }
 
 void Renderer::Shutdown()
 {
-    if(s_current_api != RendererAPI::NA)
-        s_functions.Shutdown();
-}
-
-void Renderer::SetRenderingAPI(RendererAPI api)
-{
-    if(s_current_api != RendererAPI::NA)
-        s_functions.Shutdown();
-
-    s_current_api = api;
-    
-    s_functions = OpenGL::RendererAPIFunctions;
-    s_functions.Init();
-
-
-    
+    Verify(s_initialized);
+    s_functions.Shutdown();
 }
 
 }

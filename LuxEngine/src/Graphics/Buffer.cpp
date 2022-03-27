@@ -1,7 +1,7 @@
 #include "Buffer.h"
 
 #include "System/OpenGL/Buffer.h"
-#include "System/SystemController.h"
+#include "Graphics/Renderer.h"
 
 #include "Utils/Assert.h"
 
@@ -10,7 +10,7 @@ namespace Lux
 
 VertexBuffer* VertexBuffer::Create(void* data, u32 size)
 {
-    if(SystemController::Renderer() == SystemRenderer::OpenGL)
+    if(Renderer::GetRendererAPI() == RendererAPI::OpenGL)
         return new OpenGL::VertexBuffer(data, size);
 
     TODO();
@@ -20,7 +20,7 @@ VertexBuffer* VertexBuffer::Create(void* data, u32 size)
 
 VertexBuffer* VertexBuffer::Create(u32 size)
 {
-    if(SystemController::Renderer() == SystemRenderer::OpenGL)
+    if(Renderer::GetRendererAPI() == RendererAPI::OpenGL)
         return new OpenGL::VertexBuffer(size);
 
     
@@ -31,7 +31,7 @@ VertexBuffer* VertexBuffer::Create(u32 size)
 
 IndexBuffer* IndexBuffer::Create(unsigned int* data, u32 count)
 {
-    if(SystemController::Renderer() == SystemRenderer::OpenGL)
+    if(Renderer::GetRendererAPI() == RendererAPI::OpenGL)
         return new OpenGL::IndexBuffer(data, count);
 
     

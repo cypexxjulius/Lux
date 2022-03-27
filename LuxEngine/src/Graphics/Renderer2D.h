@@ -2,11 +2,9 @@
 
 #include "Utils/Types.h"
 
-#include "Shader.h"
 #include "Camera2D.h"
-#include "Assets/Font.h"
-#include "Assets/Texture2D.h"
 #include "VertexArray.h"
+#include "Assets/Texture.h"
 
 namespace Lux
 {
@@ -18,13 +16,10 @@ struct Rect2D
     float tiling;
     float zIndex;
     float rotation;
-    Ref<Texture2D> texture;
+    Ref<Texture> texture;
     v2 position;
     v4 color;
 };
-
-struct Renderer2DData;
-
 
 class Renderer2D
 {

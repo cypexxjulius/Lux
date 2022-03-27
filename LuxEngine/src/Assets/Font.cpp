@@ -18,7 +18,8 @@
 namespace Lux
 {
 
-void Font::make_self(const std::string& filepath)
+Font::Font(const std::string& filepath)
+    : m_Bitmap(nullptr)
 {
     std::string fileContent = IO::read_file(filepath); 
 
@@ -46,20 +47,12 @@ void Font::make_self(const std::string& filepath)
     stbtt_pack_context packContext;
     stbtt_packedchar charData[CHAR_COUNT];
 
-    if(stbtt_PackBegin(&packContext, bitmap, BITMAP_WIDTH, BITMAP_HEIGHT, BITMAP_WIDTH, 0, nullptr))
-    {
-        m_error_code = 1;
-        return;
-    }
-
+    Verify(stbtt_PackBegin(&packContext, bitmap, BITMAP_WIDTH, BITMAP_HEIGHT, BITMAP_WIDTH, 0, nullptr))
 
     stbtt_PackSetOversampling(&packContext, 4, 4);
 
-    if(stbtt_PackFontRange(&packContext, fileContentPtr, 0, fontHeight, FIRST_CHAR, CHAR_COUNT, charData)) // !ERROR bitmap size to small
-    {
-        m_error_code = 2;
-        return;
-    }
+    Verify(stbtt_PackFontRange(&packContext, fileContentPtr, 0, fontHeight, FIRST_CHAR, CHAR_COUNT, charData)) // !ERROR bitmap size to small
+    
 
     stbtt_PackEnd(&packContext);
 
@@ -103,7 +96,7 @@ void Font::make_self(const std::string& filepath)
     m_LineHeight =  m_Ascent - m_Descent;
     m_LineGap = static_cast<float>(unscaled_linegap) * scale;
 
-    m_Bitmap = std::make_unique<Bitmap>(Bitmap::Create(BITMAP_WIDTH, BITMAP_HEIGHT, ImageType::ALPHA));
+    m_Bitmap = Bitmap::Create(BITMAP_WIDTH, BITMAP_HEIGHT, ImageType::ALPHA);
     m_Bitmap->set_data(bitmap, BITMAP_WIDTH * BITMAP_HEIGHT);
 
     delete[] bitmap;

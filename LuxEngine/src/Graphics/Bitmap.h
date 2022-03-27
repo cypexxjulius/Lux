@@ -1,6 +1,7 @@
 #pragma once 
 
 #include "Utils/Types.h"
+#include <memory>
 
 namespace Lux
 {
@@ -51,7 +52,7 @@ public:
 
     virtual DataFormat data_format() const = 0;
 
-    static Bitmap* Create(u32 width, u32 height, ImageType type); 
+    static std::unique_ptr<Bitmap> Create(u32 width, u32 height, ImageType type); 
 
 };
 
