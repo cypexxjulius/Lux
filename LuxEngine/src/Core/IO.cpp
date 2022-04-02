@@ -8,24 +8,27 @@
 #include "Utils/Assert.h"
 #include "Utils/Logger.h"
 
+
 namespace Lux
 {
 
 
 std::string IO::read_file(const std::string& filename)
 {
-    assert(!std::filesystem::is_regular_file(filename));
+    Verify(std::filesystem::is_regular_file(filename));
 
 
-    std::fstream file(filename, std::ios::in | std::ios::binary);
-    assert(!file.is_open());
+    std::ifstream file(filename, std::ios::in | std::ios::binary);
+    Verify(file.is_open());
 
-    std::string file_content;
-    file >> file_content;
+    const std::size_t& size = std::filesystem::file_size(filename);
+
+    std::string content(size, '\0');
+    file.read(content.data(), size);
 
     file.close();
 
-    return file_content;
+    return content;
 }
 
 

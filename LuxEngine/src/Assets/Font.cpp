@@ -23,6 +23,8 @@ Font::Font(const std::string& filepath)
 {
     std::string fileContent = IO::read_file(filepath); 
 
+    Verify(!fileContent.empty());
+
     u8* fileContentPtr = (u8*)fileContent.c_str();
 
 
@@ -80,7 +82,7 @@ Font::Font(const std::string& filepath)
         data.width  = (quad.x1 - quad.x0);
         data.height = (quad.y1 - quad.y0);
     
-        data.baseline = quad.y0; 
+        data.baseline = quad.y0;  
 
         data.ax = advanceX * scale;
         data.lsb = leftSideBearing * scale;

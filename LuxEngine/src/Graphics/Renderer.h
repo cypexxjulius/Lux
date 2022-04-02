@@ -58,7 +58,7 @@ public:
         s_functions.SetClearColor(color);
     }
 
-    static inline void DrawIndexed(Ref<VertexArray> va, u32 index_count = 0)
+    static inline void DrawIndexed(Ref<VertexArray> va, u32 index_count)
     {
         s_functions.DrawIndexed(va, index_count);
     }

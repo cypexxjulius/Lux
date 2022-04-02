@@ -5,6 +5,7 @@
 #include <glfw/glfw3.h>
 
 #include "Utils/Logger.h"
+#include "Utils/Assert.h"
 
 namespace Lux::OpenGL
 {
@@ -17,8 +18,6 @@ inline void RendererInit()
 	glDebugMessageCallback(
         [](GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message, const void *userParam)
         {
-            if(severity <= GL_DEBUG_SEVERITY_MEDIUM)
-                return;
 
             (void)source;
             (void)length;
@@ -31,6 +30,7 @@ inline void RendererInit()
                     "Severity   : {}\n"
                     "Text:     \n"
                     "{}\n", source, type, severity, message);
+            //TODO();
         }, NULL
     );
 		
@@ -40,6 +40,8 @@ inline void RendererInit()
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     glEnable(GL_DEPTH_TEST);
+
+    glEnable(GL_MULTISAMPLE);
 }
 
 inline void RendererShutdown()

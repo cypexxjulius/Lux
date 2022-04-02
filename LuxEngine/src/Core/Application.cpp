@@ -1,5 +1,9 @@
 #include "Application.h"
 #include "Graphics/Renderer.h"
+#include "Graphics/Renderer2D.h"
+
+#include "Assets/Manager.h"
+#include "GUI/GUILayer.h"
 
 namespace Lux
 {
@@ -10,13 +14,20 @@ Application::Application(const std::string& title)
     : m_title(title), m_window(title, (u32)m_width, (u32)m_height)
 {
     s_Instance = this;
+
+    Renderer::Init(RendererAPI::OpenGL);
+    Renderer::SetClearColor({0.8, 0.1, 0.3, 1.0});
+
+    ResourceManager::Init();
+
+    
+    Renderer2D::Init();
+
+    PushLayer<GUILayer>();
 }
 
 void Application::loop()
 {
-    Renderer::Init(RendererAPI::OpenGL);
-    Renderer::SetClearColor({0.8, 0.1, 0.3, 1.0});
-
     while(m_running)
     {
 
@@ -45,6 +56,8 @@ void Application::loop()
     for(auto& layer : m_layerstack)
         layer->on_detach();
 
+    Renderer2D::Shutdown();
+    ResourceManager::Shutdown();
     Renderer::Shutdown();
 }
 

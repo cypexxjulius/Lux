@@ -21,10 +21,8 @@ struct VirtualIO
 {
     
     v2 mouse_position;
-    u32 mouse_buttons[SystemController::MaxMouseKeys()];
-    u32 keyboard[SystemController::MaxKeyboardKeys()];
-
-
+    KeyState mouse_buttons[SystemController::MaxMouseKeys()];
+    KeyState keyboard[SystemController::MaxKeyboardKeys()];
     // FIXME: Add controller support 
 };
 
@@ -45,6 +43,7 @@ class Application
 {
 
 private:
+
     bool m_minimized = false;
     bool m_running = true;
     float m_width = 1280; 
@@ -53,7 +52,7 @@ private:
 
     std::string m_title;
     static Application* s_Instance;
-    mutable std::vector<Layer*> m_layerstack;
+    mutable std::vector<Layer*> m_layerstack{};
 
 
 
@@ -61,8 +60,8 @@ private:
 
     Window m_window;
     
-    EventBuffer m_event_buffer;
-    VirtualIO m_iostate;
+    EventBuffer m_event_buffer{};
+    VirtualIO m_iostate{};
 
 
 
@@ -76,7 +75,9 @@ private:
 
     void dispatch_single_event(Event& event);
 
-    static inline Application& Get_private()
+private:
+
+    static constexpr Application& Get()
     { return *s_Instance; }
 
     inline void close_application()
@@ -87,6 +88,8 @@ public:
 
     friend class Window;
 
+    friend class Input;
+
     Application(const std::string& title);
 
     void loop();
@@ -96,19 +99,19 @@ public:
     static inline void PushLayer()
     { 
         static_assert(std::is_base_of<Layer, T>::value, "Class has to inherit from the Layer class");
-        Application::Get_private().m_layerstack.emplace_back(new T);  
-        Application::Get_private().m_layerstack.back()->on_attach();
+        Application::Get().m_layerstack.emplace_back(new T);  
+        Application::Get().m_layerstack.back()->on_attach();
 
     }
 
     static inline float Width()
-    { return Application::Get_private().m_width; }
+    { return Application::Get().m_width; }
 
     static inline float Height()
-    { return Application::Get_private().m_height; }
+    { return Application::Get().m_height; }
 
-    static inline VirtualIO IOState()
-    { return Application::Get_private().m_iostate; }
+    static inline VirtualIO& IOState()
+    { return Application::Get().m_iostate; }
 
 };
 

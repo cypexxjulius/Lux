@@ -49,9 +49,9 @@ VertexArray::~VertexArray()
 
 static inline void vertex_array_bind(u32 id)
 {
-    static u32 bound_adress = 0;
+    static i32 bound_adress = -1;
     
-    if(id == bound_adress)
+    if(static_cast<i32>(id) == bound_adress)
         return;
     
     glBindVertexArray(id);
@@ -62,10 +62,10 @@ void VertexArray::add_vertex_buffer(VertexBuffer* vb)
 {
     bind();
     vb->bind();
-    m_Index = 0;
 
     const auto& layout = vb->layout();
 
+    m_Index = 0;
     for(const auto& element : layout)
     {   
         glEnableVertexAttribArray(m_Index);
@@ -73,12 +73,12 @@ void VertexArray::add_vertex_buffer(VertexBuffer* vb)
             m_Index,
             element.count,  
             Lux_to_gl_type(element.type), 
-            element.normalized ? GL_TRUE : GL_FALSE, 
+            static_cast<int>(element.normalized), 
             vb->stride(), 
             (const void*)(intptr_t)element.offset
         );
         
-         m_Index++;
+        m_Index++;
     }
 
     m_VertexBuffers.push_back(vb);
@@ -92,7 +92,8 @@ void VertexArray::bind()
 
 void VertexArray::set_index_buffer(IndexBuffer* ib)
 {
-    assert(ib != nullptr);
+    Verify(ib != nullptr);
+    
     bind();
     ib->bind();
     m_IndexBuffer = ib;

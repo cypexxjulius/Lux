@@ -15,6 +15,7 @@ constexpr u32 MAX_CHAR_COUNT  = ('~' - ' ' + 1);
 
 struct CharData
 {
+   
     float x0, x1, y0, y1;
     float width, height;
     float baseline;

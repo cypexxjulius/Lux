@@ -3,6 +3,8 @@
 #include "System/OpenGL/RendererAPI.h"
 #include "System/SystemController.h"
 
+#include "Renderer2D.h"
+
 #include "Utils/Assert.h"
 
 #include <functional>
@@ -34,8 +36,7 @@ void Renderer::Init(RendererAPI api)
     default:
         TODO();
         break;
-    }
-    
+    }    
 }
 
 void Renderer::Shutdown()

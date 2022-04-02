@@ -9,4 +9,6 @@ int main()
     lux_start();
 
     app->loop();
+
+    delete app;
 }

@@ -3,6 +3,7 @@
 #include "Core/Window.h"
 #include "Core/Event.h"
 
+#include "Utils/Logger.h"
 #include "Utils/Assert.h"
 
 #include <glad/glad.h>
@@ -17,6 +18,7 @@ constexpr KeyState gl_to_lux_keystate[] = {
     KeyState::Repeated
 };
 
+
 Key OpenGL_to_Lux_KeyCode(GLenum gl_key);
 MouseKey OpenGL_to_Lux_MouseKey(GLenum gl_key); 
 
@@ -30,7 +32,7 @@ Window::Window(const std::string& title, u32 width, u32 height)
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
+    glfwWindowHint(GLFW_SAMPLES, 4);
 
     m_handle = (void*)glfwCreateWindow(width, height, title.c_str(), NULL, NULL);
 
@@ -49,7 +51,7 @@ Window::Window(const std::string& title, u32 width, u32 height)
     glfwSetFramebufferSizeCallback(m_Handle, [](GLFWwindow* glWindow, int width, int height)
     {
 
-        auto& app = Application::Get_private();
+        auto& app = Application::Get();
         auto& buffer = app.m_event_buffer; 
         app.m_width  = buffer.window_resize.width  = static_cast<float>(width);
         app.m_height = buffer.window_resize.height = static_cast<float>(height);
@@ -62,35 +64,36 @@ Window::Window(const std::string& title, u32 width, u32 height)
     // Window close callback 
     glfwSetWindowCloseCallback(m_Handle, [](GLFWwindow* glWindow)
     {    
-        Application::Get_private().close_application();
+        Application::Get().close_application();
     });
 
     // Char input callback
     glfwSetCharCallback(m_Handle, [](GLFWwindow* glWindow, unsigned int character)
     {
-        auto& buffer = Application::Get_private().m_event_buffer; 
-        buffer.char_events.emplace_back(Event(EventType::Char));
+        auto& buffer = Application::Get().m_event_buffer; 
+        buffer.char_events.emplace_back(EventType::Char);
     });
 
     // General key interaction callback
     glfwSetKeyCallback(m_Handle, [](GLFWwindow* glWindow, int key, int scancode, int action, int mods)
     {
-        auto& app = Application::Get_private();
+        auto& app = Application::Get();
         auto& buffer = app.m_event_buffer; 
         Event event(EventType::KeyPressed);
         event.action = gl_to_lux_keystate[static_cast<u8>(action)];
         event.keycode.keyboard = OpenGL_to_Lux_KeyCode(key);
         event.mod = static_cast<u8>(mods);
         
-        buffer.key_events.emplace_back(std::move(event));    
+        app.m_iostate.keyboard[static_cast<u32>(event.keycode.keyboard)] = event.action;
 
-        app.m_iostate.keyboard[key] = action;
+        buffer.key_events.emplace_back(event);    
+
     });
 
     // Mouse button interaction callback
     glfwSetMouseButtonCallback(m_Handle, [](GLFWwindow* glWindow, int button, int action, int mods)
     { 
-        auto& app = Application::Get_private();
+        auto& app = Application::Get();
         auto& buffer = app.m_event_buffer; 
         
         Event event(EventType::MouseButtonPressed);
@@ -99,22 +102,27 @@ Window::Window(const std::string& title, u32 width, u32 height)
         event.action = gl_to_lux_keystate[static_cast<u8>(action)];
         event.position = app.m_iostate.mouse_position;
 
-        buffer.mouse_button.emplace_back(std::move(event));
+        app.IOState().mouse_buttons[static_cast<u32>(event.keycode.mouse)] = event.action;
+        
+        buffer.mouse_button.emplace_back(event);
     });
 
     glfwSetScrollCallback(m_Handle, [](GLFWwindow* glWindow, double xOffset, double yOffset)
     {
-        auto& buffer = Application::Get_private().m_event_buffer; 
-        
-        buffer.scrolled.delta = v2{ xOffset, yOffset};
+        auto& buffer = Application::Get().m_event_buffer; 
+        buffer.scrolled.delta += v2{ xOffset, yOffset};
         buffer.scrolled.valid = true;
     }); 
 
     glfwSetCursorPosCallback(m_Handle, [](GLFWwindow* glWindow, double x, double y)
     {
         static double xOldPos = 0.0, yOldPos = 0.0; 
-        auto& app = Application::Get_private();
+        auto& app = Application::Get();
         auto& buffer = app.m_event_buffer; 
+
+        x /= static_cast<double>(Application::Width());
+
+        y /= static_cast<double>(Application::Height());
 
 
         buffer.mouse_moved.delta += v2{ x - xOldPos, y - yOldPos };

@@ -39,7 +39,7 @@ using v3 = glm::vec3;
 
 using v4 = glm::vec4;
 
-enum class DataType
+enum class DataType : u32
 {
     INVALID,
     FLOAT,
@@ -53,10 +53,9 @@ enum class DataType
     MAT2,
     MAT3,
     MAT4,
+    SAMPLER1D,
+    SAMPLER2D,
+    SAMPLER3D,
 };
-
-template<typename T>
-inline bool is_contained(std::unordered_map<std::string_view, Ref<T>> map, std::string_view name)
-{ return map.find(name) != map.end(); }
 
 }

@@ -63,7 +63,7 @@ public:
         width = 0;
         height = 0;
         position = { 0, 0};
-        delta = { 0, 0};
+        delta = {0, 0};
         delta_time = time;
     }
 

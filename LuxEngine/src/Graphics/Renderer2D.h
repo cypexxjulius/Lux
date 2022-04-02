@@ -6,6 +6,8 @@
 #include "VertexArray.h"
 #include "Assets/Texture.h"
 
+#include <utility>
+
 namespace Lux
 {
 
@@ -14,7 +16,6 @@ struct Rect2D
     float width;
     float height;
     float tiling;
-    float zIndex;
     float rotation;
     Ref<Texture> texture;
     v2 position;
@@ -31,11 +32,11 @@ public:
 
     static void Shutdown();
 
-    static void BeginScene(const Camera2D& camera);
+    static void BeginScene(const Ref<Camera2D>& camera);
 
-    static void DrawRect(Rect2D& quad);
+    static void DrawRect(Rect2D&& quad);
 
-    // static void DrawText(std::string_view string, float scale, v3 color, v2 position, float zIndex = 0.0f);
+    static std::pair<f32, f32> DrawText(std::string_view string, float scale, v2 position, v3 color);
 
     static void EndScene();
 

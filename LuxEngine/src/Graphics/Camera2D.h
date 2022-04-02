@@ -13,7 +13,7 @@ private:
 
     float m_Rotation; 
     float m_Width, m_Height;
-    v3 m_Position;
+    v2 m_Position;
     mat4 m_ProjMat, m_ViewMat;
     mat4 m_ViewProjMat;
 
@@ -28,16 +28,16 @@ public:
     void set_projection(float left, float right, float top, float bottom);
 
  
-    inline void set_position(const v3& position)
+    inline void set_position(const v2& position)
     { m_Position = position; }
 
-    inline void add_position(const v3& position)
+    inline void add_position(const v2& position)
     { 
         m_Position += position; 
         recalculate();
     }  
 
-    inline v3 position() const 
+    inline v2 position() const 
     { return m_Position; }
  
 

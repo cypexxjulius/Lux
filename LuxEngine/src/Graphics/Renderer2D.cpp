@@ -27,13 +27,13 @@ struct RectVertex
 constexpr u32 MaxRects = 20000;
 constexpr u32 MaxRectVertices = MaxRects * 4;
 constexpr u32 MaxRectIndices = MaxRects * 6;
-constexpr u32 MaxTextureSlots = 32;
+constexpr u32 MaxTextureSlots = 30;
 
 constexpr v4 RectVertexPositions[4] = {
-    {  0.0f,  0.0f, 0.0f, 1.0f },
-	{  1.0f,  0.0f, 0.0f, 1.0f },
-	{  1.0f,  -1.0f, 0.0f, 1.0f },
-	{  0.0f,  -1.0f, 0.0f, 1.0f },
+    {   0.0f,   0.0f,  0.0f, 1.0f },
+	{   1.0f,   0.0f,  0.0f, 1.0f },
+	{   1.0f,  -1.0f,  0.0f, 1.0f },
+	{   0.0f,  -1.0f,  0.0f, 1.0f },
 };
 
 constexpr const v2 RectTextureCoords[4] = {
@@ -54,6 +54,9 @@ struct Renderer2DData
     std::vector<RectVertex> rect_vertexes;
     std::vector<Ref<Texture>> texture_slots;
 
+    Ref<Shader> active_shader;
+    Ref<Font> active_font;
+
 };
 
 static Renderer2DData* RendererData = nullptr;
@@ -64,7 +67,7 @@ void Renderer2D::Init()
     
     RendererData = new Renderer2DData;
     RendererData->rect_vertexes.reserve(MaxRectVertices);
-    RendererData->texture_slots.reserve(MaxTextureSlots - 1);
+    RendererData->texture_slots.reserve(MaxTextureSlots);
     
     RendererData->rect_vertex_array = VertexArray::Create();
 
@@ -102,31 +105,39 @@ void Renderer2D::Init()
 
     delete[] QuadIndices;
 
-    u32 WhiteTextureData = UINT32_MAX;
+    constexpr u32 WhiteTextureData = 0xffffffff;
     
+    ResourceManager::CreateFont("StandardFont", { "EngineLayer/res/fonts/Roboto-Regular.ttf" });
     ResourceManager::CreateTexture("IdentityTexture", { ImageType::RGBA, 1, 1, (void*)&WhiteTextureData });
 
     std::vector<int> samplers;
-    samplers.reserve(MaxTextureSlots);
+    samplers.reserve(MaxTextureSlots + 2);
 
-    for(u32 i = 0; i < MaxTextureSlots; i++)
-        samplers[i] = i;
+    for(u32 i = 0; i < MaxTextureSlots + 2; i++)
+        samplers.push_back(i);
 
-    auto shader = ResourceManager::CreateShader("TextureShader", { "res/shaders/TextureShader.glsl" });
-    shader->upload_int_array("u_Textures", samplers);
+    RendererData->active_shader = ResourceManager::CreateShader("TextureShader", { "EngineLayer/res/shaders/TextureShader.glsl" });
+    RendererData->active_shader->bind();
+    RendererData->active_shader->upload_int_array("u_Textures", samplers);
 }
 
 void Renderer2D::Shutdown()
 {
     Verify(RendererData != nullptr);
+    
+    ResourceManager::DeleteFont("StandardFont");
+    ResourceManager::DeleteShader("TextureShader");
+    ResourceManager::DeleteTexture("IdentityTexture");
+
     delete RendererData;
 }
 
-void Renderer2D::BeginScene(const Camera2D& camera)
+void Renderer2D::BeginScene(const Ref<Camera2D>& camera)
 {
-    auto shader = ResourceManager::GetShader("TextureShader");
-    shader->bind();
-    shader->upload_mat4("u_ViewProj", camera.view_proj_mat());
+    Verify(RendererData != nullptr);
+
+    RendererData->active_shader->bind();
+    RendererData->active_shader->upload_mat4("u_ViewProj", camera->view_proj_mat());
 
 
     RendererData->rect_index_count = 0;
@@ -135,19 +146,23 @@ void Renderer2D::BeginScene(const Camera2D& camera)
 }
 void Renderer2D::EndScene()
 {
+    Verify(RendererData != nullptr);
     if(RendererData->rect_index_count != 0)
         UploadBatch();
 }
 
 inline void Renderer2D::UploadBatch()
 {
-    ResourceManager::GetShader("TextureShader")->bind();
+    RendererData->active_shader->bind();
 
     u8 bound_texture_slot = 0;
     ResourceManager::GetTexture("IdentityTexture")->bind(bound_texture_slot++);
+    ResourceManager::GetFont("StandardFont")->bind(bound_texture_slot++);
     for(auto& texture : RendererData->texture_slots)
         texture->bind(bound_texture_slot++);
 
+    // TODO Create a seperate data structure for this
+    std::reverse(RendererData->rect_vertexes.begin(), RendererData->rect_vertexes.end()); 
     RendererData->rect_vertex_array->vertexbuffer(0)->set_data(
         RendererData->rect_vertexes.data(),
         static_cast<u32>(RendererData->rect_vertexes.size() *  sizeof(RectVertex))
@@ -160,25 +175,12 @@ inline void Renderer2D::UploadBatch()
     RendererData->texture_slots.clear();
 }
 
-inline void PushVertices(v3 position[4], v4 color, const v2 textureCoords[4], float textureID, float tiling)
+
+ 
+void Renderer2D::DrawRect(Rect2D&& quad)
 {
-    for(u8 i = 0; i < 4; i++)
-    {
-        RendererData->rect_vertexes.emplace_back(
-            position[i],
-            color,
-            textureCoords[i],
-            textureID,
-            tiling
-        );                                                  
-    }
+    Verify(RendererData != nullptr);
 
-    RendererData->rect_index_count += 6; 
-}
-
-
-void Renderer2D::DrawRect(Rect2D& quad)
-{
     if((RendererData->rect_index_count + 6 >= MaxRectIndices) || (quad.texture != nullptr && RendererData->texture_slots.capacity() == RendererData->texture_slots.size()))
         UploadBatch();
 
@@ -215,8 +217,102 @@ void Renderer2D::DrawRect(Rect2D& quad)
             transform * RectVertexPositions[3],
     };
 
-    PushVertices(positions, color, RectTextureCoords, TextureID, tiling);
+    for(u8 i = 0; i < 4; i++)
+    {
+        RendererData->rect_vertexes.emplace_back(
+            positions[i],
+            color,
+            RectTextureCoords[i],
+            TextureID,
+            tiling
+        );                                                  
+    }
+
+    RendererData->rect_index_count += 6; 
 }
 
+
+constexpr v4 TextVertexPositions[4] = {
+                { 0.0f, 1.0f, 0.0f, 1.0f },
+                { 1.0f, 1.0f, 0.0f, 1.0f },
+                { 1.0f, 0.0f, 0.0f, 1.0f },
+                { 0.0f, 0.0f, 0.0f, 1.0f }
+};
+
+std::pair<f32, f32> Renderer2D::DrawText(std::string_view string, float scale, v2 position, v3 color)
+{
+    Verify(RendererData != nullptr);
+
+    if(string.empty())
+        return {};
+    
+    scale *= 0.01f;
+ 
+    auto font = ResourceManager::GetFont("StandardFont");
+
+    float lineLength = 0.0f;
+    
+    position.y += font->descent() * scale;
+
+    u32 count = 0;
+    for(char character : string)
+    {
+
+        auto& glyph = font->operator[](character);
+
+        v2 textureCoords[4] = {
+            { glyph.x0, glyph.y1 },
+            { glyph.x1, glyph.y1 },
+            { glyph.x1, glyph.y0 },
+            { glyph.x0, glyph.y0 }        
+        };
+
+        float width = glyph.width * scale;
+        float height = glyph.height * scale;
+
+        lineLength += glyph.lsb * scale;
+
+        float posx = position.x + lineLength;
+        float posy = position.y + glyph.baseline * scale;
+        
+        if(character != ' ')
+        {
+            const mat4 transform =  glm::translate(glm::mat4(1.0f), { posx, posy, 1.0f })
+			                        * glm::scale(glm::mat4(1.0f), { width, height, 1.0f });
+    
+            v3 positions[4] = {
+                transform * TextVertexPositions[0],
+                transform * TextVertexPositions[1],
+                transform * TextVertexPositions[2],
+                transform * TextVertexPositions[3],
+            };
+
+            
+
+            for(u8 i = 0; i < 4; i++)
+            {
+                RendererData->rect_vertexes.emplace_back(
+                    positions[i],
+                    v4 { color.x, color.y, color.z, 1.0f },
+                    textureCoords[i],
+                    1.0f,
+                    1.0f
+                );                                                  
+            }
+
+            RendererData->rect_index_count += 6; 
+        }
+
+        
+        if(count + 1 < string.length())
+            lineLength += glyph.kerning[string[count + 1] - Font::FIRST_CHAR] * scale;
+
+        lineLength += glyph.ax * scale;
+        count++;
+    }
+
+    return { lineLength, font->lineheight() * scale};
+
+}
 
 }

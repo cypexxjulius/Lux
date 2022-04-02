@@ -8,12 +8,6 @@
 namespace Lux
 {
 
-enum class Camera2DControll
-{
-    DRAG = 0b1,
-    SCROLL = 0b10
-};
-
 class Camera2DController 
 {
 private:
@@ -24,22 +18,21 @@ private:
     float m_AspectRatio = 1.0f;
     float m_ZoomLevel = 1.0f;
 
-    u32 m_Controlls;
+    float m_width, m_height;
 
-    v2 m_MouseMovedDelta;
-    Camera2D* m_Camera;
+    v2 m_camera_aspect{};
+
+    Ref<Camera2D> m_Camera = nullptr;
 
 
 public:
 
-    Camera2DController(std::initializer_list<Camera2DControll> init_list);
-
-    ~Camera2DController();
+    Camera2DController();
     
     bool on_event(const Event& event);
 
-    constexpr const Camera2D& camera() const
-    { return *m_Camera; }
+    inline Ref<Camera2D> camera() const
+    { return m_Camera; }
 
 };
 

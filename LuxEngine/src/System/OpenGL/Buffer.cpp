@@ -8,7 +8,7 @@
 namespace Lux::OpenGL
 {
 
-static int convert_Lux_to_gl_type(DataType type)
+static inline int convert_Lux_to_gl_type(DataType type)
 {
     switch(type)
     {
@@ -26,7 +26,7 @@ static int convert_Lux_to_gl_type(DataType type)
 VertexBuffer::VertexBuffer(void* data, u32 size)
 {
     glGenBuffers(1, &m_ID);
-    glBindBuffer(GL_ARRAY_BUFFER, m_ID);
+    bind();
     glBufferData(GL_ARRAY_BUFFER, size, data, GL_STATIC_DRAW);
 }
 
@@ -34,7 +34,7 @@ VertexBuffer::VertexBuffer(u32 size)
 {
 
     glGenBuffers(1, &m_ID);
-    glBindBuffer(GL_ARRAY_BUFFER, m_ID);
+    bind();
     glBufferData(GL_ARRAY_BUFFER, size, NULL, GL_DYNAMIC_DRAW);
 
 }
@@ -46,9 +46,9 @@ VertexBuffer::~VertexBuffer()
 
 static inline void vertex_buffer_bind(u32 id)
 {
-    static u32 bound_id = 0;
+    static i32 bound_id = -1;
 
-    if(id == bound_id)
+    if(static_cast<i32>(id) == bound_id)
         return;
 
     glBindBuffer(GL_ARRAY_BUFFER, id);
@@ -63,7 +63,7 @@ void VertexBuffer::bind() const
 
 void VertexBuffer::set_data(void *data, u32 size)
 {
-    glBindBuffer(GL_ARRAY_BUFFER, m_ID);
+    bind();
     glBufferSubData(GL_ARRAY_BUFFER, 0, size, data);
 }
 
@@ -88,7 +88,7 @@ IndexBuffer::IndexBuffer(unsigned int* data, u32 size)
     : m_Count(size)
 {
     glGenBuffers(1, &m_ID);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ID);
+    bind();
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, size * sizeof(u32), data, GL_STATIC_DRAW);
 }
 
@@ -100,9 +100,9 @@ IndexBuffer::~IndexBuffer()
 
 static inline void index_buffer_bind(u32 id)
 {
-    static u32 bound_id = 0;
+    static i32 bound_id = -1;
 
-    if(id == bound_id)
+    if(static_cast<i32>(id) == bound_id)
         return;
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, id);
