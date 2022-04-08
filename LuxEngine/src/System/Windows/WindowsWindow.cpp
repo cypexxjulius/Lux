@@ -55,6 +55,7 @@ Window::Window(const std::string& title, u32 width, u32 height)
         auto& buffer = app.m_event_buffer; 
         app.m_width  = buffer.window_resize.width  = static_cast<float>(width);
         app.m_height = buffer.window_resize.height = static_cast<float>(height);
+        app.m_aspect_ratio = app.m_width / app.m_height;
 
         buffer.window_resize.valid = true;
 

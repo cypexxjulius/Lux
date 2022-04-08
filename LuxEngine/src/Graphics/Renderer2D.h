@@ -6,25 +6,30 @@
 #include "VertexArray.h"
 #include "Assets/Texture.h"
 
+#include "Renderable2D.h"
+
 #include <utility>
 
 namespace Lux
 {
 
-struct Rect2D
+struct Renderer2DVertex
 {
-    float width;
-    float height;
-    float tiling;
-    float rotation;
-    Ref<Texture> texture;
-    v2 position;
-    v4 color;
+    v3 Position;
+    v4 Color;
+    v2 TexCoord;
+    float TextureSlot;
+    float Tiling;
 };
+
 
 class Renderer2D
 {
-    static void UploadBatch();
+    static inline void UploadBatch();
+
+    static void DrawRect(const Renderable2D<Renderable2DType::Rect>& rect);
+
+    static void DrawText(const Renderable2D<Renderable2DType::Text>& rect);
 
 public:
 
@@ -34,11 +39,18 @@ public:
 
     static void BeginScene(const Ref<Camera2D>& camera);
 
-    static void DrawRect(Rect2D&& quad);
-
-    static std::pair<f32, f32> DrawText(std::string_view string, float scale, v2 position, v3 color);
-
     static void EndScene();
+
+    template<Renderable2DType Type>
+    static void Draw(const Renderable2D<Type>& element)
+    {
+        if constexpr(Type == Renderable2DType::Rect)
+            return DrawRect(element);
+
+        if constexpr(Type == Renderable2DType::Text)
+            return DrawText(element);
+    }
+
 
 };
 

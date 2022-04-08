@@ -49,6 +49,7 @@ private:
     float m_width = 1280; 
     float m_height = 720;
     float m_frame_time;
+    float m_aspect_ratio;
 
     std::string m_title;
     static Application* s_Instance;
@@ -109,6 +110,9 @@ public:
 
     static inline float Height()
     { return Application::Get().m_height; }
+
+    static inline float AspectRatio()
+    { return Application::Get().m_aspect_ratio; }
 
     static inline VirtualIO& IOState()
     { return Application::Get().m_iostate; }

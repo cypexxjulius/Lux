@@ -14,16 +14,18 @@ Application::Application(const std::string& title)
     : m_title(title), m_window(title, (u32)m_width, (u32)m_height)
 {
     s_Instance = this;
+    m_aspect_ratio = m_width / m_height;
 
     Renderer::Init(RendererAPI::OpenGL);
-    Renderer::SetClearColor({0.8, 0.1, 0.3, 1.0});
+    Renderer::SetClearColor({0.3, 0.4, 0.3, 1.0});
 
     ResourceManager::Init();
 
     
     Renderer2D::Init();
 
-    PushLayer<GUILayer>();
+    PushLayer<GUI::GUILayer>();
+
 }
 
 void Application::loop()

@@ -1,5 +1,6 @@
 #pragma once 
 
+#include "GUI.h"
 
 #include "Core/Layer.h"
 #include "Core/Event.h"
@@ -11,9 +12,8 @@
 
 #include <vector>
 
+#include "Assets/Manager.h"
 
-#include "GUI.h"
-#include "LGA.h"
 
 namespace Lux::GUI
 {
@@ -24,9 +24,14 @@ class GUILayer final : public Layer
 private:
 
     static GUILayer* s_Instance;
-    std::vector<GUI::Box> m_boxes;
+    std::vector<Box> m_boxes;
+
+    Box* m_selected_box = nullptr;
+    Box* m_dragged_box = nullptr;
+
 
     Camera2DController m_camera;
+    Ref<Font> m_used_font;
 
 
     static constexpr GUILayer& Get()
@@ -43,8 +48,10 @@ public:
     virtual void on_attach() override
     {
         Verify(s_Instance == nullptr);
-
         s_Instance = this;
+
+        // TODO Check if this font exists
+        m_used_font = ResourceManager::GetFont("StandardFont");
     }   
 
     virtual void on_detach() override 

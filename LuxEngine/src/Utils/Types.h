@@ -1,6 +1,10 @@
 #pragma once 
 
+#pragma warning(disable: 4201)
 #include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#pragma warning(default: 4201)
+
 #include <memory>
 #include <array>
 #include <unordered_map>
