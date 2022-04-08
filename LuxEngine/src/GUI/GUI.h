@@ -53,7 +53,6 @@ struct Box
 
     bool is_valid = true;
     bool is_snapped = false;
-    bool is_closed = false;
     bool is_dragged = false;
     bool is_selected = false;
 

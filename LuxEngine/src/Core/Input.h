@@ -1,23 +1,37 @@
 #pragma once 
 
-
 #include "Application.h"
+#include "Window.h"
 
 
 namespace Lux 
 {
 
+enum class CursorType
+{
+    Arrow,
+    IBeam,
+    Crosshair,
+    Hand,
+    HResize,
+    VResize
+};
 
 class Input 
 {
 
 public:
 
-    static constexpr KeyState GetState(Key key)
-    { return Application::Get().m_iostate.keyboard[static_cast<u32>(key)]; }
+    static inline KeyState GetState(Key key)
+    { return Application::m_VirtualIO.keyboard[static_cast<u32>(key)]; }
 
-    static constexpr KeyState GetState(MouseKey key)
-    { return Application::Get().m_iostate.mouse_buttons[static_cast<u32>(key)]; }
+    static inline KeyState GetState(MouseKey key)
+    { return Application::m_VirtualIO.mouse_buttons[static_cast<u32>(key)]; }
+
+    static inline void SetCursorType(CursorType type)
+    {
+        Window::SetCursorType(type);
+    }
     
 };
 

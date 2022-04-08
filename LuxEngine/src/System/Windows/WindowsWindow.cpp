@@ -1,4 +1,3 @@
-#include "Core/Application.h"
 #include "Core/Keycode.h"
 #include "Core/Window.h"
 #include "Core/Event.h"
@@ -9,23 +8,35 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
+#include "Core/Application.h"
+
 namespace Lux
 {
 
-constexpr KeyState gl_to_lux_keystate[] = {
+constexpr KeyState glfw_to_lux_keystate[] = {
     KeyState::Released,
     KeyState::Pressed,
     KeyState::Repeated
 };
 
+Key GLFW_to_Lux_KeyCode(GLenum gl_key);
+MouseKey GLFW_to_Lux_MouseKey(GLenum gl_key); 
 
-Key OpenGL_to_Lux_KeyCode(GLenum gl_key);
-MouseKey OpenGL_to_Lux_MouseKey(GLenum gl_key); 
-
-Window::Window(const std::string& title, u32 width, u32 height)
-    : m_width(width), m_height(height), m_title(title)
+struct WindowAssets
 {
+    bool vsync;
+    GLFWwindow* handle;
 
+    std::array<GLFWcursor*, 6> cursors;
+};
+
+static WindowAssets* wAssets = nullptr;
+
+void Window::Open(const std::string& title, u32 width, u32 height)
+{
+    Verify(wAssets == nullptr);
+
+    wAssets = new WindowAssets;
 
     Verify(glfwInit());
 
@@ -34,92 +45,91 @@ Window::Window(const std::string& title, u32 width, u32 height)
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_SAMPLES, 4);
 
-    m_handle = (void*)glfwCreateWindow(width, height, title.c_str(), NULL, NULL);
+    wAssets->handle = glfwCreateWindow(width, height, title.c_str(), NULL, NULL);
 
-    glfwMakeContextCurrent((GLFWwindow*)m_handle);
+    glfwMakeContextCurrent(wAssets->handle);
 
     Verify(gladLoadGLLoader((GLADloadproc) glfwGetProcAddress));
 
-    glfwSetWindowUserPointer((GLFWwindow*)m_handle, this);
-
     glfwSwapInterval(1);
-    m_vsync = true;
+    wAssets->vsync = true;
 
-    GLFWwindow* m_Handle = (GLFWwindow*)m_handle;
+    wAssets->cursors[0] = glfwCreateStandardCursor(GLFW_ARROW_CURSOR);
+    wAssets->cursors[1] = glfwCreateStandardCursor(GLFW_IBEAM_CURSOR);
+    wAssets->cursors[2] = glfwCreateStandardCursor(GLFW_CROSSHAIR_CURSOR);
+    wAssets->cursors[3] = glfwCreateStandardCursor(GLFW_HAND_CURSOR);
+    wAssets->cursors[4] = glfwCreateStandardCursor(GLFW_HRESIZE_CURSOR);
+    wAssets->cursors[5] = glfwCreateStandardCursor(GLFW_VRESIZE_CURSOR);
+
 
 #pragma warning(disable: 4100)
-    glfwSetFramebufferSizeCallback(m_Handle, [](GLFWwindow* glWindow, int width, int height)
+    glfwSetFramebufferSizeCallback(wAssets->handle, [](GLFWwindow* glWindow, int width, int height)
     {
 
-        auto& app = Application::Get();
-        auto& buffer = app.m_event_buffer; 
-        app.m_width  = buffer.window_resize.width  = static_cast<float>(width);
-        app.m_height = buffer.window_resize.height = static_cast<float>(height);
-        app.m_aspect_ratio = app.m_width / app.m_height;
+        auto& buffer = Application::m_EventBuffer; 
+        Application::m_Width  = buffer.window_resize.width  = static_cast<float>(width);
+        Application::m_Height = buffer.window_resize.height = static_cast<float>(height);
+        Application::m_AspectRatio = Application::m_Width / Application::m_Height;
 
         buffer.window_resize.valid = true;
 
-        app.m_minimized = (width + height) == 0;
+        Application::m_Minimized = (width + height) == 0;
     });
 
     // Window close callback 
-    glfwSetWindowCloseCallback(m_Handle, [](GLFWwindow* glWindow)
+    glfwSetWindowCloseCallback(wAssets->handle, [](GLFWwindow* glWindow)
     {    
-        Application::Get().close_application();
+        Application::Close();
     });
 
     // Char input callback
-    glfwSetCharCallback(m_Handle, [](GLFWwindow* glWindow, unsigned int character)
+    glfwSetCharCallback(wAssets->handle, [](GLFWwindow* glWindow, unsigned int character)
     {
-        auto& buffer = Application::Get().m_event_buffer; 
-        buffer.char_events.emplace_back(EventType::Char);
+        Application::m_EventBuffer.char_events.emplace_back(EventType::Char);
     });
 
     // General key interaction callback
-    glfwSetKeyCallback(m_Handle, [](GLFWwindow* glWindow, int key, int scancode, int action, int mods)
+    glfwSetKeyCallback(wAssets->handle, [](GLFWwindow* glWindow, int key, int scancode, int action, int mods)
     {
-        auto& app = Application::Get();
-        auto& buffer = app.m_event_buffer; 
+        auto& buffer = Application::m_EventBuffer; 
         Event event(EventType::KeyPressed);
-        event.action = gl_to_lux_keystate[static_cast<u8>(action)];
-        event.keycode.keyboard = OpenGL_to_Lux_KeyCode(key);
+        event.action = glfw_to_lux_keystate[static_cast<u8>(action)];
+        event.keycode.keyboard = GLFW_to_Lux_KeyCode(key);
         event.mod = static_cast<u8>(mods);
         
-        app.m_iostate.keyboard[static_cast<u32>(event.keycode.keyboard)] = event.action;
+        Application::m_VirtualIO.keyboard[static_cast<u32>(event.keycode.keyboard)] = event.action;
 
         buffer.key_events.emplace_back(event);    
 
     });
 
     // Mouse button interaction callback
-    glfwSetMouseButtonCallback(m_Handle, [](GLFWwindow* glWindow, int button, int action, int mods)
+    glfwSetMouseButtonCallback(wAssets->handle, [](GLFWwindow* glWindow, int button, int action, int mods)
     { 
-        auto& app = Application::Get();
-        auto& buffer = app.m_event_buffer; 
+        auto& buffer = Application::m_EventBuffer; 
         
         Event event(EventType::MouseButtonPressed);
-        event.keycode.mouse = OpenGL_to_Lux_MouseKey(button);
+        event.keycode.mouse = GLFW_to_Lux_MouseKey(button);
         event.mod = static_cast<u8>(mods);
-        event.action = gl_to_lux_keystate[static_cast<u8>(action)];
-        event.position = app.m_iostate.mouse_position;
+        event.action = glfw_to_lux_keystate[static_cast<u8>(action)];
+        event.position = Application::m_VirtualIO.mouse_position;
 
-        app.IOState().mouse_buttons[static_cast<u32>(event.keycode.mouse)] = event.action;
+        Application::m_VirtualIO.mouse_buttons[static_cast<u32>(event.keycode.mouse)] = event.action;
         
         buffer.mouse_button.emplace_back(event);
     });
 
-    glfwSetScrollCallback(m_Handle, [](GLFWwindow* glWindow, double xOffset, double yOffset)
+    glfwSetScrollCallback(wAssets->handle, [](GLFWwindow* glWindow, double xOffset, double yOffset)
     {
-        auto& buffer = Application::Get().m_event_buffer; 
+        auto& buffer = Application::m_EventBuffer; 
         buffer.scrolled.delta += v2{ xOffset, yOffset};
         buffer.scrolled.valid = true;
     }); 
 
-    glfwSetCursorPosCallback(m_Handle, [](GLFWwindow* glWindow, double x, double y)
+    glfwSetCursorPosCallback(wAssets->handle, [](GLFWwindow* glWindow, double x, double y)
     {
         static double xOldPos = 0.0, yOldPos = 0.0; 
-        auto& app = Application::Get();
-        auto& buffer = app.m_event_buffer; 
+        auto& buffer = Application::m_EventBuffer; 
 
         x /= static_cast<double>(Application::Width());
 
@@ -131,7 +141,7 @@ Window::Window(const std::string& title, u32 width, u32 height)
 
         buffer.mouse_moved.valid = true;
 
-        app.m_iostate.mouse_position = buffer.mouse_moved.position;
+        Application::m_VirtualIO.mouse_position = buffer.mouse_moved.position;
 
         xOldPos = x;
         yOldPos = y;
@@ -140,29 +150,46 @@ Window::Window(const std::string& title, u32 width, u32 height)
 
 }
 
-void Window::swap_buffers()
+void Window::SwapBuffers()
 {
-    glfwSwapBuffers((GLFWwindow*)m_handle);
+    Verify(wAssets != nullptr);
+    glfwSwapBuffers(wAssets->handle);
 }
 
-void Window::poll_events()
+void Window::PollEvents()
 {
+    Verify(wAssets != nullptr);
     glfwPollEvents();
 }
 
-void Window::set_vsync(bool state)
+void Window::SetVsync(bool state)
 {
-    m_vsync = state;
+    Verify(wAssets != nullptr);
+    wAssets->vsync = state;
     glfwSwapInterval((int)state);
 }
 
-Window::~Window()
+void Window::Close()
 {
-    glfwDestroyWindow((GLFWwindow*)m_handle);
+    Verify(wAssets != nullptr);
+ 
+    for(u32 i = 0; i < 6; i++)
+    {
+        glfwDestroyCursor(wAssets->cursors[i]);
+    }
+ 
+    glfwDestroyWindow(wAssets->handle);
     glfwTerminate();
+    
+    delete wAssets;
 }
 
-float Window::delta_time()
+void Window::SetCursorType(CursorType type)
+{
+    glfwSetCursor(wAssets->handle, wAssets->cursors[static_cast<int>(type)]);
+}
+
+float Window::DeltaTime()
 {
     static double lastTime = 0.0;
 

@@ -5,16 +5,29 @@
 #include "Assets/Manager.h"
 #include "GUI/GUILayer.h"
 
+#include "Window.h"
+
 namespace Lux
 {
 
-Application* Application::s_Instance = nullptr;
+float       Application::m_Width = 1280; 
+float       Application::m_Height = 720;
 
-Application::Application(const std::string& title)
-    : m_title(title), m_window(title, (u32)m_width, (u32)m_height)
+bool  Application::m_Minimized = false;
+bool  Application::m_Running = true;
+float Application::m_FrameTime = 0.0f;
+float Application::m_AspectRatio = 1280.0f / 720.0f;
+
+std::string             Application::m_Title;
+std::vector<Layer*>     Application::m_LayerStack;
+VirtualIO               Application::m_VirtualIO;
+EventBuffer             Application::m_EventBuffer; 
+
+
+void Application::Start(const std::string& title)
 {
-    s_Instance = this;
-    m_aspect_ratio = m_width / m_height;
+    m_Title = title;
+    Window::Open(m_Title, (u32)m_Width, (u32)m_Height);
 
     Renderer::Init(RendererAPI::OpenGL);
     Renderer::SetClearColor({0.3, 0.4, 0.3, 1.0});
@@ -28,92 +41,83 @@ Application::Application(const std::string& title)
 
 }
 
-void Application::loop()
+void Application::Run()
 {
-    while(m_running)
+    while(m_Running)
     {
 
-        m_frame_time = m_window.delta_time();
+        m_FrameTime = Window::DeltaTime();
+        
         // Event Processing
         do {
             
-            prepare_event_buffer();
-            m_window.poll_events();
-            dispatch_event_buffer();
+            m_EventBuffer.prepare(m_FrameTime);
+            Window::PollEvents();
 
-        } while(m_minimized);
+            DispatchEventBuffer();
+
+        } while(m_Minimized);
 
         Renderer::Clear();
 
         // Reverse callstack
-        for(int i = (int)m_layerstack.size() - 1; i >= 0; i--)
-        {
-            m_layerstack[i]->on_update();
-        }
+        for(auto rit = m_LayerStack.rbegin(); rit != m_LayerStack.rend(); rit++)
+            (*rit)->on_update();
 
 
-        m_window.swap_buffers();
+        Window::SwapBuffers();
     }
 
-    for(auto& layer : m_layerstack)
+    for(auto& layer : m_LayerStack)
         layer->on_detach();
 
     Renderer2D::Shutdown();
     ResourceManager::Shutdown();
     Renderer::Shutdown();
+
+    Window::Close();
 }
 
-void Application::prepare_event_buffer()
-{
-    m_event_buffer.scrolled.reset(m_frame_time);
-    m_event_buffer.mouse_moved.reset(m_frame_time);
-    m_event_buffer.window_resize.reset(m_frame_time);
 
-
-    m_event_buffer.key_events.clear();
-    m_event_buffer.char_events.clear();
-    m_event_buffer.mouse_button.clear();
-}
-
-void Application::dispatch_event_buffer()
+void Application::DispatchEventBuffer()
 { 
 
-    if(m_event_buffer.scrolled.valid)
-        dispatch_single_event(m_event_buffer.scrolled);
+    if(m_EventBuffer.scrolled.valid)
+        DispatchSingleEvent(m_EventBuffer.scrolled);
 
-    if(m_event_buffer.mouse_moved.valid)
-        dispatch_single_event(m_event_buffer.mouse_moved);
+    if(m_EventBuffer.mouse_moved.valid)
+        DispatchSingleEvent(m_EventBuffer.mouse_moved);
 
-    if(m_event_buffer.window_resize.valid)
+    if(m_EventBuffer.window_resize.valid)
     {
-        dispatch_single_event(m_event_buffer.window_resize);
-        Renderer::SetViewport(static_cast<u32>(m_width), static_cast<u32>(m_height));
+        DispatchSingleEvent(m_EventBuffer.window_resize);
+        Renderer::SetViewport(static_cast<u32>(m_Width), static_cast<u32>(m_Height));
     }
 
-    for(auto& event : m_event_buffer.mouse_button)
+    for(auto& event : m_EventBuffer.mouse_button)
     {
-        event.delta_time = m_frame_time;
-        dispatch_single_event(event);
+        event.delta_time = m_FrameTime;
+        DispatchSingleEvent(event);
     }
 
-    for(auto& event : m_event_buffer.key_events)
+    for(auto& event : m_EventBuffer.key_events)
     {
-        event.delta_time = m_frame_time;
-        dispatch_single_event(event);
+        event.delta_time = m_FrameTime;
+        DispatchSingleEvent(event);
     }
 
-    for(auto& event : m_event_buffer.char_events)
+    for(auto& event : m_EventBuffer.char_events)
     {
-        event.delta_time = m_frame_time;
-        dispatch_single_event(event);
+        event.delta_time = m_FrameTime;
+        DispatchSingleEvent(event);
     }
 }
 
 
 
-void Application::dispatch_single_event(Event& event)
+void Application::DispatchSingleEvent(Event& event)
 {
-    for(auto layer : m_layerstack)
+    for(auto layer : m_LayerStack)
     {
         bool returnValue = layer->on_event(event);
 

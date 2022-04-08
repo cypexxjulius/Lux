@@ -4,32 +4,43 @@
 #include "Utils/Types.h"
 #include "Utils/Assert.h"
 
+
+
 namespace Lux
 {
 
+enum class CursorType;
+
 class Window
 {
+
 private:
-    bool m_vsync;
-    u32 m_width, m_height;
-    void* m_handle;
-    std::string m_title;
+
+    Window() = delete;
+
+    static void Open(const std::string& title, u32 width, u32 height);
+
+    static void Close();
+
+    static void SwapBuffers();
+
+    static void SetCursorType(CursorType type);
 
 public:
 
-    Window(const std::string& title, u32 width, u32 height);
 
-    ~Window();
+    friend class Application;
 
-    void swap_buffers();
+    friend class Input;
 
-    void poll_events();
+    static void PollEvents();
 
-    void set_vsync(bool state);
+    static void SetVsync(bool state);
 
-    bool is_vsync_set();
+    static bool IsVsyncSet();
 
-    float delta_time();
+    static float DeltaTime();
+
 
 };
 

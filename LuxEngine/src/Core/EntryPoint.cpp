@@ -4,11 +4,9 @@ void lux_start();
 
 int main()
 {
-    auto* app = new Lux::Application("Start Project");
+    Lux::Application::Start("Start Project");
 
     lux_start();
 
-    app->loop();
-
-    delete app;
+    Lux::Application::Run();
 }

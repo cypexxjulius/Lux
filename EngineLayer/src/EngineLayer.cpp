@@ -20,13 +20,7 @@ public:
 
     void on_attach() override
     {
-        LGA::Begin("Test", { 0.0f, 0.0f}, 0.5, 0.5);
 
-        LGA::End();
-
-        LGA::Begin("Test2", { 0.0f, 0.0f}, 0.5, 0.5);
-
-        LGA::End();
     }
 
     void on_detach() override
@@ -42,6 +36,13 @@ public:
 
     void on_update() override
     {
+        LGA::Begin("Test", { 0.0f, 0.0f}, 0.5, 0.5);
+
+        LGA::End();
+
+        LGA::Begin("Test2", { 0.0f, 0.0f}, 0.5, 0.5);
+
+        LGA::End();
     }
 
 };

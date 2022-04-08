@@ -25,18 +25,20 @@ class GUILayer final : public Layer
 private:
 
     static GUILayer* s_Instance;
-    std::unordered_map<std::string, Box> m_boxes;
-    std::vector<Box*> m_box_positions;
 
     Box* m_selected_box = nullptr;
     Box* m_dragged_box = nullptr;
+    Box* m_active_box = nullptr;
+
+    std::vector<Box*> m_box_positions;
+    std::unordered_map<std::string, Box> m_boxes;
 
 
     Camera2DController m_camera;
     Ref<Font> m_used_font;
 
 
-    static constexpr GUILayer& Get()
+    static inline GUILayer& Get()
     { return *s_Instance; }
 
     static constexpr bool Valid()

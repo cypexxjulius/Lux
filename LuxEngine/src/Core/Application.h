@@ -5,18 +5,17 @@
 #include <memory>
 
 #include "Layer.h"
-#include "Window.h"
-#include "Utils/Types.h"
 #include "Event.h"
 
-#include "Graphics/Renderer.h"
+#include "Utils/Types.h"
+
 #include "System/SystemController.h"
 
 namespace Lux
 {
 
 
-// Virtual representation of the keyboard and mouse state, updated and owned by the Application class
+// Virtual representation of the keyboard and mouse state, updated by the window and owned by the Application class
 struct VirtualIO
 {
     
@@ -37,6 +36,21 @@ struct EventBuffer
     std::vector<Event> key_events;
     std::vector<Event> char_events;
 
+    friend class Application;
+
+private:
+
+    void prepare(float frame_time)
+    {
+        scrolled.reset(frame_time);
+        mouse_moved.reset(frame_time);
+        window_resize.reset(frame_time);
+
+        key_events.clear();
+        char_events.clear();
+        mouse_button.clear();
+    }
+
 };
 
 class Application
@@ -44,46 +58,28 @@ class Application
 
 private:
 
-    bool m_minimized = false;
-    bool m_running = true;
-    float m_width = 1280; 
-    float m_height = 720;
-    float m_frame_time;
-    float m_aspect_ratio;
-
-    std::string m_title;
-    static Application* s_Instance;
-    mutable std::vector<Layer*> m_layerstack{};
-
-
-
-
-
-    Window m_window;
+    static float m_Width;
+    static float m_Height;
     
-    EventBuffer m_event_buffer{};
-    VirtualIO m_iostate{};
+    static bool m_Minimized;
+    static bool m_Running;
+    static float m_FrameTime;
+    static float m_AspectRatio;
 
+    static std::string m_Title;
 
+    static std::vector<Layer*>  m_LayerStack;
+    static VirtualIO            m_VirtualIO;
+    static EventBuffer          m_EventBuffer; 
 
-private:
+    static void DispatchEventBuffer();
 
-    void prepare_event_buffer();
+    static void DispatchSingleEvent(Event& event);
 
-    EventBuffer& get_event_buffer(); 
-
-    void dispatch_event_buffer();
-
-    void dispatch_single_event(Event& event);
-
-private:
-
-    static constexpr Application& Get()
-    { return *s_Instance; }
-
-    inline void close_application()
-    { m_running = false; }
-
+    static inline void Close()
+    {
+        m_Running = false;
+    }
 
 public:
 
@@ -91,31 +87,26 @@ public:
 
     friend class Input;
 
-    Application(const std::string& title);
+    static void Start(const std::string& title);
 
-    void loop();
-
+    static void Run();
 
     template<class T>
     static inline void PushLayer()
     { 
         static_assert(std::is_base_of<Layer, T>::value, "Class has to inherit from the Layer class");
-        Application::Get().m_layerstack.emplace_back(new T);  
-        Application::Get().m_layerstack.back()->on_attach();
-
+        m_LayerStack.emplace_back(new T);  
+        m_LayerStack.back()->on_attach();
     }
 
     static inline float Width()
-    { return Application::Get().m_width; }
+    { return m_Width; }
 
     static inline float Height()
-    { return Application::Get().m_height; }
+    { return m_Height; }
 
     static inline float AspectRatio()
-    { return Application::Get().m_aspect_ratio; }
-
-    static inline VirtualIO& IOState()
-    { return Application::Get().m_iostate; }
+    { return m_AspectRatio; }
 
 };
 
