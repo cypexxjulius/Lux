@@ -72,7 +72,7 @@ public:
 
     friend class Renderer2D;
 
-    Renderable2D(v2 position,const v4& color, float width, float height, const Ref<Texture>& texture = NoTexture, float tiling = 1.0f)
+    Renderable2D(v2 position, float width, float height, const v4& color, const Ref<Texture>& texture = NoTexture, float tiling = 1.0f)
         :   m_transform(glm::translate(glm::mat4(1.0f), { position.x, position.y, 1.0f }) * glm::scale(glm::mat4(1.0f), { width, height, 1.0f })),
             m_texture_coords(RectTextureCoords),
             m_texture(texture),
@@ -91,12 +91,15 @@ public:
         m_color = color;
     }
 
-    inline void reset(v2 position,const v4& color, float width, float height, const Ref<Texture>& texture = NoTexture, float tiling = 1.0f)
+    inline void set_texture(const Ref<Texture>& texture, float tiling = 1.0f)
+    {
+        m_texture = texture;
+        m_tiling = tiling;
+    }
+
+    inline void reset_transform(v2 position, float width, float height)
     {
         m_transform = glm::translate(glm::mat4(1.0f), { position.x, position.y, 1.0f }) * glm::scale(glm::mat4(1.0f), { width, height, 1.0f });
-        m_texture = texture;
-        m_color = color;
-        m_tiling = tiling;
     }
 };
 
@@ -180,7 +183,7 @@ public:
         m_color = { color, 1.0f };
     }
 
-    inline void reset(std::string_view string, v2 position, float scale, const v3 color = { 1.0f, 1.0f, 1.0f })
+    inline void reset_transform(std::string_view string, v2 position, float scale)
     {
         if(string.empty())
         {
@@ -195,8 +198,7 @@ public:
         
         m_glyphs.clear();
         m_glyphs.reserve(m_count);
-        m_color = { color, 1.0f };
-
+        
         for(u32 i = 0; i < string.length(); i++)
         {
 

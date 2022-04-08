@@ -51,6 +51,7 @@ struct Widget
 struct Box
 {
 
+    bool is_valid = true;
     bool is_snapped = false;
     bool is_closed = false;
     bool is_dragged = false;
@@ -72,7 +73,7 @@ struct Box
             position(box_position), 
             width(box_width), 
             height(box_height), 
-            render_component(GUISpace::ToRenderSpace(box_position), Style::box_background_color, GUISpace::ToRenderSpaceX(box_width), GUISpace::ToRenderSpaceY(box_height)),
+            render_component(GUISpace::ToRenderSpace(box_position), GUISpace::ToRenderSpaceX(box_width), GUISpace::ToRenderSpaceY(box_height), Style::box_background_color),
             text_render_component(box_title, GUISpace::ToRenderSpace(box_position), 1.0f)
     {}
 
@@ -87,8 +88,8 @@ struct Box
     void inline add_position_vector(v2 delta)
     {
         position += delta;
-        render_component.reset(GUISpace::ToRenderSpace(position), Style::box_background_color, GUISpace::ToRenderSpaceX(width), GUISpace::ToRenderSpaceY(height));
-        text_render_component.reset(title, GUISpace::ToRenderSpace(position), 1.0f);
+        render_component.reset_transform(GUISpace::ToRenderSpace(position), GUISpace::ToRenderSpaceX(width), GUISpace::ToRenderSpaceY(height));
+        text_render_component.reset_transform(title, GUISpace::ToRenderSpace(position), 1.0f);
     }
 
     void inline select() 

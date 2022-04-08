@@ -11,6 +11,7 @@
 #include "Graphics/CameraController.h"
 
 #include <vector>
+#include <string>
 
 #include "Assets/Manager.h"
 
@@ -24,7 +25,8 @@ class GUILayer final : public Layer
 private:
 
     static GUILayer* s_Instance;
-    std::vector<Box> m_boxes;
+    std::unordered_map<std::string, Box> m_boxes;
+    std::vector<Box*> m_box_positions;
 
     Box* m_selected_box = nullptr;
     Box* m_dragged_box = nullptr;
