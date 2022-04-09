@@ -42,7 +42,8 @@ void main()
     vec4 color = v_Color;
     switch(int(v_TextureID))
     {
-        case 0: color *= texture2D(u_Textures[0], v_texCoord * v_TilingFactor); break;
+        case 0:  
+            break;
         case 1: 
             color *= texture2D(u_Textures[1], v_texCoord).r; 
             if(color.r < 0.8)

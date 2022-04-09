@@ -8,7 +8,8 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-#include "Core/Application.h"
+#include "Core/Input.h"
+
 
 namespace Lux
 {
@@ -27,7 +28,7 @@ struct WindowAssets
     bool vsync;
     GLFWwindow* handle;
 
-    std::array<GLFWcursor*, 6> cursors;
+    std::array<GLFWcursor*, 9> cursors;
 };
 
 static WindowAssets* wAssets = nullptr;
@@ -57,9 +58,12 @@ void Window::Open(const std::string& title, u32 width, u32 height)
     wAssets->cursors[0] = glfwCreateStandardCursor(GLFW_ARROW_CURSOR);
     wAssets->cursors[1] = glfwCreateStandardCursor(GLFW_IBEAM_CURSOR);
     wAssets->cursors[2] = glfwCreateStandardCursor(GLFW_CROSSHAIR_CURSOR);
-    wAssets->cursors[3] = glfwCreateStandardCursor(GLFW_HAND_CURSOR);
-    wAssets->cursors[4] = glfwCreateStandardCursor(GLFW_HRESIZE_CURSOR);
-    wAssets->cursors[5] = glfwCreateStandardCursor(GLFW_VRESIZE_CURSOR);
+    wAssets->cursors[3] = glfwCreateStandardCursor(GLFW_POINTING_HAND_CURSOR);
+    wAssets->cursors[4] = glfwCreateStandardCursor(GLFW_HAND_CURSOR);
+    wAssets->cursors[5] = glfwCreateStandardCursor(GLFW_RESIZE_EW_CURSOR);
+    wAssets->cursors[6] = glfwCreateStandardCursor(GLFW_RESIZE_NS_CURSOR);
+    wAssets->cursors[7] = glfwCreateStandardCursor(GLFW_RESIZE_NWSE_CURSOR);
+    wAssets->cursors[8] = glfwCreateStandardCursor(GLFW_RESIZE_NESW_CURSOR);
 
 
 #pragma warning(disable: 4100)
@@ -186,6 +190,11 @@ void Window::Close()
 
 void Window::SetCursorType(CursorType type)
 {
+    static CursorType static_type = CursorType::Arrow;
+    if(type == static_type)
+        return;
+    
+    static_type = type;
     glfwSetCursor(wAssets->handle, wAssets->cursors[static_cast<int>(type)]);
 }
 

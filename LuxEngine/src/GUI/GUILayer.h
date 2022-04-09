@@ -14,7 +14,7 @@
 #include <string>
 
 #include "Assets/Manager.h"
-
+#include "GUIBox.h"
 
 namespace Lux::GUI
 {
@@ -26,8 +26,8 @@ private:
 
     static GUILayer* s_Instance;
 
-    Box* m_selected_box = nullptr;
-    Box* m_dragged_box = nullptr;
+    FocusBox m_FocusedBox;
+
     Box* m_active_box = nullptr;
 
     std::vector<Box*> m_box_positions;
@@ -41,7 +41,7 @@ private:
     static inline GUILayer& Get()
     { return *s_Instance; }
 
-    static constexpr bool Valid()
+    static inline bool Valid()
     { return s_Instance != nullptr; }
 
 

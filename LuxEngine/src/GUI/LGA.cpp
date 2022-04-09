@@ -26,7 +26,7 @@ void LGA::Begin(std::string_view title, v2 position, float width, float height)
         return;
     }
     
-    box_container.insert({ box_name, { box_name, position, width, height}});
+    box_container.insert({ box_name, { box_name, position, width, height }});
     GUI::GUILayer::Get().m_box_positions.push_back(&box_container.at(box_name));
     GUI::GUILayer::Get().m_active_box = &box_container.at(box_name);
 }

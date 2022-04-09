@@ -84,11 +84,9 @@ void Renderer2D::Init()
 
     delete[] QuadIndices;
 
-    constexpr u32 WhiteTextureData = 0xffffffff;
-    
+ 
     ResourceManager::CreateFont("StandardFont", { "EngineLayer/res/fonts/Roboto-Black.ttf" });
-    ResourceManager::CreateTexture("IdentityTexture", { ImageType::RGBA, 1, 1, (void*)&WhiteTextureData });
-
+   
     std::vector<int> samplers;
     samplers.reserve(MaxTextureSlots + 2);
 
@@ -106,7 +104,6 @@ void Renderer2D::Shutdown()
     
     ResourceManager::DeleteFont("StandardFont");
     ResourceManager::DeleteShader("TextureShader");
-    ResourceManager::DeleteTexture("IdentityTexture");
 
     delete RendererData;
 }
@@ -135,8 +132,7 @@ inline void Renderer2D::UploadBatch()
 {
     RendererData->active_shader->bind();
 
-    u8 bound_texture_slot = 0;
-    ResourceManager::GetTexture("IdentityTexture")->bind(bound_texture_slot++);
+    u8 bound_texture_slot = 1;
     ResourceManager::GetFont("StandardFont")->bind(bound_texture_slot++);
     for(auto& texture : RendererData->texture_slots)
         texture->bind(bound_texture_slot++);
@@ -174,13 +170,11 @@ void Renderer2D::DrawRect(const Renderable2D<Renderable2DType::Rect>& rect)
             textures.push_back(rect.m_texture);
         }
         else 
-        {
             TextureID = static_cast<float>(std::distance(textures.begin(), it));
-        }
     }
 
 
-    const mat4& transform = rect.m_transform;
+    const mat4& transform = RendererData->transform_stack_back * rect.m_transform;
     const auto& texture_coords = rect.m_texture_coords;
 
     RendererData->rect_vertexes.emplace_back(
@@ -227,8 +221,10 @@ void Renderer2D::DrawText(const Renderable2D<Renderable2DType::Text>& text)
 
     float TextureID = 1.0f;
 
-    for(const auto&[transform, texture_coords] : text.m_glyphs)
+    for(const auto&[glyph_transform, texture_coords] : text.m_glyphs)
     {
+        mat4 transform = RendererData->transform_stack_back * glyph_transform;
+
         RendererData->rect_vertexes.emplace_back(
             transform * Renderable2D<Renderable2DType::Text>::VertexPositions[0],
             text.m_color,

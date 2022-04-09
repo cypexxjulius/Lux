@@ -13,7 +13,6 @@ enum class CursorType;
 
 class Window
 {
-
 private:
 
     Window() = delete;

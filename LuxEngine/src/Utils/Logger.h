@@ -1,7 +1,7 @@
 #pragma once 
 
-#include <format>
 #include <iostream>
+#include <format>
 
 namespace Lux
 {

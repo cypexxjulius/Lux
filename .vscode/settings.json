@@ -117,5 +117,6 @@
         "**/.gitmodules": true,
         "**/.vs": true,
         "**/.vscode": true
-    }
+    },
+    "diffEditor.codeLens": true
 }

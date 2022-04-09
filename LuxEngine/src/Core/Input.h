@@ -12,9 +12,12 @@ enum class CursorType
     Arrow,
     IBeam,
     Crosshair,
+    PointingHand,
     Hand,
     HResize,
-    VResize
+    VResize,
+    HVResizeTB,
+    HVResizeBT,
 };
 
 class Input 
