@@ -51,7 +51,7 @@ void Application::Run()
         // Event Processing
         do {
             
-            m_EventBuffer.prepare(m_FrameTime);
+            m_EventBuffer.prepare();
             Window::PollEvents();
 
             DispatchEventBuffer();
@@ -82,13 +82,13 @@ void Application::Run()
 void Application::DispatchEventBuffer()
 { 
 
-    if(m_EventBuffer.scrolled.valid)
+    if(m_EventBuffer.scrolled.is_active())
         DispatchSingleEvent(m_EventBuffer.scrolled);
 
-    if(m_EventBuffer.mouse_moved.valid)
+    if(m_EventBuffer.mouse_moved.is_active())
         DispatchSingleEvent(m_EventBuffer.mouse_moved);
 
-    if(m_EventBuffer.window_resize.valid)
+    if(m_EventBuffer.window_resize.is_active())
     {
         DispatchSingleEvent(m_EventBuffer.window_resize);
         Renderer::SetViewport(static_cast<u32>(m_Width), static_cast<u32>(m_Height));
@@ -114,14 +114,28 @@ void Application::DispatchEventBuffer()
 }
 
 
-
-void Application::DispatchSingleEvent(Event& event)
+template<EventType Type>
+void Application::DispatchSingleEvent(Event<Type>& event)
 {
     for(auto layer : m_LayerStack)
     {
-        bool returnValue = layer->on_event(event);
+        bool return_value = false;
+        if constexpr (Type == EventType::Char)
+            return_value = layer->on_char_press(event);
+        else if constexpr(Type == EventType::KeyPressed)
+            return_value = layer->on_key_press(event);
+        else if constexpr(Type == EventType::MouseButtonPressed)
+            return_value = layer->on_mouse_button_press(event);
+        else if constexpr(Type == EventType::MouseMoved)
+            return_value = layer->on_mouse_move(event);    
+        else if constexpr(Type == EventType::Scrolled)
+            return_value = layer->on_scroll(event);
+        else if constexpr(Type == EventType::WindowResize)
+            layer->on_resize(event);   
+            
 
-        if(returnValue && event.is_erasable())
+
+        if(return_value)
             return;
     }
 }

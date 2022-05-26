@@ -118,6 +118,8 @@ private:
 
     v4 m_color;
     u32 m_count = 0;
+
+    float m_width, m_height;
     
     std::vector<std::pair<mat4, std::array<v2, 4>>> m_glyphs;
 
@@ -137,6 +139,8 @@ public:
         scale *= 0.01f;
         float lineLength = 0.0f;
         position.y += font->ascent() * scale;
+
+        m_height = font->lineheight() * scale;
 
         m_glyphs.reserve(m_count);
 
@@ -172,8 +176,10 @@ public:
             lineLength += glyph.ax * scale;
 
             if(i + 1 == string.length())
+            {
+                m_width = lineLength;
                 return;
-        
+            }
             lineLength += glyph.kerning[string[i + 1] - Font::FIRST_CHAR] * scale;
         }
     }
@@ -198,12 +204,16 @@ public:
         
         m_glyphs.clear();
         m_glyphs.reserve(m_count);
+
+        m_height = font->lineheight() * scale;
         
         for(u32 i = 0; i < string.length(); i++)
         {
 
             auto& glyph = font->operator[](string[i]);
 
+            if(i != 0)
+                lineLength += glyph.kerning[string[i - 1] - Font::FIRST_CHAR] * scale;
 
             lineLength += glyph.lsb * scale;
 
@@ -229,12 +239,8 @@ public:
             }
 
             lineLength += glyph.ax * scale;
-
-            if(i + 1 == string.length())
-                return;
-        
-            lineLength += glyph.kerning[string[i + 1] - Font::FIRST_CHAR] * scale;
         }
+        m_width = lineLength;
 
     }
 

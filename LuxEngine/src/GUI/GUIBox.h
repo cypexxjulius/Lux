@@ -56,9 +56,13 @@ struct Box
             position(box_position), 
             width(box_width), 
             height(box_height), 
-            render_component(GUISpace::ToRenderSpace(box_position), GUISpace::ToRenderSpaceX(box_width), GUISpace::ToRenderSpaceY(box_height), Style::box_background_color),
-            text_render_component(box_title, GUISpace::ToRenderSpace(box_position), 0.3f)
-    {}
+            render_component(GUISpace::ToRenderSpace(box_position), GUISpace::ToRenderSpaceX(box_width + GUI::Style::title_text_padding * 2), GUISpace::ToRenderSpaceY(box_height + GUI::Style::title_text_padding * 2), Style::box_background_color),
+            text_render_component(box_title, GUISpace::ToRenderSpaceOrigin(), 0.3f)
+    {
+        const auto[ minimal_width, minimal_height ] = Renderer2D::Dimensions(text_render_component);
+        min_width = GUISpace::FromRenderSpaceX(minimal_width) + GUI::Style::title_text_padding * 2;
+        min_height = GUISpace::FromRenderSpaceY(minimal_height) + GUI::Style::title_text_padding * 2;
+    }
 
     bool inline is_intersecting(v2 check_position) const 
     {
@@ -122,7 +126,6 @@ struct Box
     inline void update_render_components()
     {
         render_component.reset_transform(GUISpace::ToRenderSpace(position), GUISpace::ToRenderSpaceX(width), GUISpace::ToRenderSpaceY(height));
-        text_render_component.reset_transform(title, GUISpace::ToRenderSpace(position), 0.3f);
     }
 
     inline void on_select(v2 new_position)
@@ -192,7 +195,10 @@ struct Box
                 width += delta.x;
                 height += delta.y;
                 break;
+
         }
+        width = std::max(width, min_width);
+        height = std::max(height, min_height);
 
         update_render_components();
     }
@@ -237,9 +243,18 @@ struct Box
 
     inline void draw()
     {
+
         Renderer2D::Draw(render_component);
 
-        Renderer2D::Draw(text_render_component);
+        Renderer2D::PushOrigin(GUISpace::ToRenderSpaceDelta(position));
+
+            Renderer2D::PushOrigin(GUISpace::ToRenderSpaceDelta({ GUI::Style::title_text_padding, GUI::Style::title_text_padding}));
+
+            Renderer2D::Draw(text_render_component);
+
+            Renderer2D::PopTransform();
+
+        Renderer2D::PopTransform();
     }
 
 };

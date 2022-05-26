@@ -19,25 +19,18 @@ Camera2DController::Camera2DController()
 }
 
     
-bool Camera2DController::on_event(const Event& event)
+bool Camera2DController::on_resize(const Event<EventType::WindowResize>& event)
 {
-    switch(event.type())
-    {
-        case EventType::WindowResize:
-
-            m_AspectRatio = (float)event.width / (float)event.height;
+    m_AspectRatio = (float)event.width / (float)event.height;
             
-            m_Camera->set_projection(
-                -m_AspectRatio * m_ZoomLevel,
-                 m_AspectRatio * m_ZoomLevel,
-                -m_ZoomLevel,
-                 m_ZoomLevel
-            );
+    m_Camera->set_projection(
+        -m_AspectRatio * m_ZoomLevel,
+         m_AspectRatio * m_ZoomLevel,
+        -m_ZoomLevel,
+         m_ZoomLevel
+    );
 
-            return true;
-    }
-
-    return false;
+    return true;
 }
 
 }

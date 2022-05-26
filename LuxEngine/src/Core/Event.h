@@ -10,7 +10,6 @@ namespace Lux
 enum class EventType : u8
 {
     Char,
-    Close,
     Scrolled,
     KeyPressed,
     MouseMoved,
@@ -25,57 +24,100 @@ enum class KeyState
     Repeated
 };
 
-struct Event
-{    
-    bool valid = true;
-    
-    // Event Props
-    u8 mod;
-    float width, height;
-    KeyState action;
-    union 
-    {   
-        MouseKey mouse;
-        Key keyboard;
-    } keycode;
+struct EventCore 
+{
+public:
 
-    v2 position;
-    v2 delta;
-    float delta_time;
+    inline void activate()
+    { active = true;}
+
+    inline void disable()
+    { active = false; }
+
+    inline bool is_active()
+    { return active; }
 
 private:
 
-    EventType p_type;
-    bool erasable;
-    
+    bool active{ true };
+
 public:
 
-    Event(EventType event_type, bool is_erasable = true)
-        : p_type(event_type), erasable(is_erasable)
+    float delta_time;
+
+};
+
+template<EventType Type>
+struct Event
+{
+private:
+    Event() = default;
+};
+
+template<>
+struct Event<EventType::Char> : public EventCore
+{
+    Event(u32 event_char)
+    {
+        character = event_char;
+    }
+
+public:
+    u32 character;
+};
+
+
+template<>
+struct Event<EventType::Scrolled> : public EventCore
+{
+    v2 delta;
+};
+
+template<>
+struct Event<EventType::KeyPressed> : public EventCore
+{
+
+    Event(Key event_key, KeyState event_state, u8 event_mod)
+    :   key(event_key), action(event_state), mod(event_mod)
     {
     }
 
-    inline void reset(float time) 
-    { 
-        valid = false; 
-        mod = 0;
-        action = KeyState::Released;
-        width = 0;
-        height = 0;
-        position = { 0, 0};
-        delta = {0, 0};
-        delta_time = time;
-    }
+public:
+    Key key;
+    KeyState action;
+    u8 mod;
+};
 
-    inline EventType type() const 
-    { 
-        return p_type;
-    }
+template<>
+struct Event<EventType::MouseMoved> : public EventCore
+{
+    v2 delta;
+    v2 position;
+};
 
-    inline bool is_erasable() const 
-    {
-        return erasable;
-    }
+template<>
+struct Event<EventType::WindowResize> : public EventCore
+{
+public:
+
+    float width, height;
+
+};
+
+template<>
+struct Event<EventType::MouseButtonPressed> : public EventCore
+{
+
+    Event(MouseKey event_key, KeyState event_state, u8 event_mod, v2 event_position)
+    :   key(event_key), state(event_state), mod(event_mod), position(event_position)
+    {}
+
+public:
+    MouseKey key;
+    KeyState state;
+    u8 mod;
+    v2 position;
+
 };
 
 }

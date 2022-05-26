@@ -28,23 +28,29 @@ struct VirtualIO
 struct EventBuffer
 {
 
-    Event scrolled{EventType::Scrolled};
-    Event mouse_moved{EventType::MouseMoved};
-    Event window_resize{EventType::WindowResize, false};
+    Event<EventType::Scrolled> scrolled;
+    Event<EventType::MouseMoved> mouse_moved;
+    Event<EventType::WindowResize> window_resize;
 
-    std::vector<Event> mouse_button;
-    std::vector<Event> key_events;
-    std::vector<Event> char_events;
+    std::vector<Event<EventType::Char>> char_events;
+    std::vector<Event<EventType::KeyPressed>> key_events;
+    std::vector<Event<EventType::MouseButtonPressed>> mouse_button;
 
     friend class Application;
 
 private:
 
-    void prepare(float frame_time)
+    void prepare()
     {
-        scrolled.reset(frame_time);
-        mouse_moved.reset(frame_time);
-        window_resize.reset(frame_time);
+        scrolled.disable();
+        scrolled.delta = {};
+
+        mouse_moved.disable();
+        mouse_moved.delta = {};
+
+        window_resize.disable();
+        window_resize.width = 0;
+        window_resize.height = 0;
 
         key_events.clear();
         char_events.clear();
@@ -74,7 +80,8 @@ private:
 
     static void DispatchEventBuffer();
 
-    static void DispatchSingleEvent(Event& event);
+    template<EventType Type>
+    static void DispatchSingleEvent(Event<Type>& event);
 
     static inline void Close()
     {

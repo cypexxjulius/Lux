@@ -39,74 +39,71 @@ void GUILayer::on_update()
 }
 
 
-bool GUILayer::on_event(const Event& event)
+bool GUILayer::on_mouse_button_press(const Event<EventType::MouseButtonPressed>& event)
 {
-    switch(event.type())
+    switch(event.state)
     {
-        case EventType::MouseButtonPressed:
+        case KeyState::Pressed:
 
-            switch(event.action)
-            {
-                case KeyState::Pressed:
-
-                    for(u32 i = 0; i < m_box_positions.size(); i++)
-                    {    
-                        auto* box = m_box_positions[i];
+            for(u32 i = 0; i < m_box_positions.size(); i++)
+            {    
+                auto* box = m_box_positions[i];
                         
-                        if(box->is_intersecting(event.position))
-                        {
-                            m_FocusedBox.select(box, event.position);   
-                            m_box_positions[0] = std::exchange(m_box_positions[i], m_box_positions[0]);
-                            return true;
-                        }
-                    }
+                if(box->is_intersecting(event.position))
+                {
+                    m_FocusedBox.select(box, event.position);   
+                    m_box_positions[0] = std::exchange(m_box_positions[i], m_box_positions[0]);
+                    return true;
+                }
+            }
 
-                    if(!m_FocusedBox.is_selected())
-                        return false;
+            if(!m_FocusedBox.is_selected())
+                return false;
 
                     m_FocusedBox.unselect();
                     return true;
                     
-                case KeyState::Released:
+        case KeyState::Released:
 
-                    if(!m_FocusedBox.is_holding())
-                        return false;
+            if(!m_FocusedBox.is_holding())
+                return false;
                     
-                    m_FocusedBox.unhold();
-                    return true;
+            m_FocusedBox.unhold();
+            return true;
                     
-                default:
-                    return false;
-
-            }
-
-
-        case EventType::MouseMoved:
-
-            if(m_FocusedBox.is_holding())
-            {
-                m_FocusedBox.box().on_mousedelta(event.delta);
-                return true;
-            }
-
-            for(auto& box : m_box_positions)
-            {
-                if(box->is_intersecting(event.position))
-                {
-                    Input::SetCursorType(box->on_hover(event.position));
-                    return false;
-                }
-            }
-
-            Input::SetCursorType(CursorType::Arrow);
-        
         default:
-            break;
+            return false;
+
+    }
+}
+
+
+bool GUILayer::on_mouse_move(const Event<EventType::MouseMoved>& event)
+{
+    if(m_FocusedBox.is_holding())
+    {
+        m_FocusedBox.box().on_mousedelta(event.delta);
+        return true;
     }
 
+    for(auto& box : m_box_positions)
+    {
+        if(box->is_intersecting(event.position))
+        {
+            Input::SetCursorType(box->on_hover(event.position));
+            return false;
+        }
+    }
 
-    m_camera.on_event(event);
-    return false;
+    Input::SetCursorType(CursorType::Arrow);
+    
+    return true;
+}
+
+bool GUILayer::on_resize(const Event<EventType::WindowResize>& event)
+{
+    // TODO: notify every box etc. about resizing changes 
+    return m_camera.on_resize(event);
 }
 
 }

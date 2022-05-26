@@ -20,8 +20,8 @@ constexpr KeyState glfw_to_lux_keystate[] = {
     KeyState::Repeated
 };
 
-Key GLFW_to_Lux_KeyCode(GLenum gl_key);
-MouseKey GLFW_to_Lux_MouseKey(GLenum gl_key); 
+Key glfw_to_lux_keycode(GLenum gl_key);
+MouseKey glfw_to_lux_mousekey(GLenum gl_key); 
 
 struct WindowAssets
 {
@@ -75,7 +75,7 @@ void Window::Open(const std::string& title, u32 width, u32 height)
         Application::m_Height = buffer.window_resize.height = static_cast<float>(height);
         Application::m_AspectRatio = Application::m_Width / Application::m_Height;
 
-        buffer.window_resize.valid = true;
+        buffer.window_resize.activate();
 
         Application::m_Minimized = (width + height) == 0;
     });
@@ -89,21 +89,25 @@ void Window::Open(const std::string& title, u32 width, u32 height)
     // Char input callback
     glfwSetCharCallback(wAssets->handle, [](GLFWwindow* glWindow, unsigned int character)
     {
-        Application::m_EventBuffer.char_events.emplace_back(EventType::Char);
+        Application::m_EventBuffer.char_events.emplace_back( character );
     });
 
     // General key interaction callback
     glfwSetKeyCallback(wAssets->handle, [](GLFWwindow* glWindow, int key, int scancode, int action, int mods)
     {
         auto& buffer = Application::m_EventBuffer; 
-        Event event(EventType::KeyPressed);
-        event.action = glfw_to_lux_keystate[static_cast<u8>(action)];
-        event.keycode.keyboard = GLFW_to_Lux_KeyCode(key);
-        event.mod = static_cast<u8>(mods);
-        
-        Application::m_VirtualIO.keyboard[static_cast<u32>(event.keycode.keyboard)] = event.action;
 
-        buffer.key_events.emplace_back(event);    
+        Key lux_keycode = glfw_to_lux_keycode(key);
+        KeyState lux_keystate = glfw_to_lux_keystate[static_cast<u8>(action)];
+
+        buffer.key_events.emplace_back(
+            lux_keycode,
+            lux_keystate,
+            static_cast<u8>(mods)
+        );
+        
+        Application::m_VirtualIO.keyboard[static_cast<u32>(lux_keycode)] = lux_keystate;
+
 
     });
 
@@ -111,23 +115,27 @@ void Window::Open(const std::string& title, u32 width, u32 height)
     glfwSetMouseButtonCallback(wAssets->handle, [](GLFWwindow* glWindow, int button, int action, int mods)
     { 
         auto& buffer = Application::m_EventBuffer; 
-        
-        Event event(EventType::MouseButtonPressed);
-        event.keycode.mouse = GLFW_to_Lux_MouseKey(button);
-        event.mod = static_cast<u8>(mods);
-        event.action = glfw_to_lux_keystate[static_cast<u8>(action)];
-        event.position = Application::m_VirtualIO.mouse_position;
 
-        Application::m_VirtualIO.mouse_buttons[static_cast<u32>(event.keycode.mouse)] = event.action;
+        MouseKey key = glfw_to_lux_mousekey(button);
+        KeyState state = glfw_to_lux_keystate[static_cast<u8>(action)];
+
+        buffer.mouse_button.emplace_back(
+            key,
+            state,
+            static_cast<u8>(mods),
+            Application::m_VirtualIO.mouse_position
+        );
+
+        Application::m_VirtualIO.mouse_buttons[static_cast<u32>(key)] = state;
         
-        buffer.mouse_button.emplace_back(event);
     });
 
     glfwSetScrollCallback(wAssets->handle, [](GLFWwindow* glWindow, double xOffset, double yOffset)
     {
         auto& buffer = Application::m_EventBuffer; 
         buffer.scrolled.delta += v2{ xOffset, yOffset};
-        buffer.scrolled.valid = true;
+        
+        buffer.scrolled.activate();
     }); 
 
     glfwSetCursorPosCallback(wAssets->handle, [](GLFWwindow* glWindow, double x, double y)
@@ -143,7 +151,7 @@ void Window::Open(const std::string& title, u32 width, u32 height)
         buffer.mouse_moved.delta += v2{ x - xOldPos, y - yOldPos };
         buffer.mouse_moved.position =  v2{ x, y };
 
-        buffer.mouse_moved.valid = true;
+        buffer.mouse_moved.activate();
 
         Application::m_VirtualIO.mouse_position = buffer.mouse_moved.position;
 

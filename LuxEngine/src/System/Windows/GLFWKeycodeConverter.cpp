@@ -6,7 +6,7 @@
 namespace Lux
 {
 
-Key GLFW_to_Lux_KeyCode(GLenum keycode)
+Key glfw_to_lux_keycode(GLenum keycode)
 {
     switch(keycode)
     {
@@ -125,7 +125,7 @@ Key GLFW_to_Lux_KeyCode(GLenum keycode)
 
     return Key::UNKNOWN;
 } 
-MouseKey GLFW_to_Lux_MouseKey(GLenum key)
+MouseKey glfw_to_lux_mousekey(GLenum key)
 {
     switch(key)
     {

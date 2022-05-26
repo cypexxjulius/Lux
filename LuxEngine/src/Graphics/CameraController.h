@@ -29,7 +29,7 @@ public:
 
     Camera2DController();
     
-    bool on_event(const Event& event);
+    bool on_resize(const Event<EventType::WindowResize>& event);
 
     inline Ref<Camera2D> camera() const
     { return m_Camera; }

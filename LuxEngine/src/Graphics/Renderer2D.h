@@ -41,6 +41,20 @@ public:
 
     static void EndScene();
 
+    static void PushTransform(mat4 transform, bool transform_override = false);
+
+    static void PopTransform();
+
+    static inline void PushOrigin(v2 origin)
+    {
+        Renderer2D::PushTransform(glm::translate(glm::mat4(1.0f), { origin.x, origin.y, 0.0f }));
+    }
+
+    static inline void PushScale(v2 scale)
+    {
+        Renderer2D::PushTransform(glm::scale(glm::mat4(1.0f), { scale.x, scale.y, 1.0f }));
+    }
+
     template<Renderable2DType Type>
     static void Draw(const Renderable2D<Type>& element)
     {
@@ -51,6 +65,11 @@ public:
             return DrawText(element);
     }
 
+    template<Renderable2DType Type>
+    static std::pair<float, float> Dimensions(const Renderable2D<Type>& element)
+    {
+        return { element.m_width, element.m_height };
+    }
 
 };
 

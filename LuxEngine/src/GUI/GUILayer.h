@@ -63,7 +63,11 @@ public:
         s_Instance = nullptr;
     }
 
-    virtual bool on_event(const Event& event) override;
+    virtual bool on_mouse_button_press(const Event<EventType::MouseButtonPressed>& event) override;
+
+    virtual bool on_mouse_move(const Event<EventType::MouseMoved>& event) override;
+
+    virtual bool on_resize(const Event<EventType::WindowResize>& event) override;
 
     virtual void on_update() override;
 

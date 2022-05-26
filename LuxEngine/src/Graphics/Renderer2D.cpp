@@ -33,7 +33,7 @@ struct Renderer2DData
     Ref<Shader> active_shader;
     Ref<Font> active_font;
 
-    mat4 transform_stack_back{1.0f};
+    mat4* transform_stack_back;
     std::vector<mat4> transform_stack;
 };
 
@@ -46,8 +46,10 @@ void Renderer2D::Init()
     RendererData = new Renderer2DData;
     RendererData->rect_vertexes.reserve(MaxVertices);
     RendererData->texture_slots.reserve(MaxTextureSlots);
+
     RendererData->transform_stack.emplace_back(1.0f);
-    
+    RendererData->transform_stack_back = &RendererData->transform_stack.back(); 
+
     RendererData->rect_vertex_array = VertexArray::Create();
 
     VertexBuffer* vb = VertexBuffer::Create(MaxVertices * sizeof(Renderer2DVertex));
@@ -174,7 +176,7 @@ void Renderer2D::DrawRect(const Renderable2D<Renderable2DType::Rect>& rect)
     }
 
 
-    const mat4& transform = RendererData->transform_stack_back * rect.m_transform;
+    const mat4& transform = *RendererData->transform_stack_back * rect.m_transform;
     const auto& texture_coords = rect.m_texture_coords;
 
     RendererData->rect_vertexes.emplace_back(
@@ -223,7 +225,7 @@ void Renderer2D::DrawText(const Renderable2D<Renderable2DType::Text>& text)
 
     for(const auto&[glyph_transform, texture_coords] : text.m_glyphs)
     {
-        mat4 transform = RendererData->transform_stack_back * glyph_transform;
+        mat4 transform = *RendererData->transform_stack_back * glyph_transform;
 
         RendererData->rect_vertexes.emplace_back(
             transform * Renderable2D<Renderable2DType::Text>::VertexPositions[0],
@@ -259,6 +261,24 @@ void Renderer2D::DrawText(const Renderable2D<Renderable2DType::Text>& text)
             
         RendererData->rect_index_count += 6; 
     }
+}
+
+void Renderer2D::PushTransform(mat4 transform, bool transform_override)
+{
+    if (transform_override)
+        RendererData->transform_stack.push_back(transform);
+	else
+		RendererData->transform_stack.push_back(RendererData->transform_stack.back() * transform);
+
+	RendererData->transform_stack_back = &RendererData->transform_stack.back();
+}
+
+void Renderer2D::PopTransform()
+{
+    if (RendererData->transform_stack.size() > 1)
+			RendererData->transform_stack.pop_back();
+
+	RendererData->transform_stack_back = &RendererData->transform_stack.back();
 }
 
 }

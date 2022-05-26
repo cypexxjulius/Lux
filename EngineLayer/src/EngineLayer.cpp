@@ -28,19 +28,13 @@ public:
 
     }
 
-    bool on_event(const Lux::Event& event) override
-    {
-
-        return camera_obj.on_event(event);
-    }
-
     void on_update() override
     {
-        LGA::Begin("Test", { 0.0f, 0.0f}, 0.5, 0.5);
+        LGA::Begin("Test ggjj", { 0.0f, 0.0f}, 0.3f, 0.2f);
 
         LGA::End();
 
-        LGA::Begin("Test2", { 0.0f, 0.0f}, 0.5, 0.5);
+        LGA::Begin("Test2", { 0.0f, 0.0f}, 0.3f, 0.2f);
 
         LGA::End();
     }
