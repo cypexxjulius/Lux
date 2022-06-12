@@ -98,10 +98,10 @@ public:
 
     static void Run();
 
-    template<class T>
+    template<class T> 
+    requires std::is_base_of_v<Layer, T>
     static inline void PushLayer()
     { 
-        static_assert(std::is_base_of<Layer, T>::value, "Class has to inherit from the Layer class");
         m_LayerStack.emplace_back(new T);  
         m_LayerStack.back()->on_attach();
     }

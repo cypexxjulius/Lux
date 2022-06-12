@@ -11,18 +11,10 @@ namespace Lux
 class Camera2DController 
 {
 private:
-    float m_ZoomIntensity = 2.0f;
-    float m_CameraTranslationSpeed = 5.0f; 
-    float m_CameraRotationSpeed = 1.0f;
-
     float m_AspectRatio = 1.0f;
     float m_ZoomLevel = 1.0f;
 
-    float m_width, m_height;
-
-    v2 m_camera_aspect{};
-
-    Ref<Camera2D> m_Camera = nullptr;
+    Camera2D m_Camera{1.0f, 1.0f, 1.0f, 1.0f};
 
 
 public:
@@ -31,8 +23,8 @@ public:
     
     bool on_resize(const Event<EventType::WindowResize>& event);
 
-    inline Ref<Camera2D> camera() const
-    { return m_Camera; }
+    inline const glm::mat4& get_projection() const
+    { return m_Camera.view_proj_mat(); }
 
 };
 

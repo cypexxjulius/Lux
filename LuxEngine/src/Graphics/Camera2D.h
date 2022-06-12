@@ -25,6 +25,8 @@ public:
 
     Camera2D(float left, float right, float top, float bottom);
 
+    Camera2D() = default;
+
     void set_projection(float left, float right, float top, float bottom);
 
  

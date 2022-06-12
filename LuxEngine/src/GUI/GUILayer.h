@@ -14,7 +14,7 @@
 #include <string>
 
 #include "Assets/Manager.h"
-#include "GUIBox.h"
+#include "Types.h"
 
 namespace Lux::GUI
 {
@@ -26,12 +26,8 @@ private:
 
     static GUILayer* s_Instance;
 
-    FocusBox m_FocusedBox;
-
-    Box* m_active_box = nullptr;
-
+    std::unordered_map<std::string, Box> m_box_container;
     std::vector<Box*> m_box_positions;
-    std::unordered_map<std::string, Box> m_boxes;
 
 
     Camera2DController m_camera;
@@ -46,8 +42,6 @@ private:
 
 
 public:
-
-    friend class LGA;
 
     virtual void on_attach() override
     {

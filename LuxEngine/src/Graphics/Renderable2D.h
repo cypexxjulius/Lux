@@ -24,16 +24,6 @@ enum class Renderable2DType
     Text
 };
 
-static Ref<Texture> NoTexture = nullptr;
-
-
-static const v4 VertexPositions[4] = {
-    { 0, 1, 0, 1 },
-	{ 1, 1, 0, 1 },
-	{ 1, 0, 0, 1 },
-	{ 0, 0, 0, 1 },
-};
-
 static const std::array<v2, 4> RectTextureCoords = {
     v2 { 0.0f, 0.0f },
     v2 { 1.0f, 0.0f },
@@ -72,13 +62,17 @@ public:
 
     friend class Renderer2D;
 
-    Renderable2D(v2 position, float width, float height, const v4& color, const Ref<Texture>& texture = NoTexture, float tiling = 1.0f)
+    Renderable2D(v2 position, float width, float height, const v4& color, float tiling = 1.0f)
         :   m_transform(glm::translate(glm::mat4(1.0f), { position.x, position.y, 1.0f }) * glm::scale(glm::mat4(1.0f), { width, height, 1.0f })),
             m_texture_coords(RectTextureCoords),
-            m_texture(texture),
             m_color(color),
             m_tiling(tiling)
     {
+    }
+
+    inline void set_texture(const Ref<Texture>& texture)
+    {
+        m_texture = texture;
     }
 
     inline void set_dimensions(v2 position, float width, float height) 
