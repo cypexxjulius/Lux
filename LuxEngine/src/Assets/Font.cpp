@@ -7,8 +7,12 @@
 #include "Utils/Assert.h"
 #include "Utils/Logger.h"
 
+#include <msdf-atlas-gen/msdf-atlas-gen.h>
+
 namespace Lux
 {
+
+
 
 Font::Font(const std::string& filepath)
     : m_Bitmap(nullptr)
@@ -18,6 +22,8 @@ Font::Font(const std::string& filepath)
     Verify(!fileContent.empty());
 
     u8* fileContentPtr = (u8*)fileContent.c_str();
+
+    msdf_atlas::ImmediateAtlasGenerator
 
 
     stbtt_fontinfo FontData;

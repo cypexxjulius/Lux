@@ -20,7 +20,7 @@ IncludeDirs["GLFW"]			= "LuxEngine/lib/GLFW/include"
 IncludeDirs["Glad"]			= "LuxEngine/lib/Glad/include"
 IncludeDirs["glm"]			= "LuxEngine/lib/glm"
 IncludeDirs["stb_image"]	= "LuxEngine/lib/stb"
-
+IncludeDirs["msdf"]			= "LuxEngine/lib/msdf"
 
 
 include "LuxEngine/lib/GLFW"
@@ -107,7 +107,8 @@ project "LuxEngine"
 		"%{IncludeDirs.GLFW}",
 		"%{IncludeDirs.Glad}",
 		"%{IncludeDirs.stb_image}",
-		"%{IncludeDirs.glm}"
+		"%{IncludeDirs.glm}",
+		"%{IncludeDirs.msdf}",
 	}
 	
 	forceincludes  
