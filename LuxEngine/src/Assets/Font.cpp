@@ -1,14 +1,6 @@
+
 #include "Font.h"
 
-#pragma warning(disable: 4505) //Unreferenced formal parameter
-#define STBRP_STATIC
-#define STB_RECT_PACK_IMPLEMENTATION
-#include <stb_rect_pack.h>
-
-#define STBTT_STATIC
-#define STB_TRUETYPE_IMPLEMENTATION
-#include <stb_truetype.h>
-#pragma warning(default: 4505)
 
 #include "Core/IO.h"
 

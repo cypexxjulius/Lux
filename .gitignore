@@ -8,3 +8,12 @@
 **.ilk
 **.pdb
 **.pch
+
+**.sln
+**.vcxproj
+**.vcxproj.user
+
+bin/**
+binInt/**
+
+.vs/**

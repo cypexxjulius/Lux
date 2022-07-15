@@ -10,6 +10,3 @@
 
 #include "Graphics/Renderer2D.h"
 #include "Graphics/CameraController.h"
-
-#include "GUI/Inteface.h"
-#include "GUI/Types.h"
