@@ -40,7 +40,7 @@ public:
 
     virtual void bind(u8 slot) = 0;
 
-    virtual void set_data(void *data, u32 size) = 0;
+    virtual void set_data(const void *data, u32 size) = 0;
 
     virtual u32 width() const = 0;
 

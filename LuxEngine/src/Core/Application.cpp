@@ -35,7 +35,7 @@ void Application::Start(const std::string& title)
     ResourceManager::Init();
 
     
-    Renderer2D::Init();
+    //Renderer2D::Init();
 
     PushLayer<GUI::GUILayer>();
 
@@ -71,7 +71,7 @@ void Application::Run()
     for(auto& layer : m_LayerStack)
         layer->on_detach();
 
-    Renderer2D::Shutdown();
+    //Renderer2D::Shutdown();
     ResourceManager::Shutdown();
     Renderer::Shutdown();
 

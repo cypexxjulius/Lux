@@ -1,4 +1,4 @@
-
+#define USED_IN_FONTCPP
 #include "Font.h"
 
 
@@ -7,100 +7,115 @@
 #include "Utils/Assert.h"
 #include "Utils/Logger.h"
 
+#include <msdfgen.h>
+#include <msdfgen-ext.h>
 #include <msdf-atlas-gen/msdf-atlas-gen.h>
+
+using namespace msdf_atlas;
 
 namespace Lux
 {
 
+void* Font::s_FreetypeLibraryHandle = nullptr;
 
+void Font::Init()
+{
+	Verify(s_FreetypeLibraryHandle == nullptr);
+	s_FreetypeLibraryHandle = static_cast<void*>(msdfgen::initializeFreetype());
+
+	Verify(s_FreetypeLibraryHandle);
+}
+
+void Font::Shutdown()
+{
+	Verify(s_FreetypeLibraryHandle != nullptr);
+	msdfgen::deinitializeFreetype(static_cast<msdfgen::FreetypeHandle*>(s_FreetypeLibraryHandle));
+}
 
 Font::Font(const std::string& filepath)
-    : m_Bitmap(nullptr)
+: m_Bitmap(nullptr)
 {
-    std::string fileContent = IO::read_file(filepath); 
+	Verify(s_FreetypeLibraryHandle);
+	
+	auto *font = msdfgen::loadFont(static_cast<msdfgen::FreetypeHandle*>(s_FreetypeLibraryHandle), filepath.c_str());
 
-    Verify(!fileContent.empty());
+	Verify(font);	
+	
 
-    u8* fileContentPtr = (u8*)fileContent.c_str();
+	std::vector<GlyphGeometry> glyphs;
+	FontGeometry fontGeometry(&glyphs);
 
-    msdf_atlas::ImmediateAtlasGenerator
+	fontGeometry.loadCharset(font, 1.0f, Charset::ASCII);
+
+	const double maxCornerAngle = 3.0;
+	for(GlyphGeometry& glyph : glyphs)
+		glyph.edgeColoring(&msdfgen::edgeColoringInkTrap, maxCornerAngle, 0);
+
+	TightAtlasPacker packer;
+
+	packer.setDimensionsConstraint(TightAtlasPacker::DimensionsConstraint::SQUARE);
+	packer.setMinimumScale(24.0);
+
+	packer.setPixelRange(2.0);
+	packer.setMiterLimit(1.0);
+
+	packer.pack(glyphs.data(), glyphs.size());
+
+	int width, height;
+	packer.getDimensions(width, height);
+
+	ImmediateAtlasGenerator<
+		float, 
+		3, 
+		msdfGenerator,
+		BitmapAtlasStorage<msdf_atlas::byte, 3>
+	> generator(width, height);
+
+	GeneratorAttributes attributes;
+	generator.setThreadCount(4);
+
+	generator.generate(glyphs.data(), glyphs.size());
+
+	auto& storage = generator.atlasStorage();
+	
+	msdfgen::BitmapConstRef<msdf_atlas::byte, 3> bitmap = storage;
+
+	m_Bitmap = Bitmap::Create(bitmap.width, bitmap.height, ImageType::RGB);
+	m_Bitmap->set_data(static_cast<const void*>(bitmap.pixels), bitmap.width * bitmap.height * 3);
 
 
-    stbtt_fontinfo FontData;
-    stbtt_fontinfo *font = &FontData;
+	for (auto& glyph : glyphs)
+	{
+		/*
+		   b c
+			A
+		   a d
 
-    Verify(stbtt_InitFont(font, fileContentPtr , 0));
+		*/
+
+		double a, b, c, d;
+		glyph.getQuadAtlasBounds(a, b, c, d);
+
+		double advance = glyph.getAdvance();
+
+		double x1, y1, x2, y2;
+		glyph.getQuadPlaneBounds(x1, y1, x2, y2);
 
 
+		auto cp =  glyph.getCodepoint();
+		INFO("{}", cp);
 
-    byte* bitmap = new byte[BITMAP_WIDTH * BITMAP_HEIGHT * sizeof(byte)];
+		m_GlyphMetaData.insert({ cp, { {a, b, c, d}, {x1, y1, x2, y2}, advance } });
+	}
 
-
-    constexpr float fontHeight = 32.0f;
-    f32 scale = m_FontSize = stbtt_ScaleForPixelHeight(font, fontHeight); 
-
-    int unscaled_ascent, unscaled_descent, unscaled_linegap;
-    stbtt_GetFontVMetrics(font, &unscaled_ascent, &unscaled_descent, &unscaled_linegap);
-    
-
-
-    stbtt_pack_context packContext;
-    stbtt_packedchar charData[CHAR_COUNT];
-
-    Verify(stbtt_PackBegin(&packContext, bitmap, BITMAP_WIDTH, BITMAP_HEIGHT, BITMAP_WIDTH, 0, nullptr))
-
-    stbtt_PackSetOversampling(&packContext, 4, 4);
-
-    Verify(stbtt_PackFontRange(&packContext, fileContentPtr, 0, fontHeight, FIRST_CHAR, CHAR_COUNT, charData)) // !ERROR bitmap size to small
-    
-
-    stbtt_PackEnd(&packContext);
-
-   
-
-    for(u16 i = 0; i < CHAR_COUNT; i++)
-    {
-        stbtt_aligned_quad quad;
-        float unused_xpos = 0.0f, unused_ypos = 0.0f;
-        stbtt_GetPackedQuad(charData, BITMAP_WIDTH, BITMAP_HEIGHT, i, &unused_xpos, &unused_ypos, &quad, false);
-    
-        i32 advanceX = 0, leftSideBearing = 0;
-        stbtt_GetCodepointHMetrics(font, i + FIRST_CHAR, &advanceX, &leftSideBearing);
-
-        auto& data = m_CharData[i];
-
-        // Texture coordinates
-        data.x0 = quad.s0;
-        data.x1 = quad.s1;
-
-        data.y0 = quad.t0;
-        data.y1 = quad.t1;
-
-        
-        data.width  = (quad.x1 - quad.x0);
-        data.height = (quad.y1 - quad.y0);
-    
-        data.baseline = quad.y0;  
-
-        data.ax = advanceX * scale;
-        data.lsb = leftSideBearing * scale;
-
-        for(u8 k = 0; k < CHAR_COUNT; k++)
-        {
-            data.kerning[k] = static_cast<float>(stbtt_GetCodepointKernAdvance(font, i + FIRST_CHAR, k + FIRST_CHAR)) * scale;
-        }
-    }
-
-    m_Ascent = static_cast<float>(unscaled_ascent) * scale;
-    m_Descent = static_cast<float>(unscaled_descent) * scale;
-    m_LineHeight =  m_Ascent - m_Descent;
-    m_LineGap = static_cast<float>(unscaled_linegap) * scale;
-
-    m_Bitmap = Bitmap::Create(BITMAP_WIDTH, BITMAP_HEIGHT, ImageType::ALPHA);
-    m_Bitmap->set_data(bitmap, BITMAP_WIDTH * BITMAP_HEIGHT);
-
-    delete[] bitmap;
-};
+	m_FontHandle = static_cast<void*>(font);
+	
+}
+Font::~Font()
+{
+	msdfgen::destroyFont(static_cast<msdfgen::FontHandle*>(m_FontHandle));
+}
+;
 
 
 };

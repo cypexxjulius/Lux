@@ -26,7 +26,7 @@ public:
 
     virtual void bind(u8 slot) override;
 
-    virtual void set_data(void* data, u32 size) override;
+    virtual void set_data(const void* data, u32 size) override;
 
     virtual u32 width() const override
     { return m_Width; }

@@ -1,7 +1,9 @@
 workspace "Lux"
 	architecture "x64"
 
-	startproject "EngineLayer"
+	startproject "LuxEngine"
+
+	
 	
 	configurations 
 	{
@@ -13,14 +15,15 @@ workspace "Lux"
     
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
--- Include dirs
+-- Include directories
 
 IncludeDirs = {}
 IncludeDirs["GLFW"]			= "LuxEngine/lib/GLFW/include"
 IncludeDirs["Glad"]			= "LuxEngine/lib/Glad/include"
 IncludeDirs["glm"]			= "LuxEngine/lib/glm"
 IncludeDirs["stb_image"]	= "LuxEngine/lib/stb"
-IncludeDirs["msdf"]			= "LuxEngine/lib/msdf"
+IncludeDirs["msdf_atlas"]	= "LuxEngine/lib/msdf"
+IncludeDirs["msdf_core"]	= "LuxEngine/lib/msdf/msdfgen"
 
 
 include "LuxEngine/lib/GLFW"
@@ -34,6 +37,7 @@ project "EngineLayer"
 	kind "StaticLib"
 	language "C++"
 	cppdialect "C++20"
+	staticruntime "on"
 
 	targetdir ("bin/" .. outputdir .. "/%{prj.name}")
 	objdir ("binInt/" .. outputdir .. "/%{prj.name}")
@@ -46,35 +50,30 @@ project "EngineLayer"
 
 	includedirs 
 	{ 
-		"Lux/src"	
-	}
-	
-	links
-	{
-		"LuxEngine"
+		"LuxEngine/src",	
+		"LuxEngine/lib/glm"
 	}
 	
 	filter "system:windows"
 		systemversion "latest"
 
-		defines {
-			"LUX_PLATFORM_WINDOWS",
-		}
-
+		defines "LUX_PLATFORM_WINDOWS"
 	filter "configurations:Debug"
-		defines "NL_DEBUG"
+		defines "LUX_DEBUG"
 		runtime "Debug"
 		symbols "on"
 
 	filter "configurations:Release"
-		defines "NL_RELEASE"
+		defines "LUX_RELEASE"
 		runtime "Release"
 		optimize "on"
 
 	filter "configurations:Dist"
-		defines "NL_DIST"
+		defines "LUX_DIST"
 		runtime "Release"
 		optimize "on"
+
+
 
 project "LuxEngine"
 	location "LuxEngine"
@@ -88,6 +87,9 @@ project "LuxEngine"
 
 	pchheader "pch.h"
 	pchsource "%{prj.name}/pch/pch.cpp"
+
+	targetdir "../EngineLayer"
+
 
 	files
 	{
@@ -108,7 +110,8 @@ project "LuxEngine"
 		"%{IncludeDirs.Glad}",
 		"%{IncludeDirs.stb_image}",
 		"%{IncludeDirs.glm}",
-		"%{IncludeDirs.msdf}",
+		"%{IncludeDirs.msdf_atlas}",
+		"%{IncludeDirs.msdf_core}",
 	}
 	
 	forceincludes  
@@ -119,8 +122,11 @@ project "LuxEngine"
 	links
 	{
 		"GLFW",
-		"Glad",
-		"MSDF",
+		"GLAD",
+		"MSDF_ATLAS",
+		"MSDF_CORE",
+		"EngineLayer",
+		"LuxEngine/lib/freetype/freetype.lib",
 		"opengl32.lib"
 	}
 	
@@ -136,17 +142,17 @@ project "LuxEngine"
 		}
 
 	filter "configurations:Debug"
-		defines "NL_DEBUG"
+		defines "LUX_DEBUG"
 		runtime "Debug"
 		symbols "on"
 
 	filter "configurations:Release"
-		defines "NL_RELEASE"
+		defines "LUX_RELEASE"
 		runtime "Release"
 		optimize "on"
 
 	filter "configurations:Dist"
-		defines "NL_DIST"
+		defines "LUX_DIST"
 		runtime "Release"
 		optimize "on"
 

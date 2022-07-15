@@ -43,7 +43,7 @@ private:
 
 public:
 
-    float delta_time;
+    float delta_time{ 0.0f };
 
 };
 

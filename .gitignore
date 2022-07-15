@@ -11,7 +11,8 @@
 
 **.sln
 **.vcxproj
-**.vcxproj.user
+**.vcxproj.**
+
 
 bin/**
 binInt/**

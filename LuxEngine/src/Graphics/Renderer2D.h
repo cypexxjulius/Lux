@@ -27,10 +27,6 @@ class Renderer2D
 {
     static inline void UploadBatch();
 
-    static void DrawRect(const Renderable2D<Renderable2DType::Rect>& rect);
-
-    static void DrawText(const Renderable2D<Renderable2DType::Text>& rect);
-
 public:
 
     static void Init();
@@ -41,35 +37,9 @@ public:
 
     static void EndScene();
 
-    static void PushTransform(mat4 transform, bool transform_override = false);
+    static void DrawRect(const mat4& transform, const v4& color, Ref<Texture> texture = nullptr, float tiling = 1.0f);
 
-    static void PopTransform();
-
-    static inline void PushOrigin(v2 origin)
-    {
-        Renderer2D::PushTransform(glm::translate(glm::mat4(1.0f), { origin.x, origin.y, 0.0f }));
-    }
-
-    static inline void PushScale(v2 scale)
-    {
-        Renderer2D::PushTransform(glm::scale(glm::mat4(1.0f), { scale.x, scale.y, 1.0f }));
-    }
-
-    template<Renderable2DType Type>
-    static void Draw(const Renderable2D<Type>& element)
-    {
-        if constexpr(Type == Renderable2DType::Rect)
-            return DrawRect(element);
-
-        if constexpr(Type == Renderable2DType::Text)
-            return DrawText(element);
-    }
-
-    template<Renderable2DType Type>
-    static std::pair<float, float> Dimensions(const Renderable2D<Type>& element)
-    {
-        return { element.m_width, element.m_height };
-    }
+    static void DrawText(std::string_view text, const v3& position, const v4& color, const Ref<Font>& font, float scale);
 
 };
 

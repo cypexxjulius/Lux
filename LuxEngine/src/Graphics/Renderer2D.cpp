@@ -1,5 +1,5 @@
 #include "Renderer2D.h"
-#include "Graphics/Renderer.h"
+#include <Graphics/Renderer.h>
 
 
 #pragma warning(disable: 4201)
@@ -8,9 +8,17 @@
 #pragma warning(default: 4201)
 
 
-#include "Assets/Manager.h"
+#include <Assets/Manager.h>
+
+#include <Utils/Types.h>
+
+struct RectBatch
+{
+    Ref<VertexArray> va;
+};
 
 
+/*
 namespace Lux
 {
 
@@ -282,3 +290,4 @@ void Renderer2D::PopTransform()
 }
 
 }
+*/

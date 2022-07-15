@@ -37,10 +37,16 @@ public:
     static inline void Init()
     { 
         s_Container = new AssetContainers; 
+
+        Font::Init();
     }
 
     static inline void Shutdown()
-    { delete s_Container; }
+    { 
+        Font::Shutdown();
+    
+        delete s_Container; 
+    }
 
     static Ref<Shader> CreateShader(const std::string& name, Shader&& shader)
     {

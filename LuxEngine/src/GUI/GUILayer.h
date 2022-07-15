@@ -49,7 +49,7 @@ public:
         s_Instance = this;
 
         // TODO Check if this font exists
-        m_used_font = ResourceManager::GetFont("StandardFont");
+        m_used_font = ResourceManager::CreateFont("StandardFont", { "../EngineLayer/res/fonts/Roboto-Medium.ttf" });
     }   
 
     virtual void on_detach() override 

@@ -1,88 +1,65 @@
-#pragma once 
+#pragma once
 
 #include <memory>
 #include <string_view>
 
+#include "Graphics/Bitmap.h"
 #include "Utils/Assert.h"
 #include "Utils/Types.h"
-#include "Graphics/Bitmap.h"
 
+namespace Lux {
 
-namespace Lux
+class ResourceManager;
+
+struct Glyph
 {
+	std::array<double, 4> text_coords;
+	std::array<double, 4> positions;
+	double advance;
 
-constexpr u32 MAX_CHAR_COUNT  = ('~' - ' ' + 1);
-
-struct CharData
-{
-   
-    float x0, x1, y0, y1;
-    float width, height;
-    float baseline;
-    float ax, lsb;
-
-    f32 kerning[MAX_CHAR_COUNT];
+	Glyph(std::array<double, 4> arg_text_coords, std::array<double, 4> arg_positions, double advance)
+		:	text_coords(arg_text_coords),
+			positions(arg_positions),
+			advance(advance)
+	{}
 };
 
 
-
-class Font
-{
+class Font {
 
 private:
+	friend ResourceManager;
 
+	Scope<Bitmap> m_Bitmap = nullptr;
 
-    static constexpr u32 CHAR_COUNT = MAX_CHAR_COUNT;
-    static constexpr u32 BITMAP_WIDTH = 1024;
-    static constexpr u32 BITMAP_HEIGHT = 4024;
+	static void* s_FreetypeLibraryHandle;
 
-    Scope<Bitmap> m_Bitmap = nullptr;
-    float m_Ascent, m_Descent; 
-    float m_LineHeight, m_FontSize, m_LineGap;
-    CharData m_CharData[CHAR_COUNT];
+	static void Init();
 
+	static void Shutdown();
 
-    
+private:
+	void *m_FontHandle = nullptr;
+	
+	std::unordered_map<char, const Glyph> m_GlyphMetaData;
+
 public:
 
-    Font(const std::string& file_path);
+	Font(const std::string &file_path);
 
+	~Font();
 
-    static constexpr u8 LAST_CHAR = '~' + 1;
-    static constexpr u8 FIRST_CHAR = ' ';
+	inline void bind(u8 slot) const { m_Bitmap->bind(slot); };
 
-    static constexpr u32 char_to_glyph(u32 character)
-    { return character - FIRST_CHAR; }
+	inline const Glyph& getGlyph(char character)
+	{
+		auto it = m_GlyphMetaData.find(character);
 
+		Verify(it != m_GlyphMetaData.end());
 
-    inline void bind(u8 slot) const
-    { m_Bitmap->bind(slot); };
-
-    inline const CharData& operator[](int index) const
-    {
-        if(index >= 0 && index < UINT8_MAX)
-            return m_CharData[char_to_glyph(index)];
-
-        TODO();
-        return m_CharData[0];
-    }
-
-    inline float lineheight() const
-    { return m_LineHeight; }
-
-    inline float linegap() const 
-    { return m_LineGap; }
-
-    inline float ascent() const 
-    { return m_Ascent; }
-
-    inline float descent() const 
-    { return m_Descent; }
-
-
-    inline float fontsize() const 
-    { return m_FontSize; }
+		return it->second;
+	}
 
 };
 
-}
+} // namespace Lux

@@ -1,6 +1,7 @@
 #include "Core/Keycode.h"
-#include <glfw/glfw3.h>
 
+#include <glad/glad.h>
+#include <glfw/glfw3.h>
 #include "Utils/Assert.h"
 
 namespace Lux

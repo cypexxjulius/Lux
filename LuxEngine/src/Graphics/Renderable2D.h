@@ -13,6 +13,7 @@
 
 #include <Assets/Manager.h>
 
+/*
 namespace Lux
 {
 
@@ -242,3 +243,4 @@ public:
 
 
 }
+*/

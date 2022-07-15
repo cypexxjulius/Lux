@@ -10,21 +10,21 @@ private:
     Camera2DController camera_obj{};
     v2 text_dimemsions{};
 
-    GUI::BoxHandle m_boxHandle;
+    //GUI::BoxHandle m_boxHandle;
 
 public:
 
     void on_attach() override
     {
-        m_boxHandle = GUI::CreateBox("Test", { 0.0f, 0.0f });
+      //  m_boxHandle = GUI::CreateBox("Test", { 0.0f, 0.0f });
 
     }
 
     void on_detach() override
     {
-        GUI::Delete({
-            m_boxHandle
-        });
+        //GUI::Delete({
+          //  m_boxHandle
+        //});
     }
 
     void on_update() override
