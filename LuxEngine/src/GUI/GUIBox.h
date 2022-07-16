@@ -17,17 +17,4 @@
 namespace Lux::GUI
 {
 
-enum class ResizingPoint
-{
-    None,
-    Left,
-    Right,
-    Top,
-    Bottom,
-    TopLeft,
-    TopRight,
-    BottomLeft,
-    BottomRight
-};
-
 }

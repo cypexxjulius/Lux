@@ -1,7 +1,7 @@
 #pragma once 
 
 #include "Utils/Types.h"
-#include "VertexArray.h"
+#include "Graphics/Core/VertexArray.h"
 
 #include <functional>
 
@@ -26,7 +26,7 @@ struct RendererFunctions
     std::function<void()> Clear;
     std::function<void(const v4& color)> SetClearColor;
     std::function<void(u32 width, u32 height)> SetViewport;
-    std::function<void(Ref<VertexArray> va, u32 indexCount)> DrawIndexed;
+    std::function<void(const Ref<VertexArray>& va, u32 indexCount)> DrawIndexed;
 };
 
 
@@ -58,7 +58,7 @@ public:
         s_functions.SetClearColor(color);
     }
 
-    static inline void DrawIndexed(Ref<VertexArray> va, u32 index_count)
+    static inline void DrawIndexed(const Ref<VertexArray>& va, u32 index_count)
     {
         s_functions.DrawIndexed(va, index_count);
     }

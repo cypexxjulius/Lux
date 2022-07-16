@@ -11,6 +11,12 @@
 #include <msdfgen-ext.h>
 #include <msdf-atlas-gen/msdf-atlas-gen.h>
 
+
+#define STBIWDEF inline
+#define STB_IMAGE_WRITE_STATIC
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include <stb_image_write.h>
+
 using namespace msdf_atlas;
 
 namespace Lux
@@ -83,29 +89,49 @@ Font::Font(const std::string& filepath)
 	m_Bitmap = Bitmap::Create(bitmap.width, bitmap.height, ImageType::RGB);
 	m_Bitmap->set_data(static_cast<const void*>(bitmap.pixels), bitmap.width * bitmap.height * 3);
 
-
 	for (auto& glyph : glyphs)
 	{
 		/*
-		   b c
+			(c,d)
 			A
-		   a d
+		(a,b) 
 
 		*/
 
-		double a, b, c, d;
-		glyph.getQuadAtlasBounds(a, b, c, d);
+		double l, r, t, b;
+		glyph.getQuadAtlasBounds(l, b, r, t);
+		float left =	l / bitmap.width;
+		float right =	r / bitmap.width;
+
+		float bottom =	(bitmap.height - t)  / bitmap.height;
+		float top =		(bitmap.height - b) / bitmap.height;
+
 
 		double advance = glyph.getAdvance();
 
 		double x1, y1, x2, y2;
 		glyph.getQuadPlaneBounds(x1, y1, x2, y2);
 
+		float width = x2 - x1;
+		float height = y2 - y1;
+
+		float posx = x1;
+		float posy = y1;
 
 		auto cp =  glyph.getCodepoint();
-		INFO("{}", cp);
 
-		m_GlyphMetaData.insert({ cp, { {a, b, c, d}, {x1, y1, x2, y2}, advance } });
+		m_GlyphMetaData.insert({ 
+			cp, 
+			Glyph { 
+				glm::translate(glm::mat4(1.0f), { posx, posy, 1.0f }) * glm::scale(glm::mat4(1.0f), { width, height, 1.0f }), 
+				std::array<v2, 4> {
+					v2 { left,	top},
+					v2 { right, top},
+					v2 { right, bottom},
+					v2 { left,	bottom},
+				}, 
+				advance } 
+			});
 	}
 
 	m_FontHandle = static_cast<void*>(font);

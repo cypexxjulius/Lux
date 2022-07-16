@@ -49,10 +49,9 @@ public:
         return false;
     }
 
-    virtual bool on_resize(const Event<EventType::WindowResize>& event)
+    virtual void on_resize(const Event<EventType::WindowResize>& event)
     {
         (void) event;
-        return false;
     }
     
 };

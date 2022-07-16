@@ -2,7 +2,7 @@
 
 #include <vector>
 
-#include "Graphics/VertexArray.h"
+#include "Graphics/Core/VertexArray.h"
 
 #include "Utils/Types.h"
 

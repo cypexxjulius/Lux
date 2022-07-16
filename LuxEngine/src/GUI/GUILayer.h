@@ -8,7 +8,7 @@
 #include "Utils/Types.h"
 #include "Utils/Assert.h"
 
-#include "Graphics/CameraController.h"
+#include "Graphics/Camera/Camera2D.h"
 
 #include <vector>
 #include <string>
@@ -30,7 +30,7 @@ private:
     std::vector<Box*> m_box_positions;
 
 
-    Camera2DController m_camera;
+    Camera2D m_camera{};
     Ref<Font> m_used_font;
 
 
@@ -49,7 +49,7 @@ public:
         s_Instance = this;
 
         // TODO Check if this font exists
-        m_used_font = ResourceManager::CreateFont("StandardFont", { "../EngineLayer/res/fonts/Roboto-Medium.ttf" });
+        m_used_font = ResourceManager::CreateFont("StandardFont", { "res/fonts/Roboto-Medium.ttf" });
     }   
 
     virtual void on_detach() override 
@@ -61,7 +61,7 @@ public:
 
     virtual bool on_mouse_move(const Event<EventType::MouseMoved>& event) override;
 
-    virtual bool on_resize(const Event<EventType::WindowResize>& event) override;
+    virtual void on_resize(const Event<EventType::WindowResize>& event) override;
 
     virtual void on_update() override;
 

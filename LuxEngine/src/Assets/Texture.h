@@ -3,7 +3,7 @@
 #include <memory>
 #include <string_view>
 
-#include "Graphics/Bitmap.h"
+#include "Graphics/Core/Bitmap.h"
 
 
 
@@ -16,7 +16,7 @@ class Texture
 private:
 
 
-    Scope<Bitmap> m_Bitmap = nullptr;
+    Ref<Bitmap> m_Bitmap = nullptr;
     ImageType m_Type;
 
 
@@ -44,6 +44,10 @@ public:
     inline bool valid() const
     { return m_Bitmap != nullptr; }
 
+    inline Ref<Bitmap> bitmap()
+    {
+        return m_Bitmap;
+    }
     
     void set_data(void* data); 
 

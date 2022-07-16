@@ -6,7 +6,7 @@
 #include "Utils/Types.h"
 #include "Utils/Assert.h"
 
-#include "Graphics/ShaderProgram.h"
+#include "Graphics/Core/ShaderProgram.h"
 
 namespace Lux
 {

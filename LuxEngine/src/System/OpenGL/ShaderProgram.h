@@ -11,7 +11,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #pragma warning(default: 4201)
 
-#include "Graphics/ShaderProgram.h"
+#include "Graphics/Core/ShaderProgram.h"
 
 
 namespace Lux::OpenGL

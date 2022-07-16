@@ -1,6 +1,6 @@
 #include "Application.h"
 #include "Graphics/Renderer.h"
-#include "Graphics/Renderer2D.h"
+#include "Graphics/Renderer2D/Renderer2D.h"
 
 #include "Assets/Manager.h"
 #include "GUI/GUILayer.h"
@@ -35,7 +35,7 @@ void Application::Start(const std::string& title)
     ResourceManager::Init();
 
     
-    //Renderer2D::Init();
+    Renderer2D::Init();
 
     PushLayer<GUI::GUILayer>();
 

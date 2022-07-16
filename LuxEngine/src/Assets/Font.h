@@ -3,7 +3,7 @@
 #include <memory>
 #include <string_view>
 
-#include "Graphics/Bitmap.h"
+#include "Graphics/Core/Bitmap.h"
 #include "Utils/Assert.h"
 #include "Utils/Types.h"
 
@@ -13,13 +13,13 @@ class ResourceManager;
 
 struct Glyph
 {
-	std::array<double, 4> text_coords;
-	std::array<double, 4> positions;
+	std::array<v2, 4> text_coords;
+	mat4 transform;
 	double advance;
 
-	Glyph(std::array<double, 4> arg_text_coords, std::array<double, 4> arg_positions, double advance)
+	Glyph(mat4 arg_transform, std::array<v2, 4> arg_text_coords, double advance)
 		:	text_coords(arg_text_coords),
-			positions(arg_positions),
+			transform(arg_transform),
 			advance(advance)
 	{}
 };
@@ -30,7 +30,7 @@ class Font {
 private:
 	friend ResourceManager;
 
-	Scope<Bitmap> m_Bitmap = nullptr;
+	Ref<Bitmap> m_Bitmap = nullptr;
 
 	static void* s_FreetypeLibraryHandle;
 
@@ -59,6 +59,12 @@ public:
 
 		return it->second;
 	}
+
+	inline Ref<Bitmap>& bitmap()
+	{
+		return m_Bitmap;
+	}
+
 
 };
 

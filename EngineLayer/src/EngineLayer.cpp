@@ -7,7 +7,7 @@ using namespace Lux;
 class EngineLayer final : public Lux::Layer
 {
 private:
-    Camera2DController camera_obj{};
+    Camera2D camera_obj{};
     v2 text_dimemsions{};
 
     //GUI::BoxHandle m_boxHandle;

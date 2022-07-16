@@ -2,7 +2,7 @@
 
 #include "Utils/Types.h"
 
-#include "Graphics/Buffer.h"
+#include "Graphics/Core/Buffer.h"
 
 
 namespace Lux

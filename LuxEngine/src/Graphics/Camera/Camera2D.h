@@ -2,6 +2,8 @@
 
 #include "Utils/Types.h"
 
+#include "Core/Event.h"
+
 namespace Lux
 {
 
@@ -23,9 +25,8 @@ private:
 
 public:
 
-    Camera2D(float left, float right, float top, float bottom);
 
-    Camera2D() = default;
+    Camera2D();
 
     void set_projection(float left, float right, float top, float bottom);
 
@@ -52,20 +53,26 @@ public:
         recalculate();
     }
 
-    inline const mat4& proj_mat() const
+    inline const mat4& projection() const
     { return m_ProjMat; }
-
-    inline const mat4& view_mat() const
-    { return m_ViewMat; }
-
-    inline const mat4& view_proj_mat() const 
-    { return m_ViewProjMat; } 
 
     inline float height() const
     { return m_Height; }
 
     inline float width() const 
     { return m_Width; }
+
+    inline void on_resize(const Event<EventType::WindowResize>& event)
+    {
+        float aspect_ratio = (float)event.width / (float)event.height;
+
+        set_projection(
+            -aspect_ratio,
+            aspect_ratio,
+            -1.0f,
+            1.0f
+        );
+    }
     
 
 };

@@ -8,5 +8,5 @@
 
 #include "Assets/Manager.h"
 
-#include "Graphics/Renderer2D.h"
-#include "Graphics/CameraController.h"
+#include "Graphics/Renderer2D/Renderer2D.h"
+#include "Graphics/Camera/Camera2D.h"

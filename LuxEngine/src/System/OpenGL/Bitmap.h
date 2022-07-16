@@ -1,6 +1,6 @@
 #pragma once 
 
-#include "Graphics/Bitmap.h"
+#include "Graphics/Core/Bitmap.h"
 #include "Utils/Types.h"
 
 namespace Lux::OpenGL

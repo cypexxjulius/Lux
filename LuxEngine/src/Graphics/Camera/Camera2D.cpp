@@ -3,16 +3,27 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
+#include "Core/Application.h"
+
 namespace Lux
 {
-Camera2D::Camera2D(float left, float right, float top, float bottom)
-    : m_ProjMat(glm::ortho(left, right, bottom, top, NEAR_VAL, FAR_VAL))
+Camera2D::Camera2D()
+    : m_ProjMat(
+        glm::ortho(
+            -Application::AspectRatio(),
+            Application::AspectRatio(),
+            -1.0f,
+            1.0f, 
+            NEAR_VAL, 
+            FAR_VAL
+        )
+    )
     , m_ViewMat(1)
     , m_Position({0.0f, 0.0f})
     , m_Rotation(0.0f)
 {
-    m_Width = abs(left) + abs(right);
-    m_Height = abs(top) + abs(bottom);
+    m_Width = Application::AspectRatio() * 2;
+    m_Height = 2;
     recalculate();
 }
 
@@ -25,7 +36,7 @@ void Camera2D::recalculate()
 	m_ViewProjMat = m_ProjMat * m_ViewMat;
 }
 
-void Camera2D::set_projection(float left, float right, float top, float bottom)
+void Camera2D::set_projection(float left, float right, float bottom, float top)
 {
     m_ProjMat = glm::ortho(left, right, bottom, top, NEAR_VAL, FAR_VAL);
     recalculate();

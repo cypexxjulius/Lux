@@ -2,7 +2,7 @@
 
 #include <vector>
 
-#include "Graphics/Buffer.h"
+#include "Graphics/Core/Buffer.h"
 
 #include "Utils/Types.h"
 

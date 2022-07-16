@@ -60,7 +60,7 @@ inline void RendererSetClearColor(const v4& color)
 }
 
 
-inline void RendererDrawIndexed(Ref<VertexArray> va, u32 indexCount)
+inline void RendererDrawIndexed(const Ref<VertexArray>& va, u32 indexCount)
 {
     u32 count = (indexCount) ? indexCount : va->indexbuffer()->count();
     
