@@ -15,30 +15,23 @@ class Window
 {
 private:
 
-    Window() = delete;
-
-    static void Open(const std::string& title, u32 width, u32 height);
-
-    static void Close();
-
-    static void SwapBuffers();
-
-    static void SetCursorType(CursorType type);
+    void* m_Assets;
 
 public:
 
+    Window(const std::string& title, u32 width, u32 height);
 
-    friend class Application;
+    ~Window();
 
-    friend class Input;
+    void swap_buffers();
 
-    static void PollEvents();
+    void set_cursor_type(CursorType type);
 
-    static void SetVsync(bool state);
+    void poll_events();
 
-    static bool IsVsyncSet();
+    void set_vsync(bool state);
 
-    static float DeltaTime();
+    float delta_time();
 
 
 };

@@ -5,9 +5,11 @@ void lux_start();
 int main()
 {
     std::cout << "Starting LuxEngine" << std::endl;
-    Lux::Application::Start("Start Project");
+    auto* app = new Lux::Application("Start Project");
 
     lux_start();
 
-    Lux::Application::Run();
+    app->run();
+
+    delete app;
 }

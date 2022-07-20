@@ -10,6 +10,7 @@
 
 #include "Core/Input.h"
 
+#include "Core/Application.h"
 
 namespace Lux
 {
@@ -31,13 +32,11 @@ struct WindowAssets
     std::array<GLFWcursor*, 9> cursors;
 };
 
-static WindowAssets* wAssets = nullptr;
 
-void Window::Open(const std::string& title, u32 width, u32 height)
+Window::Window(const std::string& title, u32 width, u32 height)
 {
-    Verify(wAssets == nullptr);
-
-    wAssets = new WindowAssets;
+    auto wAssets = new WindowAssets;
+    m_Assets = wAssets;
 
     Verify(glfwInit());
 
@@ -70,32 +69,32 @@ void Window::Open(const std::string& title, u32 width, u32 height)
     glfwSetFramebufferSizeCallback(wAssets->handle, [](GLFWwindow* glWindow, int width, int height)
     {
 
-        auto& buffer = Application::m_EventBuffer; 
-        Application::m_Width  = buffer.window_resize.width  = static_cast<float>(width);
-        Application::m_Height = buffer.window_resize.height = static_cast<float>(height);
-        Application::m_AspectRatio = Application::m_Width / Application::m_Height;
+        auto& buffer = Application::PrivateGet().PrivateGet().m_EventBuffer;
+        Application::PrivateGet().m_Width  = buffer.window_resize.width  = static_cast<float>(width);
+        Application::PrivateGet().m_Height = buffer.window_resize.height = static_cast<float>(height);
+        Application::PrivateGet().m_AspectRatio = Application::PrivateGet().m_Width / Application::PrivateGet().m_Height;
 
         buffer.window_resize.activate();
 
-        Application::m_Minimized = (width + height) == 0;
+        Application::PrivateGet().m_Minimized = (width + height) == 0;
     });
 
     // Window close callback 
     glfwSetWindowCloseCallback(wAssets->handle, [](GLFWwindow* glWindow)
     {    
-        Application::Close();
+        Application::PrivateGet().close();
     });
 
     // Char input callback
     glfwSetCharCallback(wAssets->handle, [](GLFWwindow* glWindow, unsigned int character)
     {
-        Application::m_EventBuffer.char_events.emplace_back( character );
+        Application::PrivateGet().PrivateGet().m_EventBuffer.char_events.emplace_back( character );
     });
 
     // General key interaction callback
     glfwSetKeyCallback(wAssets->handle, [](GLFWwindow* glWindow, int key, int scancode, int action, int mods)
     {
-        auto& buffer = Application::m_EventBuffer; 
+        auto& buffer = Application::PrivateGet().m_EventBuffer; 
 
         Key lux_keycode = glfw_to_lux_keycode(key);
         KeyState lux_keystate = glfw_to_lux_keystate[static_cast<u8>(action)];
@@ -106,7 +105,7 @@ void Window::Open(const std::string& title, u32 width, u32 height)
             static_cast<u8>(mods)
         );
         
-        Application::m_VirtualIO.keyboard[static_cast<u32>(lux_keycode)] = lux_keystate;
+        Application::PrivateGet().m_InputBuffer.keyboard[static_cast<u32>(lux_keycode)] = lux_keystate;
 
 
     });
@@ -114,7 +113,7 @@ void Window::Open(const std::string& title, u32 width, u32 height)
     // Mouse button interaction callback
     glfwSetMouseButtonCallback(wAssets->handle, [](GLFWwindow* glWindow, int button, int action, int mods)
     { 
-        auto& buffer = Application::m_EventBuffer; 
+        auto& buffer = Application::PrivateGet().m_EventBuffer; 
 
         MouseKey key = glfw_to_lux_mousekey(button);
         KeyState state = glfw_to_lux_keystate[static_cast<u8>(action)];
@@ -123,16 +122,16 @@ void Window::Open(const std::string& title, u32 width, u32 height)
             key,
             state,
             static_cast<u8>(mods),
-            Application::m_VirtualIO.mouse_position
+            Application::PrivateGet().m_InputBuffer.mouse_position
         );
 
-        Application::m_VirtualIO.mouse_buttons[static_cast<u32>(key)] = state;
+        Application::PrivateGet().m_InputBuffer.mouse_buttons[static_cast<u32>(key)] = state;
         
     });
 
     glfwSetScrollCallback(wAssets->handle, [](GLFWwindow* glWindow, double xOffset, double yOffset)
     {
-        auto& buffer = Application::m_EventBuffer; 
+        auto& buffer = Application::PrivateGet().m_EventBuffer; 
         buffer.scrolled.delta += v2{ xOffset, yOffset};
         
         buffer.scrolled.activate();
@@ -141,7 +140,7 @@ void Window::Open(const std::string& title, u32 width, u32 height)
     glfwSetCursorPosCallback(wAssets->handle, [](GLFWwindow* glWindow, double x, double y)
     {
         static double xOldPos = 0.0, yOldPos = 0.0; 
-        auto& buffer = Application::m_EventBuffer; 
+        auto& buffer = Application::PrivateGet().m_EventBuffer; 
 
         x /= static_cast<double>(Application::Width());
 
@@ -153,7 +152,7 @@ void Window::Open(const std::string& title, u32 width, u32 height)
 
         buffer.mouse_moved.activate();
 
-        Application::m_VirtualIO.mouse_position = buffer.mouse_moved.position;
+        Application::PrivateGet().m_InputBuffer.mouse_position = buffer.mouse_moved.position;
 
         xOldPos = x;
         yOldPos = y;
@@ -162,51 +161,46 @@ void Window::Open(const std::string& title, u32 width, u32 height)
 
 }
 
-void Window::SwapBuffers()
+void Window::swap_buffers()
 {
-    Verify(wAssets != nullptr);
-    glfwSwapBuffers(wAssets->handle);
+    glfwSwapBuffers(static_cast<WindowAssets*>(m_Assets)->handle);
 }
 
-void Window::PollEvents()
+void Window::poll_events()
 {
-    Verify(wAssets != nullptr);
     glfwPollEvents();
 }
 
-void Window::SetVsync(bool state)
+void Window::set_vsync(bool state)
 {
-    Verify(wAssets != nullptr);
-    wAssets->vsync = state;
+    static_cast<WindowAssets*>(m_Assets)->vsync = state;
     glfwSwapInterval((int)state);
 }
 
-void Window::Close()
+Window::~Window()
 {
-    Verify(wAssets != nullptr);
- 
     for(u32 i = 0; i < 6; i++)
     {
-        glfwDestroyCursor(wAssets->cursors[i]);
+        glfwDestroyCursor(static_cast<WindowAssets*>(m_Assets)->cursors[i]);
     }
  
-    glfwDestroyWindow(wAssets->handle);
+    glfwDestroyWindow(static_cast<WindowAssets*>(m_Assets)->handle);
     glfwTerminate();
     
-    delete wAssets;
+    delete static_cast<WindowAssets*>(m_Assets);
 }
 
-void Window::SetCursorType(CursorType type)
+void Window::set_cursor_type(CursorType type)
 {
     static CursorType static_type = CursorType::Arrow;
     if(type == static_type)
         return;
     
     static_type = type;
-    glfwSetCursor(wAssets->handle, wAssets->cursors[static_cast<int>(type)]);
+    glfwSetCursor(static_cast<WindowAssets*>(m_Assets)->handle, static_cast<WindowAssets*>(m_Assets)->cursors[static_cast<int>(type)]);
 }
 
-float Window::DeltaTime()
+float Window::delta_time()
 {
     static double lastTime = 0.0;
 

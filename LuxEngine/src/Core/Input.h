@@ -26,14 +26,14 @@ class Input
 public:
 
     static inline KeyState GetState(Key key)
-    { return Application::m_VirtualIO.keyboard[static_cast<u32>(key)]; }
+    { return Application::Get().input_buffer().keyboard[static_cast<u32>(key)]; }
 
     static inline KeyState GetState(MouseKey key)
-    { return Application::m_VirtualIO.mouse_buttons[static_cast<u32>(key)]; }
+    { return Application::Get().input_buffer().mouse_buttons[static_cast<u32>(key)]; }
 
     static inline void SetCursorType(CursorType type)
     {
-        Window::SetCursorType(type);
+        Application::PrivateGet().m_Window->set_cursor_type(type);
     }
     
 };

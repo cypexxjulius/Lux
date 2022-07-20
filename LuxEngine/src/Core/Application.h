@@ -1,9 +1,5 @@
 #pragma once 
 
-#include <vector>
-#include <string>
-#include <memory>
-
 #include "Layer.h"
 #include "Event.h"
 
@@ -11,12 +7,14 @@
 
 #include "System/SystemController.h"
 
+#include "Window.h"
+
 namespace Lux
 {
 
 
 // Virtual representation of the keyboard and mouse state, updated by the window and owned by the Application class
-struct VirtualIO
+struct InputBuffer
 {
     
     v2 mouse_position;
@@ -63,58 +61,118 @@ class Application
 {
 
 private:
+    static Application* s_Instance;
 
-    static float m_Width;
-    static float m_Height;
-    
-    static bool m_Minimized;
-    static bool m_Running;
-    static float m_FrameTime;
-    static float m_AspectRatio;
 
-    static std::string m_Title;
+    float m_Width = 1280;
+    float m_Height = 720;
 
-    static std::vector<Layer*>  m_LayerStack;
-    static VirtualIO            m_VirtualIO;
-    static EventBuffer          m_EventBuffer; 
+    bool  m_Minimized = false;
+    bool  m_Running = true;
+    float m_FrameTime = 0.0f;
+    float m_AspectRatio = 1280.0f / 720.0f;
 
-    static void DispatchEventBuffer();
+    std::string m_Title;
+
+    mutable std::vector<Layer*>  m_LayerStack;
+    InputBuffer          m_InputBuffer;
+    EventBuffer          m_EventBuffer; 
+
+    Scope<Window> m_Window;
+
+private:
+
+    friend class Window;
+    friend class Input;
+
+    void DispatchEventBuffer();
 
     template<EventType Type>
-    static void DispatchSingleEvent(Event<Type>& event);
+    void dispatch_single_event(Event<Type>& event)
+    {
+        for (auto layer : m_LayerStack)
+        {
+            bool return_value = false;
+            if constexpr (Type == EventType::Char)
+                return_value = layer->on_char_press(event);
+            else if constexpr (Type == EventType::KeyPressed)
+                return_value = layer->on_key_press(event);
+            else if constexpr (Type == EventType::MouseButtonPressed)
+                return_value = layer->on_mouse_button_press(event);
+            else if constexpr (Type == EventType::MouseMoved)
+                return_value = layer->on_mouse_move(event);
+            else if constexpr (Type == EventType::Scrolled)
+                return_value = layer->on_scroll(event);
+            else if constexpr (Type == EventType::WindowResize)
+                layer->on_resize(event);
 
-    static inline void Close()
+
+
+            if (return_value)
+                return;
+        }
+    }
+
+    inline void close()
     {
         m_Running = false;
     }
 
+    static inline Application& PrivateGet()
+    {
+        return *s_Instance;
+    }
+
 public:
 
-    friend class Window;
+    Application(const std::string& title);
 
-    friend class Input;
+    ~Application();
 
-    static void Start(const std::string& title);
-
-    static void Run();
+    void run();
 
     template<class T> 
     requires std::is_base_of_v<Layer, T>
     static inline void PushLayer()
     { 
-        m_LayerStack.emplace_back(new T);  
-        m_LayerStack.back()->on_attach();
+        Application::PrivateGet().m_LayerStack.emplace_back(new T);  
+        Application::PrivateGet().m_LayerStack.back()->on_attach();
     }
 
-    static inline float Width()
+    inline float width()
     { return m_Width; }
 
-    static inline float Height()
+    inline float height()
     { return m_Height; }
 
-    static inline float AspectRatio()
+    inline float aspect_ratio()
     { return m_AspectRatio; }
 
+    static inline float AspectRatio()
+    { return s_Instance->aspect_ratio(); }
+
+    static inline float Width()
+    { return s_Instance->width(); }
+
+    static inline float Height()
+    { return s_Instance->height(); }
+
+
+    inline const InputBuffer& input_buffer() const
+    {
+        return m_InputBuffer;
+    }
+
+    inline const EventBuffer& event_buffer() const
+    {
+        return m_EventBuffer;
+    }
+
+
+    static inline const Application& Get()
+    {
+        return *s_Instance;
+    }
 };
 
 

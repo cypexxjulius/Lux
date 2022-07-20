@@ -28,18 +28,18 @@ struct EventCore
 {
 public:
 
-    inline void activate()
+    inline void activate() const
     { active = true;}
 
-    inline void disable()
+    inline void disable() const 
     { active = false; }
 
-    inline bool is_active()
+    inline bool is_active() const
     { return active; }
 
 private:
 
-    bool active{ true };
+    mutable bool active{ true };
 
 public:
 
