@@ -88,9 +88,6 @@ project "LuxEngine"
 	pchheader "pch.h"
 	pchsource "%{prj.name}/pch/pch.cpp"
 
-	targetdir "../EngineLayer"
-
-
 	files
 	{
 		"%{prj.name}/pch/**.h",
