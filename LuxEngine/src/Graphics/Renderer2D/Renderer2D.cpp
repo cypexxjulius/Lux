@@ -51,8 +51,8 @@ void Renderer2D::EndScene()
 {
     Verify(Data);
 
-    Data->rect_batch.end();
     Data->glyph_batch.end();
+    Data->rect_batch.end();
 
 }
 
@@ -63,6 +63,15 @@ void Renderer2D::DrawTexturedRect(const mat4& transform, const v4& color, const 
     u32 TextureID = Data->rect_batch.register_texture(texture->bitmap());
 
     Data->rect_batch.Push(transform, color, TextureID, tiling);
+}
+
+void Renderer2D::DrawBitmap(const mat4& transform, const v4& color, const Ref<Bitmap>& texture, const std::array<v2, 4>& tex_coords)
+{
+    Verify(Data);
+
+    u32 TextureID = Data->rect_batch.register_texture(texture);
+
+    Data->rect_batch.Push(transform, color, TextureID, tex_coords);
 }
 
 void Renderer2D::DrawRect(const mat4& transform, const v4& color)
@@ -86,7 +95,7 @@ void Renderer2D::DrawText(std::string_view text, const mat4& transform, const v4
             
 
         if (character != ' ')
-            Data->glyph_batch.Push(transform * glm::translate(glm::mat4(1.0f), { linelength, 0.0f, 1.0f }) * glyph.transform, color, glyph.text_coords, TextureID);
+            Data->glyph_batch.Push(transform * glm::translate(glm::mat4(1.0f), { linelength, 0.0f, 0.0f }) * glyph.transform, color, glyph.text_coords, TextureID);
         
         linelength += glyph.advance;
 
