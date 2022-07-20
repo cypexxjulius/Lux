@@ -18,6 +18,9 @@ Shader::Shader(const std::string& file_path)
 
     Verify(file.is_open());
 
+    if (!file.is_open())
+        ERROR("Failed to open shader asset file {}", file_path);
+
     std::vector<RawShader> shaders;
 
     for(std::string line; std::getline(file, line, '\n');)

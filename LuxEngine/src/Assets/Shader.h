@@ -5,8 +5,11 @@
 
 #include "Utils/Types.h"
 #include "Utils/Assert.h"
+#include "Utils/Logger.h"
 
 #include "Graphics/Core/ShaderProgram.h"
+
+
 
 namespace Lux
 {
@@ -63,31 +66,53 @@ public:
 
     void inline upload_mat4(const std::string& uniform, mat4 matrix)
     {
-        Verify(check_uniform(m_uniforms, uniform));
+        if (!check_uniform(m_uniforms, uniform))
+        {
+            ERROR("Upload canceled due to invalid variable name \"{}\"", uniform);
+            return;
+        }
+        
+        
         m_program->upload_mat4(m_uniforms[uniform].id, matrix);
     }
 
     void inline upload_float(const std::string& uniform, float fvalue)
     {
-        Verify(check_uniform(m_uniforms, uniform));
+        if (!check_uniform(m_uniforms, uniform))
+        {
+            ERROR("Upload canceled due to invalid variable name \"{}\"", uniform);
+            return;
+        }
         m_program->upload_float(m_uniforms[uniform].id, fvalue);
     }
 
     void inline upload_int(const std::string& uniform, int ivalue)
     {
-        Verify(check_uniform(m_uniforms, uniform));
+        if (!check_uniform(m_uniforms, uniform))
+        {
+            ERROR("Upload canceled due to invalid variable name \"{}\"", uniform);
+            return;
+        }
         m_program->upload_int(m_uniforms[uniform].id, ivalue);
     }
 
     void inline upload_v4(const std::string& uniform, v4 vec4)
     {
-        Verify(check_uniform(m_uniforms, uniform));
+        if (!check_uniform(m_uniforms, uniform))
+        {
+            ERROR("Upload canceled due to invalid variable name \"{}\"", uniform);
+            return;
+        }
         m_program->upload_v4(m_uniforms[uniform].id, vec4);
     }
 
     void inline upload_int_array(const std::string& uniform, const std::vector<int>& array)
     {
-        Verify(check_uniform(m_uniforms, uniform));
+        if (!check_uniform(m_uniforms, uniform))
+        {
+            ERROR("Upload canceled due to invalid variable name \"{}\"", uniform);
+            return;
+        }
         m_program->upload_int_array(m_uniforms[uniform].id, array);
     }
 
