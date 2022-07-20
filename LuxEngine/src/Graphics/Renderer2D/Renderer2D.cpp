@@ -28,6 +28,15 @@ void Renderer2D::Init()
     Verify(Data == nullptr);
 
     Data = new Renderer2DData();
+
+    Renderer::get_api().enable_debug();
+
+    Renderer::get_api().enable(RenderingOption::BLEND);
+    Renderer::get_api().set_blend_function(BlendFunc::SRC_ALPHA, BlendFunc::ONE_MINUS_SRC_ALPHA);
+
+    Renderer::get_api().enable(RenderingOption::DEPTH_TEST);
+    Renderer::get_api().enable(RenderingOption::MULTISAMPLE);
+
 }
 
 void Renderer2D::Shutdown()

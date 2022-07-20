@@ -3,46 +3,22 @@
 #include "System/OpenGL/RendererAPI.h"
 #include "System/SystemController.h"
 
-#include "Renderer2D/Renderer2D.h"
-
-#include "Utils/Assert.h"
-
-#include <functional>
-
 namespace Lux
 {
 
+Scope<RendererAPI> Renderer::m_API = nullptr;
 
-
-
-
-RendererFunctions Renderer::s_functions;
-bool Renderer::s_initialized = false;
-RendererAPI Renderer::m_api = RendererAPI::NA;
-
-void Renderer::Init(RendererAPI api)
+void Renderer::Init()
 {
-    m_api = api;
-
-    switch (api)
-    {
-    case RendererAPI::OpenGL:
-        s_functions = OpenGL::RendererAPIFunctions;
-        s_functions.Init(); 
-
-        s_initialized = true;
-        break;
-    
-    default:
-        TODO();
-        break;
-    }    
+    Verify(m_API == nullptr);
+    m_API = std::make_unique<OpenGL::RendererAPI>();
+    m_API->init();
 }
 
 void Renderer::Shutdown()
 {
-    Verify(s_initialized);
-    s_functions.Shutdown();
+    Verify(m_API != nullptr);
+    m_API->shutdown();
 }
 
 }

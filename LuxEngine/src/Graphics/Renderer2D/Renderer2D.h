@@ -5,6 +5,8 @@
 #include "Assets/Texture.h"
 #include "Assets/Font.h"
 
+#include "Graphics/Core/Bitmap.h"
+
 #include <string_view>
 
 namespace Lux
@@ -14,13 +16,15 @@ class Renderer2D
 {
 private:
 
-    Renderer2D() {}
+    friend class Application;
 
-public:
+    Renderer2D() {}
 
     static void Init();
 
     static void Shutdown();
+
+public:
 
     static void BeginScene(const mat4& projection);
 

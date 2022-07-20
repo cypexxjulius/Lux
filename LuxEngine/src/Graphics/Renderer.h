@@ -1,74 +1,81 @@
 #pragma once 
 
 #include "Utils/Types.h"
+#include "Utils/Assert.h"
+
 #include "Graphics/Core/VertexArray.h"
-
-#include <functional>
-
 
 namespace Lux
 {
 
-enum class RendererAPI
+enum class RenderingOption
 {
-    NA,
-    OpenGL,
-    Vulcan,
-    DirectX12,
-    Metal
+    BLEND,
+    DEPTH_TEST,
+    MULTISAMPLE
 };
 
-struct RendererFunctions
+enum class BlendFunc
 {
-    std::function<void()> Init;
-    std::function<void()> Shutdown;
-
-    std::function<void()> Clear;
-    std::function<void(const v4& color)> SetClearColor;
-    std::function<void(u32 width, u32 height)> SetViewport;
-    std::function<void(const Ref<VertexArray>& va, u32 indexCount)> DrawIndexed;
+    ZERO,
+    ONE,
+    SRC_COLOR,
+    ONE_MINUS_SRC_COLOR,
+    DST_COLOR,
+    ONE_MINUS_DST_COLOR,
+    SRC_ALPHA,
+    ONE_MINUS_SRC_ALPHA,
+    DST_ALPHA,
+    ONE_MINUS_DST_ALPHA
 };
 
+class RendererAPI
+{
+public:
+
+    virtual void init() = 0;
+
+    virtual void shutdown() = 0;
+
+    virtual void clear() const = 0;
+
+    virtual void draw_indexed(const Ref<VertexArray>& va, u32 index_count) const = 0;
+
+    virtual void set_viewport(u32 width, u32 height) const = 0;
+
+    virtual void enable(RenderingOption option) const = 0;
+
+    virtual void disable(RenderingOption option) const = 0;
+
+    virtual void set_blend_function(BlendFunc src,BlendFunc function) const = 0;
+
+    virtual void set_clear_color(const v4& color) const = 0;
+
+    virtual void enable_debug() const = 0;
+
+    virtual void disable_debug() const = 0;
+
+};
 
 class Renderer
 {
 private:
-    static RendererFunctions s_functions;
     static bool s_initialized;
-    static RendererAPI m_api;
+    static Scope<RendererAPI> m_API;
 
 public: 
-
-    static void Init(RendererAPI api);
+    static void Init();
 
     static void Shutdown();
 
-    static inline RendererAPI GetRendererAPI()
+    static inline const RendererAPI& get_api()
     {
-        return m_api;
+        Verify(m_API);
+        return *m_API;
     }
-
-    static inline void Clear()
-    {
-        s_functions.Clear();
-    }
-
-    static inline void SetClearColor(const v4& color)
-    {
-        s_functions.SetClearColor(color);
-    }
-
-    static inline void DrawIndexed(const Ref<VertexArray>& va, u32 index_count)
-    {
-        s_functions.DrawIndexed(va, index_count);
-    }
-
-    static void SetViewport(u32 width, u32 height)
-    {
-        s_functions.SetViewport(width, height);
-    }
-
 };
+
+
 
 
 }

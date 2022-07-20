@@ -102,7 +102,7 @@ public:
         );
 
         shader->bind();
-        Renderer::DrawIndexed(va, index_count);
+        Renderer::get_api().draw_indexed(va, index_count);
         
         index_count = 0;
         vertices.clear();
@@ -159,7 +159,7 @@ struct RectBatch final : public Renderer2DBatch<RectVertex>
 {
 private:
         
-    Ref<Texture> standard_color;
+    Ref<Bitmap> standard_color;
 
     static constexpr v4 VertexPositions[4]{
         { 0, 1, 0, 1 },
@@ -199,12 +199,17 @@ public:
         shader->upload_int_array("u_Textures", samplers);
 
         u32 pure_color = UINT32_MAX;
-        standard_color = ResourceManager::CreateTexture("PureWhiteTexture", { ImageType::RGBA, 1, 1, &pure_color});
+        BitmapSpec spec;
+
+        spec.type = ImageType::RGBA;
+
+        standard_color = Bitmap::Create(spec, 1, 1);
+        standard_color->set_data(&pure_color, sizeof(u32));
     }
 
     virtual void on_begin(const mat4& projection) override
     {
-        textures.push_back(standard_color->bitmap());
+        textures.push_back(standard_color);
         
         shader->bind();
         shader->upload_mat4("u_ViewProj", projection);
