@@ -47,6 +47,8 @@ Font::Font(const std::string& filepath)
 
 	Verify(font);	
 	
+	if (!font)
+		ERROR("Failed to open font {}", filepath);
 
 	std::vector<GlyphGeometry> glyphs;
 	FontGeometry fontGeometry(&glyphs);
@@ -60,7 +62,7 @@ Font::Font(const std::string& filepath)
 	TightAtlasPacker packer;
 
 	packer.setDimensionsConstraint(TightAtlasPacker::DimensionsConstraint::SQUARE);
-	packer.setMinimumScale(24.0);
+	packer.setMinimumScale(32.0);
 
 	packer.setPixelRange(2.0);
 	packer.setMiterLimit(1.0);
@@ -86,7 +88,14 @@ Font::Font(const std::string& filepath)
 	
 	msdfgen::BitmapConstRef<msdf_atlas::byte, 3> bitmap = storage;
 
-	m_Bitmap = Bitmap::Create(bitmap.width, bitmap.height, ImageType::RGB);
+	BitmapSpec spec;
+
+	spec.unpack_aligned = true;
+	spec.type = ImageType::RGB;
+	spec.mag_filter = FilterMethod::LINEAR;
+	spec.min_filter = FilterMethod::LINEAR;
+
+	m_Bitmap = Bitmap::Create(spec, bitmap.width, bitmap.height);
 	m_Bitmap->set_data(static_cast<const void*>(bitmap.pixels), bitmap.width * bitmap.height * 3);
 
 	for (auto& glyph : glyphs)
@@ -98,14 +107,14 @@ Font::Font(const std::string& filepath)
 
 		*/
 
+
 		double l, r, t, b;
 		glyph.getQuadAtlasBounds(l, b, r, t);
-		float left =	l / bitmap.width;
-		float right =	r / bitmap.width;
+		float glyph_left =	l / bitmap.width;
+		float glyph_width = (r - l) / bitmap.width;
 
-		float bottom =	(bitmap.height - t)  / bitmap.height;
-		float top =		(bitmap.height - b) / bitmap.height;
-
+		float glyph_bottom = b  / bitmap.height;
+		float glyph_height = (t - b) / bitmap.height;
 
 		double advance = glyph.getAdvance();
 
@@ -120,15 +129,16 @@ Font::Font(const std::string& filepath)
 
 		auto cp =  glyph.getCodepoint();
 
+
 		m_GlyphMetaData.insert({ 
 			cp, 
 			Glyph { 
-				glm::translate(glm::mat4(1.0f), { posx, posy, 1.0f }) * glm::scale(glm::mat4(1.0f), { width, height, 1.0f }), 
+				glm::translate(glm::mat4(1.0f), { posx, posy, 0.0f }) * glm::scale(glm::mat4(1.0f), { width, height, 1.0f }), 
 				std::array<v2, 4> {
-					v2 { left,	top},
-					v2 { right, top},
-					v2 { right, bottom},
-					v2 { left,	bottom},
+					v2 { glyph_left,	glyph_bottom + glyph_height},
+					v2 { glyph_left + glyph_width,				glyph_bottom + glyph_height},
+					v2 { glyph_left + glyph_width,				glyph_bottom},
+					v2 { glyph_left,	glyph_bottom}
 				}, 
 				advance } 
 			});

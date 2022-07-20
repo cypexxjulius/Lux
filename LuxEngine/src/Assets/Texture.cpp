@@ -43,7 +43,11 @@ Texture::Texture(std::string_view filepath)
 
     }
 
-    m_Bitmap = Bitmap::Create(width, height, m_Type);
+    BitmapSpec spec;
+
+    spec.type = m_Type;
+
+    m_Bitmap = Bitmap::Create(spec, width, height);
 
     m_Bitmap->set_data(data, width * height * channels);
 
@@ -53,7 +57,12 @@ Texture::Texture(std::string_view filepath)
 Texture::Texture(ImageType type, u32 width, u32 height, void* data)
 {
     m_Type = type;
-    m_Bitmap = Bitmap::Create(width, height, m_Type);
+
+    BitmapSpec spec;
+
+    spec.type = m_Type;
+
+    m_Bitmap = Bitmap::Create(spec, width, height);
 
     if(data != nullptr)
         m_Bitmap->set_data(data, width * height * static_cast<int>(m_Type));

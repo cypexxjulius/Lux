@@ -8,85 +8,94 @@
 
 namespace Lux::OpenGL
 {
+
+class LuxToGL
+{
+public:
+    static inline GLenum InternalFormat(ImageType type)
+    {
+        switch (type)
+        {
+        case ImageType::RGBA:   return GL_RGBA8;
+        case ImageType::RGB:    return GL_RGB8;
+        case ImageType::ALPHA:  return GL_R8;
+
+        default: TODO();
+        }
+
+        return GL_FALSE;
+    }
+
+    static inline GLenum DataFormat(ImageType type)
+    {
+        switch (type)
+        {
+        case ImageType::RGBA:   return GL_RGBA;
+        case ImageType::RGB:    return GL_RGB;
+        case ImageType::ALPHA:  return GL_RED;
+
+        default: TODO();
+        }
+
+        return GL_FALSE;
+    }
+
+    static inline u32 Channels(ImageType type)
+    {
+        return static_cast<u32>(type);
+    }
+
+    static inline GLenum FilterMethod(FilterMethod filter)
+    {
+        switch (filter)
+        {
+        case FilterMethod::LINEAR:      return GL_LINEAR;
+        case FilterMethod::NEAREST:    return GL_NEAREST;
+
+        default: TODO();
+        }
+
+        return GL_FALSE;
+    }
+
+    static inline GLenum WrapMethod(WrapMethod method)
+    {
+        switch (method)
+        {
+        case WrapMethod::REPEAT:   return GL_REPEAT;
+        
+        default: TODO();
+        }
+
+        return GL_FALSE;
+    }
+
+};
     
-static inline GLenum to_gl_internal_format(InternalFormat format)
+
+Bitmap::Bitmap(const BitmapSpec& spec, u32 width, u32 height)
+    :   m_Channels(LuxToGL::Channels(spec.type)),
+        m_Width(width),
+        m_Height(height),
+        m_Spec(spec)
 {
-    switch(format)
-    {
-        case InternalFormat::RGBA8 : return GL_RGBA8;
-        case InternalFormat::RGB8 :return GL_RGB8;  
-        case InternalFormat::RED8 : return GL_R8;
-
-        default: TODO();
-    }
-
-    return GL_FALSE;
-}
-
-static inline GLenum to_gl_data_format(DataFormat format)
-{
-    switch(format)
-    {
-        case DataFormat::RGBA : return GL_RGBA;
-        case DataFormat::RGB : return GL_RGB;  
-        case DataFormat::RED : return GL_RED;
-
-        default: TODO();
-
-    }
-
-    return GL_FALSE;
-}
-
-
-void Bitmap::CreateEmptyImpl(u32 width, u32 height, InternalFormat internalFormat, DataFormat dataFormat)
-{
-    m_DataFormat = dataFormat;
-
-    m_Width = width;
-    m_Height = height;
-
     glCreateTextures(GL_TEXTURE_2D, 1, &m_ID);
-	glTextureStorage2D(m_ID, 1, to_gl_internal_format(internalFormat), width, height);
 
-	glTextureParameteri(m_ID, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTextureParameteri(m_ID, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTextureStorage2D(m_ID, 1, LuxToGL::InternalFormat(m_Spec.type), width, height);
 
-	glTextureParameteri(m_ID, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTextureParameteri(m_ID, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTextureParameteri(m_ID, GL_TEXTURE_MIN_FILTER, LuxToGL::FilterMethod(m_Spec.min_filter));
+    glTextureParameteri(m_ID, GL_TEXTURE_MAG_FILTER, LuxToGL::FilterMethod(m_Spec.mag_filter));
 
-}
-
-Bitmap::Bitmap(u32 width, u32 height, ImageType type)
-{
-    switch (type)
-    {
-    case (ImageType::RGBA):
-        CreateEmptyImpl(width, height, InternalFormat::RGBA8, DataFormat::RGBA);
-        m_Channels = 4;
-        return;
-
-    case (ImageType::RGB):
-        CreateEmptyImpl(width, height, InternalFormat::RGB8, DataFormat::RGB);
-        m_Channels = 3;
-        return;
-
-    case (ImageType::ALPHA):
-        CreateEmptyImpl(width, height, InternalFormat::RED8, DataFormat::RED);
-        m_Channels = 1;
-        return;
-    
-    default:
-        TODO();
-        return;
-
-    }
+    glTextureParameteri(m_ID, GL_TEXTURE_WRAP_S, LuxToGL::WrapMethod(m_Spec.wrap_s));
+    glTextureParameteri(m_ID, GL_TEXTURE_WRAP_T, LuxToGL::WrapMethod(m_Spec.wrap_t));
 }
 
 void Bitmap::set_data(const void* data, u32 size)
 {
     assert(size == (m_Width * m_Height * m_Channels));
-    glTextureSubImage2D(m_ID, 0, 0, 0, m_Width, m_Height, to_gl_data_format(m_DataFormat), GL_UNSIGNED_BYTE, data);
+    if(m_Spec.unpack_aligned)
+        glPixelStorei(GL_UNPACK_ALIGNMENT, GL_TRUE);
+    glTextureSubImage2D(m_ID, 0, 0, 0, m_Width, m_Height, LuxToGL::DataFormat(m_Spec.type), GL_UNSIGNED_BYTE, data);
 }
 
 
@@ -98,7 +107,6 @@ Bitmap::~Bitmap()
 void Bitmap::bind(u8 slot)
 {
     glBindTextureUnit(slot, m_ID);
-    m_BoundSlot = slot;
 }
 
 }

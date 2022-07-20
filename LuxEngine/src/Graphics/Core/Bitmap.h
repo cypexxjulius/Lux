@@ -22,9 +22,34 @@ enum class DataFormat : u8
 
 enum class ImageType : u8
 {
+    NONE = 0,
     ALPHA = 1,
     RGB = 3,
     RGBA = 4,
+};
+
+enum class FilterMethod
+{
+    NONE,
+    LINEAR,
+    NEAREST
+};
+
+enum class WrapMethod
+{
+    NONE,
+    REPEAT
+};
+
+struct BitmapSpec
+{
+    ImageType type = ImageType::NONE;
+    bool unpack_aligned = false;
+
+    FilterMethod min_filter = FilterMethod::LINEAR;
+    FilterMethod mag_filter = FilterMethod::NEAREST;
+    WrapMethod wrap_s = WrapMethod::REPEAT;
+    WrapMethod wrap_t = WrapMethod::REPEAT;
 };
 
 class Bitmap
@@ -50,9 +75,9 @@ public:
 
     virtual u32 id() const = 0;
 
-    virtual DataFormat data_format() const = 0;
+    virtual const BitmapSpec& spec() const = 0;
 
-    static std::unique_ptr<Bitmap> Create(u32 width, u32 height, ImageType type); 
+    static std::shared_ptr<Bitmap> Create(const BitmapSpec& spec, u32 width, u32 height); 
 
 };
 

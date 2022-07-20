@@ -9,18 +9,16 @@ namespace Lux::OpenGL
 class Bitmap final : public ::Lux::Bitmap
 {
 private:
-    u8 m_Channels, m_BoundSlot = 0;
-    DataFormat m_DataFormat;
-    u32 m_ID;
-    u32 m_Width, m_Height;
+    u32 m_ID = 0;
+    u8 m_Channels;
+    u32 m_Width;
+    u32 m_Height;
 
-private:
-
-    void CreateEmptyImpl(u32 width, u32 height, InternalFormat internalFormat, DataFormat dataFormat);
+    BitmapSpec m_Spec;
 
 public:
 
-    Bitmap(u32 width, u32 height, ImageType type);
+    Bitmap(const BitmapSpec& spec, u32 width, u32 height);
 
     ~Bitmap();
 
@@ -40,8 +38,8 @@ public:
     virtual u32 id() const override 
     { return m_ID; }
 
-    virtual DataFormat data_format() const override
-    { return m_DataFormat; }
+    virtual const BitmapSpec& spec() const override
+    { return m_Spec; }
 
 };
 
