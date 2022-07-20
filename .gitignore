@@ -18,3 +18,4 @@ bin/**
 binInt/**
 
 .vs/**
+*.png
