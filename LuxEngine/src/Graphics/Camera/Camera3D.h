@@ -63,7 +63,7 @@ public:
 		return true;
 	}
 	
-	const mat4& projection() const
+	const mat4 projection() const
 	{
 		return m_Projection * m_ViewMatrix;
 	}
