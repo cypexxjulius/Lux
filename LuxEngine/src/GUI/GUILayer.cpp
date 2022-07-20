@@ -18,15 +18,11 @@ GUILayer* GUILayer::s_Instance = nullptr;
 
 void GUILayer::on_update()
 {
-    Renderer2D::BeginScene(m_camera.projection());
+    Renderer2D::BeginScene(m_Camera.projection());
 
-    mat4 transform = glm::translate(mat4{ 1.0f }, { -1.0f, 0.0f, 1.0f });
-     
-    Renderer2D::DrawRect(transform, {0.0f, 0.0f, 0.8f, 1.0f});
+    auto transform = glm::translate(mat4{ 1.0f }, { -1.0f, -1.0f, 0.0f }) * glm::scale(mat4{1.0f}, {0.5f, 0.5f, 1.0f});
 
-    transform *= glm::scale(mat4{ 1.0f }, { 0.3, 0.3, 1.0f });
-
-    Renderer2D::DrawText("Hello World", transform, { 0.0f, 0.0f, 0.0f, 1.0f }, m_used_font);
+    Renderer2D::DrawText("Hello World", transform, { 1.0f, 1.0f, 1.0f, 1.0f }, m_UsedFont);
 
     Renderer2D::EndScene();
 }
@@ -34,21 +30,33 @@ void GUILayer::on_update()
 
 bool GUILayer::on_mouse_button_press(const Event<EventType::MouseButtonPressed>& event)
 {
-    (void) event;
-    return false;
+    if (event.key != MouseKey::LEFT)
+        return false;
+
+    if (event.state != KeyState::Pressed)
+        return false;
+
+    m_pressed = !m_pressed;
 }
 
 
 bool GUILayer::on_mouse_move(const Event<EventType::MouseMoved>& event)
 {
-    (void) event;
     return false;
 }
+
+bool GUILayer::on_scroll(const Event<EventType::Scrolled>& event)
+{
+    m_pressed = true;
+    return true;
+}
+
 
 void GUILayer::on_resize(const Event<EventType::WindowResize>& event)
 {
     // TODO: notify every box etc. about resizing changes 
-    m_camera.on_resize(event);
+    m_Camera.on_resize(event);
+    m_Camera3D.on_resize(event);
 }
 
 }

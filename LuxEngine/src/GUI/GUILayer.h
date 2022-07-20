@@ -10,6 +10,8 @@
 
 #include "Graphics/Camera/Camera2D.h"
 
+#include "Graphics/Camera/Camera3D.h"
+
 #include <vector>
 #include <string>
 
@@ -30,9 +32,11 @@ private:
     std::vector<Box*> m_box_positions;
 
 
-    Camera2D m_camera{};
-    Ref<Font> m_used_font;
+    Camera2D m_Camera{};
+    Camera3D m_Camera3D{45.0f, Application::AspectRatio()};
+    Ref<Font> m_UsedFont;
 
+    bool m_pressed = false;
 
     static inline GUILayer& Get()
     { return *s_Instance; }
@@ -49,7 +53,7 @@ public:
         s_Instance = this;
 
         // TODO Check if this font exists
-        m_used_font = ResourceManager::CreateFont("StandardFont", { "res/fonts/Roboto-Medium.ttf" });
+        m_UsedFont = ResourceManager::CreateFont("StandardFont", { "res/fonts/Roboto-Medium.ttf" });
     }   
 
     virtual void on_detach() override 
@@ -62,6 +66,8 @@ public:
     virtual bool on_mouse_move(const Event<EventType::MouseMoved>& event) override;
 
     virtual void on_resize(const Event<EventType::WindowResize>& event) override;
+
+    virtual bool on_scroll(const Event<EventType::Scrolled>& event) override;
 
     virtual void on_update() override;
 
