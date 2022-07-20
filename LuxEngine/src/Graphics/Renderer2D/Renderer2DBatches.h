@@ -93,6 +93,7 @@ public:
         if (!index_count)
             return;
 
+
         prep_upload();
 
         va->vertexbuffer(0)->set_data(
@@ -100,6 +101,7 @@ public:
             static_cast<u32>(vertices.size() * sizeof(T))
         );
 
+        shader->bind();
         Renderer::DrawIndexed(va, index_count);
         
         index_count = 0;
@@ -142,13 +144,15 @@ public:
             return textures.size() - 1;
         }
         
-        return std::distance(textures.begin(), it);
+        return static_cast<u32>(std::distance(textures.begin(), it));
     }
 
 
     virtual void prep_upload() = 0;
 
     virtual void on_begin(const mat4& projection) = 0;
+
+    virtual void print_debug_output() = 0;
 };
 
 struct RectBatch final : public Renderer2DBatch<RectVertex>
@@ -202,7 +206,7 @@ public:
     {
         textures.push_back(standard_color->bitmap());
         
-
+        shader->bind();
         shader->upload_mat4("u_ViewProj", projection);
     }
 
@@ -215,6 +219,28 @@ public:
         for (auto& bitmap : textures)
             bitmap->bind(i++);
         
+    }
+
+    virtual void print_debug_output() override
+    {
+        std::cout << "<RectBatch Debug Output>" << '\n';
+
+        std::cout << std::endl;
+        
+        for (auto& bitmap : textures)
+            INFO("Bitmap : {}  [{} {}]", bitmap->id(), bitmap->width(), bitmap->height());
+
+        std::cout << std::endl;
+
+        u32 index = 0;
+        for (auto& vert : vertices)
+        {
+            INFO("{} : ([{}, {}, {}])", index++, vert.Position.x, vert.Position.y, vert.Position.z);
+            if (index % 4 == 0)
+                std::cout << std::endl;
+        }
+
+        std::cout << std::endl;
     }
 
     inline void Push(const mat4& transform, const v4& color, u32 texture_id, float tiling)
@@ -231,6 +257,25 @@ public:
                 static_cast<float>(texture_id),
                 tiling
             });
+        }
+
+        index_count += 6;
+    }
+
+    inline void Push(const mat4& transform, const v4& color, u32 texture_id, const std::array<v2, 4>& tex_coords)
+    {
+        if (index_count == MaxIndices)
+            upload();
+
+        for (u8 i = 0; i < 4; i++)
+        {
+            push_vertex({
+                transform * VertexPositions[i],
+                color,
+                tex_coords[i],
+                static_cast<float>(texture_id),
+                1.0f
+                });
         }
 
         index_count += 6;
@@ -273,6 +318,7 @@ public:
 
     virtual void on_begin(const mat4& projection) override
     {
+        shader->bind();
         shader->upload_mat4("u_ViewProj", projection);
     }
 
@@ -303,6 +349,28 @@ public:
         }
 
         index_count += 6;
+    }
+
+    virtual void print_debug_output() override
+    {
+        std::cout << "<Glyph Debug Output>" << '\n';
+
+        std::cout << std::endl;
+
+        for (auto& bitmap : textures)
+            INFO("Bitmap : {}  [{} {}]", bitmap->id(), bitmap->width(), bitmap->height());
+
+        std::cout << std::endl;
+
+        u32 index = 0;
+        for (auto& vert : vertices)
+        {
+            INFO("{} : ({}, {}, {})", index++, vert.Position.x, vert.Position.y, vert.Position.z);
+            if (index % 4 == 0)
+                std::cout << std::endl;
+        }
+
+        std::cout << std::endl;
     }
 };
 
