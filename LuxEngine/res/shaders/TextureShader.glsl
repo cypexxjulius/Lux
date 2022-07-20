@@ -26,7 +26,7 @@ void main()
 #type fragment
 #version 440 core
 
-layout(location = 0) out vec4 GLcolor;
+layout(location = 0) out vec4 pxl_color;
 
 in vec4 v_Color;
 in vec2 v_texCoord;
@@ -76,5 +76,5 @@ void main()
         case 31: color *= texture2D(u_Textures[31], v_texCoord * v_TilingFactor); break;
     }
         
-    GLcolor = color;
+    pxl_color = color;
 }
