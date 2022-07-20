@@ -10,34 +10,17 @@ namespace Lux
 
 VertexBuffer* VertexBuffer::Create(void* data, u32 size)
 {
-    if(Renderer::GetRendererAPI() == RendererAPI::OpenGL)
-        return new OpenGL::VertexBuffer(data, size);
-
-    TODO();
-
-    return nullptr;
+    return new OpenGL::VertexBuffer(data, size);
 }
 
 VertexBuffer* VertexBuffer::Create(u32 size)
 {
-    if(Renderer::GetRendererAPI() == RendererAPI::OpenGL)
-        return new OpenGL::VertexBuffer(size);
-
-    
-    TODO();
-
-    return nullptr;
+    return new OpenGL::VertexBuffer(size);
 }
 
 IndexBuffer* IndexBuffer::Create(unsigned int* data, u32 count)
 {
-    if(Renderer::GetRendererAPI() == RendererAPI::OpenGL)
-        return new OpenGL::IndexBuffer(data, count);
-
-    
-    TODO();
-
-    return nullptr;
+    return new OpenGL::IndexBuffer(data, count);
 }
 
 }
