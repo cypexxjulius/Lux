@@ -35,7 +35,7 @@ VertexBuffer::VertexBuffer(u32 size)
 
     glGenBuffers(1, &m_ID);
     bind();
-    glBufferData(GL_ARRAY_BUFFER, size, NULL, GL_DYNAMIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, size, nullptr, GL_DYNAMIC_DRAW);
 
 }
 

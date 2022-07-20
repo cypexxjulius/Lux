@@ -38,13 +38,9 @@ VertexArray::~VertexArray()
     glDeleteVertexArrays(1, &m_ID);
 
     for(auto& vb : m_VertexBuffers)
-    {
         delete vb;
-        vb = nullptr;
-    }
     
     delete m_IndexBuffer;
-    m_IndexBuffer = nullptr;
 }
 
 static inline void vertex_array_bind(u32 id)
