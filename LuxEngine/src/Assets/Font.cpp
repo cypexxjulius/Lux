@@ -67,7 +67,7 @@ Font::Font(const std::string& filepath)
 	packer.setPixelRange(2.0);
 	packer.setMiterLimit(1.0);
 
-	packer.pack(glyphs.data(), glyphs.size());
+	packer.pack(glyphs.data(), static_cast<int>(glyphs.size()));
 
 	int width, height;
 	packer.getDimensions(width, height);
@@ -82,7 +82,7 @@ Font::Font(const std::string& filepath)
 	GeneratorAttributes attributes;
 	generator.setThreadCount(4);
 
-	generator.generate(glyphs.data(), glyphs.size());
+	generator.generate(glyphs.data(), static_cast<int>(glyphs.size()));
 
 	auto& storage = generator.atlasStorage();
 	
@@ -110,22 +110,22 @@ Font::Font(const std::string& filepath)
 
 		double l, r, t, b;
 		glyph.getQuadAtlasBounds(l, b, r, t);
-		float glyph_left =	l / bitmap.width;
-		float glyph_width = (r - l) / bitmap.width;
+		float glyph_left =	(float)(l / bitmap.width);
+		float glyph_width = (float)((r - l) / bitmap.width);
 
-		float glyph_bottom = b  / bitmap.height;
-		float glyph_height = (t - b) / bitmap.height;
+		float glyph_bottom = (float)(b  / bitmap.height);
+		float glyph_height = (float)((t - b) / bitmap.height);
 
 		double advance = glyph.getAdvance();
 
 		double x1, y1, x2, y2;
 		glyph.getQuadPlaneBounds(x1, y1, x2, y2);
 
-		float width = x2 - x1;
-		float height = y2 - y1;
+		float width = (float)(x2 - x1);
+		float height = (float)(y2 - y1);
 
-		float posx = x1;
-		float posy = y1;
+		float posx = (float)x1;
+		float posy = (float)y1;
 
 		auto cp =  glyph.getCodepoint();
 

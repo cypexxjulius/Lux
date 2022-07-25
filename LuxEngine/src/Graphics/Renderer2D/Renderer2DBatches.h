@@ -137,11 +137,11 @@ public:
             {
                 upload();
                 textures.push_back(bitmap);
-                return textures.size() - 1;
+                return static_cast<u32>(textures.size()) - 1;
             }
 
             textures.push_back(bitmap);
-            return textures.size() - 1;
+            return static_cast<u32>(textures.size()) - 1;
         }
         
         return static_cast<u32>(std::distance(textures.begin(), it));
