@@ -70,7 +70,7 @@ public:
 template<>
 struct Event<EventType::Scrolled> : public EventCore
 {
-    v2 delta;
+    v2 delta = { 0.0f, 0.0f};
 };
 
 template<>
@@ -91,8 +91,8 @@ public:
 template<>
 struct Event<EventType::MouseMoved> : public EventCore
 {
-    v2 delta;
-    v2 position;
+    v2 delta = {0.0f, 0.0f};
+    v2 position = {0.0f, 0.0f};
 };
 
 template<>
@@ -100,7 +100,7 @@ struct Event<EventType::WindowResize> : public EventCore
 {
 public:
 
-    float width, height;
+    float width = 0.0f, height = 0.0f;
 
 };
 

@@ -135,7 +135,7 @@ public:
     requires std::is_base_of_v<Layer, T>
     static inline void PushLayer()
     { 
-        Application::PrivateGet().m_LayerStack.emplace_back(new T);  
+        Application::PrivateGet().m_LayerStack.emplace_back(new T());  
         Application::PrivateGet().m_LayerStack.back()->on_attach();
     }
 
