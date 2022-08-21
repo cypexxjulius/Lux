@@ -1,5 +1,8 @@
 
 #include "Manager.h"
+#include "Manager.h"
+#include "Manager.h"
+#include "Manager.h"
 
 namespace Lux
 {
