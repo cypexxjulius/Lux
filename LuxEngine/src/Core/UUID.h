@@ -21,12 +21,22 @@ public:
 		: m_UUID(id)
 	{}
 
+	UUID(UUID& id)
+		: m_UUID(id)
+	{
+	}
+
 	~UUID()
 	{
 
 	}
 
 	operator u64() const { return m_UUID; }
+
+	void operator=(UUID other)
+	{
+		m_UUID = other.m_UUID;
+	}
 
 private:
 
