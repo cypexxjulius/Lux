@@ -1,6 +1,6 @@
+#pragma once
+#pragma once
 #pragma once 
-
-#include "GUI.h"
 
 #include "Core/Layer.h"
 #include "Core/Event.h"
@@ -9,59 +9,35 @@
 #include "Utils/Assert.h"
 
 #include "Graphics/Camera/Camera2D.h"
-
 #include "Graphics/Camera/Camera3D.h"
 
-#include <vector>
-#include <string>
-
 #include "Assets/Manager.h"
-#include "Types.h"
+
+#include "Context.h"
+
 
 namespace Lux::GUI
 {
 
 class GUILayer final : public Layer
 {
-
-private:
-
-    static GUILayer* s_Instance;
-
-    std::unordered_map<std::string, Box> m_box_container;
-    std::vector<Box*> m_box_positions;
-
-
-    Camera2D m_Camera{};
-    Camera3D m_Camera3D{45.0f, Application::AspectRatio()};
-    Ref<Font> m_UsedFont;
-
-    bool m_pressed = false;
-
-    static inline GUILayer& Get()
-    { return *s_Instance; }
-
-    static inline bool Valid()
-    { return s_Instance != nullptr; }
-
-
 public:
 
-    virtual void on_attach() override
+    GUILayer()
+        :   m_Camera(Application::AspectRatio()),
+            m_Camera3D(45.0f, Application::AspectRatio())
     {
-        Verify(s_Instance == nullptr);
-        s_Instance = this;
+        m_Width = Application::Width();
+        m_Height = Application::Height();
+    };
 
-        // TODO Check if this font exists
-        m_UsedFont = ResourceManager::CreateFont("StandardFont", { "res/fonts/Roboto-Medium.ttf" });
-    }   
+    virtual void on_attach() override;
 
-    virtual void on_detach() override 
-    {
-        s_Instance = nullptr;
-    }
+    virtual void on_detach() override;
 
     virtual bool on_mouse_button_press(const Event<EventType::MouseButtonPressed>& event) override;
+
+    virtual bool on_key_press(const Event<EventType::KeyPressed>& event) override;
 
     virtual bool on_mouse_move(const Event<EventType::MouseMoved>& event) override;
 
@@ -71,7 +47,21 @@ public:
 
     virtual void on_update() override;
 
+private:
 
+    static GUILayer* s_Instance;
+
+    Context m_Context;
+    
+    Camera2D m_Camera;
+    Camera3D m_Camera3D;
+
+    Camera* m_MainCamera;
+
+    Ref<Font> m_UsedFont;
+
+
+    float m_Width, m_Height;
 };
 
 }
