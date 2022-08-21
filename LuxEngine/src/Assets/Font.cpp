@@ -55,6 +55,16 @@ Font::Font(const std::string& filepath)
 
 	fontGeometry.loadCharset(font, 1.0f, Charset::ASCII);
 
+	msdfgen::FontMetrics metrics;
+	msdfgen::getFontMetrics(metrics, font);
+
+	m_LineHeight			= static_cast<float>(metrics.lineHeight);
+	m_EmSize				= static_cast<float>(metrics.emSize);
+	m_AscenderY				= static_cast<float>(metrics.ascenderY);
+	m_DecenderY				= static_cast<float>(metrics.descenderY);
+	m_UnderlineThickness	= static_cast<float>(metrics.underlineThickness);
+	m_UnderlineY			= static_cast<float>(metrics.underlineY);
+
 	const double maxCornerAngle = 3.0;
 	for(GlyphGeometry& glyph : glyphs)
 		glyph.edgeColoring(&msdfgen::edgeColoringInkTrap, maxCornerAngle, 0);

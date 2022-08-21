@@ -30,22 +30,18 @@ class Font {
 private:
 	friend ResourceManager;
 
-	Ref<Bitmap> m_Bitmap = nullptr;
-
-	static void* s_FreetypeLibraryHandle;
-
 	static void Init();
 
 	static void Shutdown();
 
 private:
-	void *m_FontHandle = nullptr;
-	
+	void* m_FontHandle = nullptr;
+
 	std::unordered_map<char, const Glyph> m_GlyphMetaData;
 
 public:
 
-	Font(const std::string &file_path);
+	Font(const std::string& file_path);
 
 	~Font();
 
@@ -65,7 +61,28 @@ public:
 		return m_Bitmap;
 	}
 
+	inline float lineheight()
+	{
+		return m_LineHeight;
+	}
 
+	inline float em_size()
+	{
+		return m_EmSize;
+	}
+
+private:
+
+	float m_LineHeight;
+	float m_EmSize;
+	float m_AscenderY;
+	float m_DecenderY;
+	float m_UnderlineThickness;
+	float m_UnderlineY;
+
+	Ref<Bitmap> m_Bitmap = nullptr;
+
+	static void* s_FreetypeLibraryHandle;
 };
 
 } // namespace Lux
