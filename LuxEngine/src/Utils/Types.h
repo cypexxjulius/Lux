@@ -8,9 +8,13 @@
 #include <memory>
 #include <array>
 #include <unordered_map>
+#include <bitset>
+#include <set>
 
 namespace Lux
 {
+
+#define BIT(x) (1 << x)
 
 template<typename T>
 using Ref = std::shared_ptr<T>;
@@ -20,6 +24,18 @@ using Scope = std::unique_ptr<T>;
 
 template<typename T, int count>
 using Array = std::array<T, count>;
+
+template<typename T, typename N>
+using Container = std::unordered_map<T, N>;
+
+template<typename T>
+using List = std::vector<T>;
+
+template<int T>
+using Bitset = std::bitset<T>;
+
+template<typename T>
+using Set = std::set<T>;
 
 using u64 = uint64_t;
 using u32 = uint32_t;
@@ -33,7 +49,7 @@ using i32 = int32_t;
 using i16 = int32_t;
 using i8 = int8_t;
 
-using f32 = float;
+using f32 = float_t;
 
 using mat4 = glm::mat4;
 
@@ -61,5 +77,26 @@ enum class DataType : u32
     SAMPLER2D,
     SAMPLER3D,
 };
+
+
+template<typename T, typename ... Args>
+constexpr Scope<T> create_scope(Args&& ... args)
+{
+	return std::make_unique<T>(std::forward<Args>(args)...);
+}
+
+
+template<typename T, typename ... Args>
+constexpr Ref<T> create_scope(Args&& ... args)
+{
+	return std::make_shared<T>(std::forward<Args>(args)...);
+}
+
+
+template<typename T, typename N>
+inline bool map_contains(std::unordered_map<T, N>& map, T& key)
+{
+    return map.find(key) != map.end();
+}
 
 }
