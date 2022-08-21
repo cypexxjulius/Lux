@@ -24,6 +24,7 @@ IncludeDirs["glm"]			= "LuxEngine/lib/glm"
 IncludeDirs["stb_image"]	= "LuxEngine/lib/stb"
 IncludeDirs["msdf_atlas"]	= "LuxEngine/lib/msdf"
 IncludeDirs["msdf_core"]	= "LuxEngine/lib/msdf/msdfgen"
+IncludeDirs["entt"]			= "LuxEngine/lib/entt/src"
 
 
 include "LuxEngine/lib/GLFW"
@@ -109,6 +110,7 @@ project "LuxEngine"
 		"%{IncludeDirs.glm}",
 		"%{IncludeDirs.msdf_atlas}",
 		"%{IncludeDirs.msdf_core}",
+		"%{IncludeDirs.entt}",
 	}
 	
 	forceincludes  
