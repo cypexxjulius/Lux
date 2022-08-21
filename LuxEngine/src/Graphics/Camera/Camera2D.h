@@ -4,29 +4,16 @@
 
 #include "Core/Event.h"
 
+#include "Camera.h"
+
 namespace Lux
 {
 
-class Camera2D
+class Camera2D : public Camera
 {
-private:
-    static constexpr float NEAR_VAL = -10.0f;
-    static constexpr float FAR_VAL = 100.0f;
-
-    float m_Rotation; 
-    float m_Width, m_Height;
-    v2 m_Position;
-    mat4 m_ProjMat, m_ViewMat;
-    mat4 m_ViewProjMat;
-
-private:
-
-    void recalculate();
-
 public:
 
-
-    Camera2D();
+    Camera2D(float aspect_ratio);
 
     void set_projection(float left, float right, float top, float bottom);
 
@@ -53,8 +40,8 @@ public:
         recalculate();
     }
 
-    inline const mat4& projection() const
-    { return m_ProjMat; }
+    virtual mat4 projection() override
+    { return m_ProjMat * m_ViewMat; }
 
     inline float height() const
     { return m_Height; }
@@ -73,8 +60,19 @@ public:
             1.0f
         );
     }
-    
 
+private:
+
+    void recalculate();
+
+private:
+    static constexpr float NEAR_VAL = -10.0f;
+    static constexpr float FAR_VAL = 100.0f;
+
+    float m_Rotation;
+    float m_Width, m_Height;
+    v2 m_Position;
+    mat4 m_ProjMat, m_ViewMat;
 };
 
 }

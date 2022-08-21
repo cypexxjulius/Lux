@@ -9,12 +9,12 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/quaternion.hpp>
 
-
+#include "Camera.h"
 
 namespace Lux
 {
 
-class Camera3D
+class Camera3D : public Camera 
 {
 public:
 
@@ -63,7 +63,7 @@ public:
 		return true;
 	}
 	
-	const mat4 projection() const
+	virtual mat4 projection() override
 	{
 		return m_Projection * m_ViewMatrix;
 	}
@@ -141,12 +141,10 @@ private:
 	
 	inline void mouse_zoom(float delta)
 	{
-		m_Distance -= delta * zoom_speed();
+		m_Distance -= delta * 2.0f;// *zoom_speed();
 		
-		m_Distance = std::max(1.0f, m_Distance);
-
-		INFO("{}", m_Distance);
-		m_Distance = std::min(m_Distance, 100.0f);
+		m_Distance = std::max(NEAR_CLIP, m_Distance);
+		m_Distance = std::min(m_Distance, FAR_CLIP);
 	}
 
 	inline v3 calculate_position() const
