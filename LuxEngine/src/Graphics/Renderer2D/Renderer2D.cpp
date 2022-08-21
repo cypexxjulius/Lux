@@ -90,6 +90,14 @@ void Renderer2D::DrawRect(const mat4& transform, const v4& color)
     Data->rect_batch.Push(transform, color, 0, 1.0f);
 }
 
+void Renderer2D::DrawGlyph(const mat4& transform, const v4& color, const std::array<v2, 4>& tex_coords, const Ref<Font>& font)
+{
+    Verify(Data);
+    u32 TextureID = Data->glyph_batch.register_texture(font->bitmap());
+    
+    Data->glyph_batch.Push(transform, color, tex_coords, TextureID);
+}
+
 void Renderer2D::DrawText(std::string_view text, const mat4& transform, const v4& color, Ref<Font>& font)
 {
     Verify(Data);

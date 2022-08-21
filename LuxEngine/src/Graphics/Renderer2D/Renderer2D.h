@@ -38,6 +38,8 @@ public:
 
     static void DrawText(std::string_view text, const mat4& transform, const v4& color, Ref<Font>& font);
 
+    static void DrawGlyph(const mat4& transform, const v4& color, const std::array<v2, 4>& tex_coords, const Ref<Font>& font);
+
 };
 
 }
