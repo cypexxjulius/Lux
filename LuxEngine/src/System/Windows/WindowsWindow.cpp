@@ -43,7 +43,10 @@ Window::Window(const std::string& title, u32 width, u32 height)
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    //glfwWindowHint(GLFW_DECORATED, GLFW_FALSE);
+
     glfwWindowHint(GLFW_SAMPLES, 4);
+
 
     wAssets->handle = glfwCreateWindow(width, height, title.c_str(), NULL, NULL);
 
@@ -70,13 +73,17 @@ Window::Window(const std::string& title, u32 width, u32 height)
     {
 
         auto& buffer = Application::PrivateGet().PrivateGet().m_EventBuffer;
+        
+        Application::PrivateGet().m_Minimized = (width + height) == 0;
+        if (Application::PrivateGet().m_Minimized)
+            return;
+
         Application::PrivateGet().m_Width  = buffer.window_resize.width  = static_cast<float>(width);
         Application::PrivateGet().m_Height = buffer.window_resize.height = static_cast<float>(height);
-        Application::PrivateGet().m_AspectRatio = Application::PrivateGet().m_Width / Application::PrivateGet().m_Height;
+        Application::PrivateGet().m_AspectRatio = static_cast<float>(width) / static_cast<float>(height);
 
         buffer.window_resize.activate();
 
-        Application::PrivateGet().m_Minimized = (width + height) == 0;
     });
 
     // Window close callback 
