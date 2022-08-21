@@ -4,6 +4,7 @@
 namespace Lux::GUI
 {
 
+/*
 void TextComponent::set(ECS::Registry& registry, std::string_view comp_text, const Ref<Font>& comp_font, v3 position, float scale)
 {
 	text = comp_text;
@@ -50,5 +51,6 @@ void TextComponent::on_destruction(ECS::Registry& registry)
 	for(auto& section : glyphs )
 		registry.destroy(section);
 }
+*/
 
 }

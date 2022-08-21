@@ -11,6 +11,9 @@ class Registry
 {
 
 public:
+
+	Registry() = default;
+
 	UUID create()
 	{
 		return {};
@@ -33,27 +36,54 @@ public:
 		return m_Manager.register_element(id);
 	}
 
+	template<typename T, typename ...Tail>
+	requires (sizeof...(Tail) == 0)
+	void add_components(UUID id) {}
+
+
+	template<typename T, typename ...Tail>
+	void add_components(UUID id)
+	{
+		Verify(is_contained<T>());
+		
+		auto m_Manager = get_manager<T>();
+		m_Manager.register_element(id);
+
+		add_components<Tail...>(id);
+	}
+
 	template<typename T>
 	inline T& remove_component(UUID id)
 	{
-
-		Verify(!is_contained<T>());
+		Verify(is_contained<T>());
+		
 		
 		auto m_Manager = get_manager<T>();
 		m_Manager.remove_component(id);
 	}
 
-	inline void register_component();
+	template<typename T, typename... VAR_ARGS>
+	requires (sizeof...(VAR_ARGS) == 0)
+	inline void register_component(){ }
 
 	template<typename T, typename... VAR_ARGS>
+	requires (sizeof...(VAR_ARGS) != 0)
 	inline void register_component()
 	{
-		m_ComponentArray.insert(get_hash<T>(), new ComponentArray<T>());
+		m_ComponentArray.insert({get_hash<T>(), new ComponentArray<T>() });
 		
-		m_ComponentIDs.insert({get_hash<T>(), m_IDCounter});
-		m_IDCounter++;
 
 		register_component<VAR_ARGS...>();
+	}
+
+	template<typename T>
+	inline T& get_component(UUID id)
+	{
+		Verify(is_contained<T>());
+		
+		
+		auto m_Manager = get_manager<T>();
+		return m_Manager.get_component(id);
 	}
 	
 	~Registry()
@@ -65,9 +95,9 @@ public:
 private:
 
 	template<typename T>
-	constexpr u64 get_hash()
+	constexpr u32 get_hash()
 	{
-		return static_cast<u64>(typeid(T).hash_code());
+		return static_cast<u32>(typeid(T).hash_code());
 	}
 
 	template<typename T>
@@ -79,16 +109,14 @@ private:
 	template<typename T>
 	inline bool is_contained()
 	{
-		return map_contains(m_ComponentArray, get_hash());
+		auto hash_value = get_hash<T>();
+		return m_ComponentArray.find(hash_value) != m_ComponentArray.end();
 	}
 
 
 private:
 
-	u32 m_IDCounter = 0;
-
-	Container<u64, u32> m_ComponentIDs;
-	Container<u64, IComponentArray*> m_ComponentArray;
+	Container<u32, IComponentArray*> m_ComponentArray { };
 };
 
 }

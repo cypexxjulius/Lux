@@ -5,6 +5,8 @@
 namespace Lux::GUI
 {
 
+class Context;
+
 class Manager
 {
 public:
@@ -19,27 +21,30 @@ public:
 		on_shutdown();
 	}
 
-	void init(ECS::Registry& registry)
-	{
-		m_Registry = registry;
-	}
-
-	UUID create()
-	{
-		return m_Registry.create();
-	}
-
+	UUID create();
+	
 	template<typename T>
 	inline T& add_component(UUID id)
 	{
-		return m_Registry.add_component<T>(id);
+		return s_Registry->add_component<T>(id);
 	}
 
+	static void Init(Context& ctx, ECS::Registry& registry)
+	{
+		s_Registry = &registry;
+		s_Context = &ctx;
+	}
 
+	static void Shutdown()
+	{
+		s_Registry = nullptr;
+		s_Context = nullptr;
+	}
 
 private:
 
-	ECS::Registry& m_Registry;
+	static ECS::Registry* s_Registry;
+	static Context* s_Context;
 };
 
 }

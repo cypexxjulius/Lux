@@ -4,11 +4,12 @@
 namespace Lux::GUI
 {
 
+class Context;
+
 class Section
 {
 public:
-
-	Section(UUID id, UUID parent)
+	Section(UUID id)
 		:	m_ID(id)
 	{
 	}
@@ -16,8 +17,6 @@ public:
 	void make_scalable() const;
 
 	void make_retractable() const;
-
-	void enable_decoration() const;
 
 	void scale(u32 rel_dim) const;
 
@@ -27,6 +26,9 @@ public:
 
 	void detach();
 
+	void make_root();
+
+
 public:
 
 	static Section Create(const std::string& title);
@@ -35,8 +37,9 @@ private:
 
 	UUID m_ID;
 
+public:
+	static void Init(Context& ctx);
+
+	static void Shutdown(Context& ctx);
 };
-
-void SetMainSection(Section section);
-
 }

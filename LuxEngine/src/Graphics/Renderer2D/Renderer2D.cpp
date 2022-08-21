@@ -8,7 +8,7 @@
 #pragma warning(default: 4201)
 
 
-#include <Assets/Manager.h>
+#include <Assets/AssetManager.h>
 
 #include "Renderer2DBatches.h"
 

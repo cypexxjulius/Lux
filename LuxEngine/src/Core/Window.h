@@ -15,7 +15,7 @@ class Window
 {
 private:
 
-    void* m_Assets;
+    void* m_Assets = nullptr;
 
 public:
 

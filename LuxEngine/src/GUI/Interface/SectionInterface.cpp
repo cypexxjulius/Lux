@@ -3,16 +3,25 @@
 
 #include "GUI/Managers/SectionManager.h"
 
+#include "GUI/Context.h"
+
+#include "GUI/GUILayer.h"
+
 namespace Lux::GUI
 {
 
 SectionManager* s_Manager = nullptr;
 
-void SectionSetManager(SectionManager* manager)
-{
-	Verify(manager);
 
-	s_Manager = manager;
+
+void Section::Init(Context& ctx)
+{
+
+	s_Manager = &ctx.get_manager<SectionManager>();
+}
+
+void Section::Shutdown(Context& ctx)
+{
 }
 
 void Section::make_scalable() const
@@ -23,11 +32,6 @@ void Section::make_scalable() const
 void Section::make_retractable() const
 {
 	s_Manager->make_retractable(m_ID);
-}
-
-void Section::enable_decoration() const 
-{
-	s_Manager->enable_decoration(m_ID);
 }
 
 void Section::set_orientation(LayoutOrientation orientation) const
@@ -51,19 +55,14 @@ void Section::detach()
 	s_Manager->detach(m_ID);
 }
 
-Section CreateSection(const std::string& title)
+void Section::make_root()
 {
-	return GUILayer::CreateSection(title);
+	GUILayer::set_root(m_ID);
 }
 
 Section Section::Create(const std::string& title)
 {
-	return s_Manager.create(title);
-}
-
-void Section::SetManager(Manager* manager)
-{
-	s_Manager = dynamic_cast<SectionManager*>(manager);
+	return Section{ s_Manager->create() };
 }
 
 }

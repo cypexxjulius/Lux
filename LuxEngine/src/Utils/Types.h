@@ -87,7 +87,7 @@ constexpr Scope<T> create_scope(Args&& ... args)
 
 
 template<typename T, typename ... Args>
-constexpr Ref<T> create_scope(Args&& ... args)
+constexpr Ref<T> create_ref(Args&& ... args)
 {
 	return std::make_shared<T>(std::forward<Args>(args)...);
 }

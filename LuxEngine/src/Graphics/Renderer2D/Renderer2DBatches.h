@@ -8,7 +8,7 @@
 #include "Graphics/Renderer.h"
 
 #include "Assets/Shader.h"
-#include "Assets/Manager.h"
+#include "Assets/AssetManager.h"
 
 namespace Lux
 {

@@ -35,7 +35,7 @@ struct WindowAssets
 
 Window::Window(const std::string& title, u32 width, u32 height)
 {
-    auto wAssets = new WindowAssets;
+    auto wAssets = new WindowAssets{};
     m_Assets = wAssets;
 
     Verify(glfwInit());

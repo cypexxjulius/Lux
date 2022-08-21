@@ -11,7 +11,7 @@
 #include "Graphics/Camera/Camera2D.h"
 #include "Graphics/Camera/Camera3D.h"
 
-#include "Assets/Manager.h"
+#include "Assets/AssetManager.h"
 
 #include "Context.h"
 
@@ -25,7 +25,8 @@ public:
 
     GUILayer()
         :   m_Camera(Application::AspectRatio()),
-            m_Camera3D(45.0f, Application::AspectRatio())
+            m_Camera3D(45.0f, Application::AspectRatio()),
+            m_MainCamera(&m_Camera)
     {
         m_Width = Application::Width();
         m_Height = Application::Height();
@@ -47,6 +48,8 @@ public:
 
     virtual void on_update() override;
 
+    static void set_root(UUID id);
+
 private:
 
     static GUILayer* s_Instance;
@@ -56,7 +59,7 @@ private:
     Camera2D m_Camera;
     Camera3D m_Camera3D;
 
-    Camera* m_MainCamera;
+    Camera* m_MainCamera = nullptr;
 
     Ref<Font> m_UsedFont;
 

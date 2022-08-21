@@ -7,6 +7,3 @@
 [submodule "LuxEngine/lib/msdf"]
 	path = LuxEngine/lib/msdf
 	url = https://github.com/juliushaag/msdf-atlas-gen.git
-[submodule "LuxEngine/lib/entt"]
-	path = LuxEngine/lib/entt
-	url = https://github.com/skypjack/entt.git

@@ -6,7 +6,7 @@
 #include "Core/Layer.h"
 
 
-#include "Assets/Manager.h"
+#include "Assets/AssetManager.h"
 
 #include "Graphics/Renderer2D/Renderer2D.h"
 #include "Graphics/Camera/Camera2D.h"

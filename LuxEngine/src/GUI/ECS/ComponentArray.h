@@ -43,8 +43,7 @@ public:
 		m_Lookup.insert({id, index});
 		m_RevLookup.insert({index, id});
 
-		m_Container[index] = { 0 };
-		return m_Container[index];
+		return m_Container.emplace_back();
 	}
 
 	void remove_component(UUID id)
@@ -53,7 +52,7 @@ public:
 			return;
 
 		u32 index = m_Lookup.at(id);
-		u32 last_index = m_Container.size() - 1;
+		u32 last_index = static_cast<u32>(m_Container.size() - 1);
 
 		// Switch the contents of the last component with the "deleted" component
 		std::swap(m_Container[index], m_Container[last_index]);

@@ -9,20 +9,18 @@ class EngineLayer final : public Lux::Layer
 private:
     Camera3D m_Camera3D{45.0f, Application::AspectRatio()};
     v2 text_dimemsions{};
-
-    std::array<mat4, 5000> transforms;
     
 public:
 
     void on_attach() override
     {
         GUI::Section body = GUI::Section::Create("Body");
+        body.make_root();
 
         body.set_orientation(GUI::LayoutOrientation::VERTICAL);
 
         GUI::Section TopBar =  GUI::Section::Create("TopBar");
-        TopBar.enable_decoration();
-
+        
         GUI::Section PageContent = GUI::Section::Create("PageContent");
         PageContent.scale(8);
 

@@ -2,12 +2,14 @@
 #include "Graphics/Renderer.h"
 #include "Graphics/Renderer2D/Renderer2D.h"
 
-#include "Assets/Manager.h"
+#include "Assets/AssetManager.h"
 #include "GUI/GUILayer.h"
 
 #include "Window.h"
 
 #include "Utils/Assert.h"
+
+#include "Utils/Types.h"
 
 namespace Lux
 {
@@ -21,7 +23,7 @@ Application::Application(const std::string& title)
     s_Instance = this;
 
     m_Title = title;
-    m_Window = std::make_unique<Window>("LuxEngine", 1280, 720);
+    m_Window = create_scope<Window>("LuxEngine", 1280, 720);
 
     Renderer::Init();
 
