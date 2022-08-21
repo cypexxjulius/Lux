@@ -21,7 +21,7 @@ public:
 
 	void destroy(UUID id)
 	{
-		for(auto manager : m_ComponentArray)
+		for(auto& manager : m_ComponentArray)
 		{
 			manager.second->on_element_destruction(id);
 		}
@@ -88,7 +88,7 @@ public:
 	
 	~Registry()
 	{
-		for(auto managers : m_ComponentArray)
+		for(auto& managers : m_ComponentArray)
 			delete managers.second;
 	}
 

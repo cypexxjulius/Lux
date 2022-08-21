@@ -62,7 +62,7 @@ private:
 
 	UUID m_RootElement = 0;
 
-	ECS::Registry m_Registry {};
+	ECS::Registry m_Registry;
 	
 	Container<type_hash, Manager*> m_Managers;
 };

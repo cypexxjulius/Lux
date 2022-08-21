@@ -22,6 +22,7 @@ void Section::Init(Context& ctx)
 
 void Section::Shutdown(Context& ctx)
 {
+	s_Manager = nullptr;
 }
 
 void Section::make_scalable() const

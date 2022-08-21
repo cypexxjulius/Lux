@@ -36,14 +36,13 @@ public:
 	{
 		Verify(!map_contains(m_Lookup, id));
 		
-		u32 index = static_cast<u32>(m_Container.size());
-		if(index == m_Container.capacity())
-			m_Container.reserve(index * 2);
+		m_Container.emplace_back();
+		u32 index = static_cast<u32>(m_Container.size() - 1);
 
 		m_Lookup.insert({id, index});
 		m_RevLookup.insert({index, id});
 
-		return m_Container.emplace_back();
+		return m_Container.back();
 	}
 
 	void remove_component(UUID id)
