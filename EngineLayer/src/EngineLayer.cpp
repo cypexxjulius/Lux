@@ -11,19 +11,48 @@ private:
     v2 text_dimemsions{};
 
     std::array<mat4, 5000> transforms;
-    //GUI::BoxHandle m_boxHandle;
-
+    
 public:
 
     void on_attach() override
     {
-        u32 index = 0;
+        GUI::Section body = GUI::Section::Create("Body");
 
-        float width = 1.0f, height = 1.0f;
-        for(auto& transform : transforms)
-            transform = glm::translate(mat4{ 1.0f }, { -1.0f, 0.0f, (index++) / 100.0f }) * glm::scale(mat4{1.0f}, {width, height, 1.0f});
+        body.set_orientation(GUI::LayoutOrientation::VERTICAL);
 
+        GUI::Section TopBar =  GUI::Section::Create("TopBar");
+        TopBar.enable_decoration();
+
+        GUI::Section PageContent = GUI::Section::Create("PageContent");
+        PageContent.scale(8);
+
+
+        body.attach({TopBar, PageContent});
+
+        GUI::Section LeftSection = GUI::Section::Create("LeftSection");
+
+
+        GUI::Section RightSection = GUI::Section::Create("RightSection");
+
+
+        GUI::Section MiddleSection = GUI::Section::Create("MiddleSection");
+        MiddleSection.scale(3);
+        MiddleSection.set_orientation(GUI::LayoutOrientation::VERTICAL);
+
+        GUI::Section ViewPortSection = GUI::Section::Create("ViewPortSection");
+        ViewPortSection.scale(4);
+        ViewPortSection.make_scalable();
+
+        GUI::Section UtilsSection = GUI::Section::Create("UtilsSection");
+        UtilsSection.make_scalable();
+
+        MiddleSection.attach({ ViewPortSection, UtilsSection });
+        
+
+        PageContent.attach({LeftSection, MiddleSection, RightSection});
     }
+
+
 
     void on_detach() override
     {
@@ -32,6 +61,7 @@ public:
 
     void on_update() override
     {
+        /*
         Renderer2D::BeginScene(m_Camera3D.projection());
 
 
@@ -47,6 +77,7 @@ public:
         // Renderer2D::DrawText("Hello World", text_transform, { 0.0f, 0.0f, 0.0f, 1.0f }, m_used_font);
 
         Renderer2D::EndScene();
+        */
     }
     virtual bool on_mouse_button_press(const Event<EventType::MouseButtonPressed>& event) override
     {
