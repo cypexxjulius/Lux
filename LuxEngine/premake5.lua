@@ -90,9 +90,6 @@ project "LuxEngine"
 			"_CRT_SECURE_NO_WARNINGS"
 		}
 
-
-
-
 	filter "configurations:Debug"
 		defines "LX_DEBUG"
 		runtime "Debug"

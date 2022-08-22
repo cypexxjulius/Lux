@@ -26,7 +26,8 @@ project "Premake"
 
 	files
 	{
-		"**/premake5.lua"
+		"**/premake5.lua",
+		"premake5.lua"
 	}
 
 	

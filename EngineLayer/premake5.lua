@@ -22,10 +22,24 @@ project "EngineLayer"
 
 	defines "FMT_HEADER_ONLY"
 
+		filter "system:linux"
+		pic "On"
+		systemversion "latest"
+
+		defines
+		{
+			"LX_UNIX"
+		}
+
 	filter "system:windows"
 		systemversion "latest"
 
-		defines "LX_WIN"
+		defines 
+		{ 
+			"LX_WIN",
+			"_CRT_SECURE_NO_WARNINGS"
+		}
+
 	filter "configurations:Debug"
 		defines "LX_DEBUG"
 		runtime "Debug"
