@@ -10,14 +10,14 @@
 namespace Lux::GUI
 {
 
-SectionManager* s_Manager = nullptr;
+Ref<SectionManager> s_Manager = nullptr;
 
 
 
 void Section::Init(Context& ctx)
 {
 
-	s_Manager = &ctx.get_manager<SectionManager>();
+	s_Manager = ctx.get_manager<SectionManager>();
 }
 
 void Section::Shutdown(Context& ctx)
@@ -63,7 +63,7 @@ void Section::make_root()
 
 Section Section::Create(const std::string& title)
 {
-	return Section{ s_Manager->create() };
+	return Section{ s_Manager->create_new() };
 }
 
 }

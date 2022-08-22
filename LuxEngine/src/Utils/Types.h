@@ -95,7 +95,7 @@ constexpr Ref<T> create_ref(Args&& ... args)
 
 
 template<typename T, typename N>
-inline bool map_contains(std::unordered_map<T, N>& map, T& key)
+inline bool map_contains(Container<T, N>& map, T& key)
 {
     return map.find(key) != map.end();
 }

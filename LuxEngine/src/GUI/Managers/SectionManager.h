@@ -4,6 +4,8 @@
 
 #include "GUI/Interface/Interface.h"
 
+#include "GUI/ECS/Components.h"
+
 namespace Lux::GUI
 {
 
@@ -12,7 +14,17 @@ class SectionManager final : public Manager
 {
 public:
 
-	void make_scalable(UUID id) { }
+	UUID create_new()
+	{
+		return create();
+	}
+
+	void make_scalable(UUID id) 
+	{ 
+		auto& layout_component = get_component<LayoutComponent>(id);
+
+		layout_component.scale = 1.0f;
+	}
 
 	void make_retractable(UUID id) { }
 

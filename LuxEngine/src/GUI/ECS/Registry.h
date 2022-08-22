@@ -12,8 +12,6 @@ class Registry
 
 public:
 
-	Registry() = default;
-
 	UUID create()
 	{
 		return {};
@@ -38,8 +36,13 @@ public:
 
 	template<typename T, typename ...Tail>
 	requires (sizeof...(Tail) == 0)
-	void add_components(UUID id) {}
+	void add_components(UUID id) 
+	{
+		Verify(is_contained<T>());
 
+		auto m_Manager = get_manager<T>();
+		m_Manager->register_element(id);
+	}
 
 	template<typename T, typename ...Tail>
 	void add_components(UUID id)
@@ -81,7 +84,6 @@ public:
 	{
 		Verify(is_contained<T>());
 		
-		
 		auto m_Manager = get_manager<T>();
 		return m_Manager->get_component(id);
 	}
@@ -116,7 +118,7 @@ private:
 
 private:
 
-	Container<u32, IComponentArray*> m_ComponentArray { };
+	Container<u32, IComponentArray*> m_ComponentArray;
 };
 
 }

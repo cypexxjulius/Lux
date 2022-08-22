@@ -29,6 +29,12 @@ public:
 		return s_Registry->add_component<T>(id);
 	}
 
+	template<typename T>
+	inline T& get_component(UUID id)
+	{
+		return s_Registry->get_component<T>(id);
+	}
+
 	static void Init(Context& ctx, ECS::Registry& registry)
 	{
 		s_Registry = &registry;

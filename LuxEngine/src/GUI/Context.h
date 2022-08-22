@@ -28,9 +28,6 @@ private:
 
 	using type_hash = u64;
 
-	
-
-
 public:
 
 	Context();
@@ -43,15 +40,15 @@ public:
 		type_hash hash = static_cast<type_hash>(typeid(MANAGER).hash_code());
 		Verify(!map_contains(m_Managers, hash));
 
-		m_Managers.insert({hash, new MANAGER()});
+		m_Managers.insert({hash,  std::dynamic_pointer_cast<Manager>(create_ref<MANAGER>())});
 	}
 
 	template<typename MANAGER>
 	requires std::derived_from<MANAGER, Manager> 
-	inline MANAGER& get_manager()
+	inline Ref<MANAGER> get_manager()
 	{
 		type_hash hash = static_cast<type_hash>(typeid(MANAGER).hash_code());
-		return *dynamic_cast<MANAGER*>(m_Managers.at(hash));
+		return  std::dynamic_pointer_cast<MANAGER>(m_Managers.at(hash));
 	}
 
 	UUID create_gui_element();
@@ -64,7 +61,7 @@ private:
 
 	ECS::Registry m_Registry;
 	
-	Container<type_hash, Manager*> m_Managers;
+	Container<type_hash, Ref<Manager>> m_Managers;
 };
 
 

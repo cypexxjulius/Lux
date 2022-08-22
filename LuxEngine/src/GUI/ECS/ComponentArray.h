@@ -18,7 +18,7 @@ public:
 	virtual void on_element_destruction(UUID element) = 0;
 };
 
-template<typename T, int START_CONTAINER_SIZE = 50>
+template<typename T>
 class ComponentArray final : public IComponentArray
 {
 private:
@@ -27,15 +27,10 @@ private:
 
 public:
 
-	ComponentArray()
-		:	m_Container(START_CONTAINER_SIZE)
-	{
-	}
-
 	T& register_element(UUID id)
 	{
 		Verify(!map_contains(m_Lookup, id));
-		
+
 		m_Container.emplace_back();
 		u32 index = static_cast<u32>(m_Container.size() - 1);
 
@@ -73,6 +68,7 @@ public:
 
 	T& get_component(UUID id)
 	{
+		Verify(map_contains(m_Lookup, id));
 		return m_Container[m_Lookup.at(id)];
 	}
 

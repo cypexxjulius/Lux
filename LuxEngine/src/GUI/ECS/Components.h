@@ -12,21 +12,19 @@
 
 #include "GUI/Interface/Interface.h"
 
-#include "GUI/ElementTypes.h"
-
 namespace Lux::GUI
 {
 
 struct TransformComponent
 {
-	v3 position;
-	v3 rotation;
-	v3 scale;
+	v3 position { 0 };
+	v3 rotation { 0 };
+	v3 scale { 0 };
 };
 
-struct TypeComponent
+enum TypeComponent
 {
-	ElementType type;
+	SECTION,
 };
 
 
@@ -40,8 +38,8 @@ struct RectComponent
 struct GlyphComponent
 {
 	v4 color;
-	std::array<v2, 4> tex_coords;
 	Ref<Font> font;
+	std::array<v2, 4> tex_coords;
 };
 
 struct TextComponent
@@ -51,6 +49,7 @@ struct TextComponent
 	v4 color;
 	v2 position;
 	float linelength, lineheight;
+	float scale;
 
 	std::vector<UUID> glyphs;
 };
@@ -72,15 +71,22 @@ struct LayoutComponent
 {
 	bool fixed;
 
-	LayoutOrientation orientation = LayoutOrientation::VERTICAL;
 	LayoutSpacing spacing = LayoutSpacing::START;
+	LayoutOrientation orientation = LayoutOrientation::VERTICAL;
 
 	float scale = 1.0f;
 	u32 max_scale_compound = 0;
 
-	UUID parent;
+	UUID parent = 0;
 
 	std::vector<LayoutInfo> sections;
+};
+
+struct SectionHeaderComponent
+{
+	UUID title_text;
+	UUID retractable_button;
+	LayoutComponent layout;
 };
 
 
