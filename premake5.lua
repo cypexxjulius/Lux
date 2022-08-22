@@ -21,6 +21,17 @@ workspace "Lux"
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
 
+project "Premake"
+	kind "Utility"	
+
+	files
+	{
+		"**/premake5.lua"
+	}
+
+	
+
+	
 
 -- Include directories
 

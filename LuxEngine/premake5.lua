@@ -4,9 +4,9 @@ IncludeDirs = {}
 IncludeDirs["glfw"]			= "lib/glfw/include"
 IncludeDirs["glad"]			= "lib/glad/include"
 IncludeDirs["glm"]			= "lib/glm"
-IncludeDirs["stb_image"]		= "lib/stb"
-IncludeDirs["msdf_atlas"]		= "lib/msdf"
-IncludeDirs["msdf_core"]		= "lib/msdf/msdfgen"
+IncludeDirs["stb_image"]	= "lib/stb"
+IncludeDirs["msdf_atlas"]	= "lib/msdf"
+IncludeDirs["msdf_core"]	= "lib/msdf/msdfgen"
 IncludeDirs["fmt"]			= "lib/fmt/include"
 
 group "Dependencies"
@@ -37,7 +37,8 @@ project "LuxEngine"
 	defines
 	{
 		"_CRT_SECURE_NO_WARNINGS",
-		"GLFW_INCLUDE_NONE"
+		"GLFW_INCLUDE_NONE",
+		"FMT_HEADER_ONLY"
 	}
 
 	includedirs

@@ -284,4 +284,4 @@ project "freetype"
         	optimize "on"
 
 	filter {}
-
+	

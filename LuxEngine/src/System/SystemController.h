@@ -20,19 +20,7 @@ public:
   
     static constexpr SystemOS OS()
     {
-    #ifdef LX_WIN
-
         return SystemOS::Windows; 
-
-    #elif LX_UNIX
-
-        return SystemOS::Linux  
-
-    #elif LX_APPLE
-
-        return SystemOS::MacOS
-    #endif 
-    
     } 
 
     static constexpr int MaxMouseKeys()

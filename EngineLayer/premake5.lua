@@ -16,13 +16,16 @@ project "EngineLayer"
 	includedirs 
 	{ 
 		"%{wks.location}/LuxEngine/src",	
-		"%{wks.location}/LuxEngine/lib/glm"
+		"%{wks.location}/LuxEngine/lib/glm",
+		"%{wks.location}/LuxEngine/lib/fmt/include"
 	}
-	
+
+	defines "FMT_HEADER_ONLY"
+
 	filter "system:windows"
 		systemversion "latest"
 
-		defines "LX_PLATFORM_WINDOWS"
+		defines "LX_WIN"
 	filter "configurations:Debug"
 		defines "LX_DEBUG"
 		runtime "Debug"
