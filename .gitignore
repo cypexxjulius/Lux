@@ -14,8 +14,9 @@
 **.vcxproj.**
 
 
-bin/**
-binInt/**
+**/bin/**
+**/bin-int/**
+**/obj/**
 
 .vs/**
 *.png
