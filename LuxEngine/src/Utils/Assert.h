@@ -1,7 +1,7 @@
 #pragma once 
-#include <assert.h>
 
 #ifdef LX_WIN
+#include <assert.h>
 #define Verify(boolean) if(!(boolean)) __debugbreak();
 
 #define TODO() __debugbreak();

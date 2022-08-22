@@ -7,6 +7,7 @@
 
 #include <memory>
 #include <array>
+#include <vector>
 #include <unordered_map>
 #include <bitset>
 #include <set>
