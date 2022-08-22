@@ -7,6 +7,7 @@ IncludeDirs["glm"]			= "lib/glm"
 IncludeDirs["stb_image"]		= "lib/stb"
 IncludeDirs["msdf_atlas"]		= "lib/msdf"
 IncludeDirs["msdf_core"]		= "lib/msdf/msdfgen"
+IncludeDirs["fmt"]			= "lib/fmt/include"
 
 group "Dependencies"
 	include "lib"
@@ -48,7 +49,8 @@ project "LuxEngine"
 		"%{IncludeDirs.stb_image}",
 		"%{IncludeDirs.glm}",
 		"%{IncludeDirs.msdf_atlas}",
-		"%{IncludeDirs.msdf_core}"
+		"%{IncludeDirs.msdf_core}",
+		"%{IncludeDirs.fmt}"
 	}
 
 	forceincludes  
@@ -69,12 +71,25 @@ project "LuxEngine"
 	}
 
 
-	filter "system:windows"
+	filter "system:linux"
+		pic "On"
 		systemversion "latest"
 
 		defines
 		{
+			"LX_UNIX"
 		}
+
+	filter "system:windows"
+		systemversion "latest"
+
+		defines 
+		{ 
+			"LX_WIN",
+			"_CRT_SECURE_NO_WARNINGS"
+		}
+
+
 
 
 	filter "configurations:Debug"

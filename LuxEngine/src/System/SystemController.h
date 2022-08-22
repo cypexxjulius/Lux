@@ -20,15 +20,15 @@ public:
   
     static constexpr SystemOS OS()
     {
-    #ifdef _WIN32
+    #ifdef LX_WIN
 
         return SystemOS::Windows; 
 
-    #elif __unix__
+    #elif LX_UNIX
 
         return SystemOS::Linux  
 
-    #elif __APPLE__
+    #elif LX_APPLE
 
         return SystemOS::MacOS
     #endif 

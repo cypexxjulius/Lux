@@ -10,3 +10,6 @@
 [submodule "LuxEngine/lib/freetype"]
 	path = LuxEngine/lib/freetype
 	url = https://github.com/freetype/freetype.git
+[submodule "LuxEngine/lib/fmt"]
+	path = LuxEngine/lib/fmt
+	url = https://github.com/fmtlib/fmt.git
