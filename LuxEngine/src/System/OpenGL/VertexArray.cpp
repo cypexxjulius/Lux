@@ -36,11 +36,6 @@ VertexArray::VertexArray()
 VertexArray::~VertexArray()
 {
     glDeleteVertexArrays(1, &m_ID);
-
-    for(auto& vb : m_VertexBuffers)
-        delete vb;
-    
-    delete m_IndexBuffer;
 }
 
 static inline void vertex_array_bind(u32 id)
@@ -54,7 +49,7 @@ static inline void vertex_array_bind(u32 id)
     bound_adress = id;
 }
 
-void VertexArray::add_vertex_buffer(VertexBuffer* vb)
+void VertexArray::add_vertex_buffer(Ref<VertexBuffer> vb)
 {
     bind();
     vb->bind();
@@ -86,7 +81,7 @@ void VertexArray::bind()
    vertex_array_bind(m_ID);  
 }
 
-void VertexArray::set_index_buffer(IndexBuffer* ib)
+void VertexArray::set_index_buffer(Ref<IndexBuffer> ib)
 {
     Verify(ib != nullptr);
     
@@ -95,7 +90,7 @@ void VertexArray::set_index_buffer(IndexBuffer* ib)
     m_IndexBuffer = ib;
 }
 
-VertexBuffer* VertexArray::vertexbuffer(u32 index)
+Ref<VertexBuffer> VertexArray::vertexbuffer(u32 index)
 {
     return m_VertexBuffers[index];
 }

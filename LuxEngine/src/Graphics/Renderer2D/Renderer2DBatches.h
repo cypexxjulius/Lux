@@ -59,7 +59,7 @@ protected:
 
         va = VertexArray::Create();
 
-        auto* vb = VertexBuffer::Create(MaxVertices * sizeof(T));
+        auto vb = VertexBuffer::Create(MaxVertices * sizeof(T));
         vb->set_layout(vb_elements);
 
         va->add_vertex_buffer(vb);

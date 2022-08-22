@@ -14,8 +14,8 @@ class VertexArray final : public ::Lux::VertexArray
 private:
 
     u32 m_ID, m_Index = 0;
-    IndexBuffer* m_IndexBuffer = nullptr; 
-    std::vector<::Lux::VertexBuffer*> m_VertexBuffers;
+    Ref<IndexBuffer> m_IndexBuffer = nullptr; 
+    std::vector<Ref<::Lux::VertexBuffer>> m_VertexBuffers;
 
 public:
 
@@ -23,15 +23,15 @@ public:
 
     ~VertexArray();
 
-    virtual void add_vertex_buffer(::Lux::VertexBuffer* VertexBuffer) override;
+    virtual void add_vertex_buffer(Ref<::Lux::VertexBuffer> VertexBuffer) override;
 
     virtual void bind() override;
 
-    virtual void set_index_buffer(::Lux::IndexBuffer* ib) override;
+    virtual void set_index_buffer(Ref<::Lux::IndexBuffer> ib) override;
 
-    virtual VertexBuffer* vertexbuffer(u32 index) override;
+    virtual Ref<VertexBuffer> vertexbuffer(u32 index) override;
 
-    virtual IndexBuffer* indexbuffer() override
+    virtual Ref<IndexBuffer> indexbuffer() override
     { return m_IndexBuffer; }
 
 };

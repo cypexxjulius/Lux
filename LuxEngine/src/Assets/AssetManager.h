@@ -27,7 +27,7 @@ struct AssetContainers
 class ResourceManager
 {
 
-    static AssetContainers* s_Container;
+    static Scope<AssetContainers> s_Container;
 
     template<typename T>
     static inline bool is_contained(const std::unordered_map<std::string, Ref<T>>& map, const std::string& name)
@@ -36,7 +36,7 @@ class ResourceManager
 public:
     static inline void Init()
     { 
-        s_Container = new AssetContainers; 
+        s_Container.reset(new AssetContainers());
 
         Font::Init();
     }
@@ -45,7 +45,8 @@ public:
     { 
         Font::Shutdown();
     
-        delete s_Container; 
+        delete s_Container.release();
+        s_Container = nullptr;
     }
 
     static Ref<Shader> CreateShader(const std::string& name, Shader&& shader)

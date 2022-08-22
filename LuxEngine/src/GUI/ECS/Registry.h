@@ -33,7 +33,7 @@ public:
 		Verify(!is_contained<T>());
 		
 		auto m_Manager = get_manager<T>();
-		return m_Manager.register_element(id);
+		return m_Manager->register_element(id);
 	}
 
 	template<typename T, typename ...Tail>
@@ -47,7 +47,7 @@ public:
 		Verify(is_contained<T>());
 		
 		auto m_Manager = get_manager<T>();
-		m_Manager.register_element(id);
+		m_Manager->register_element(id);
 
 		add_components<Tail...>(id);
 	}
@@ -59,7 +59,7 @@ public:
 		
 		
 		auto m_Manager = get_manager<T>();
-		m_Manager.remove_component(id);
+		m_Manager->remove_component(id);
 	}
 
 	template<typename T, typename... VAR_ARGS>
@@ -83,7 +83,7 @@ public:
 		
 		
 		auto m_Manager = get_manager<T>();
-		return m_Manager.get_component(id);
+		return m_Manager->get_component(id);
 	}
 	
 	~Registry()
@@ -101,9 +101,9 @@ private:
 	}
 
 	template<typename T>
-	inline ComponentArray<T>& get_manager()
+	inline ComponentArray<T>* get_manager()
 	{
-		return *static_cast<ComponentArray<T>*>(m_ComponentArray.at(get_hash<T>()));
+		return dynamic_cast<ComponentArray<T>*>(m_ComponentArray.at(get_hash<T>()));
 	}
 
 	template<typename T>

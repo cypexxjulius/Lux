@@ -20,13 +20,13 @@ public:
 
     virtual void bind() = 0;
 
-    virtual void set_index_buffer(IndexBuffer* ib) = 0;
+    virtual void set_index_buffer(Ref<IndexBuffer> ib) = 0;
     
-    virtual void add_vertex_buffer(VertexBuffer* vb)  = 0;
+    virtual void add_vertex_buffer(Ref<VertexBuffer> vb)  = 0;
 
-    virtual VertexBuffer* vertexbuffer(u32 index) = 0;
+    virtual Ref<VertexBuffer> vertexbuffer(u32 index) = 0;
 
-    virtual IndexBuffer* indexbuffer() = 0;
+    virtual Ref<IndexBuffer> indexbuffer() = 0;
 
     static Ref<VertexArray> Create();
 

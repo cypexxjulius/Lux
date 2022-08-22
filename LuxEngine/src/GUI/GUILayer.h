@@ -54,7 +54,7 @@ private:
 
     static GUILayer* s_Instance;
 
-    Context m_Context;
+    float m_Width, m_Height;
     
     Camera2D m_Camera;
     Camera3D m_Camera3D;
@@ -62,9 +62,9 @@ private:
     Camera* m_MainCamera = nullptr;
 
     Ref<Font> m_UsedFont;
+    Context m_Context;
 
 
-    float m_Width, m_Height;
 };
 
 }

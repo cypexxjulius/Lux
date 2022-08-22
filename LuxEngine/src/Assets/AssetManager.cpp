@@ -4,6 +4,6 @@
 namespace Lux
 {
     
-AssetContainers* ResourceManager::s_Container = nullptr;
+    Scope<AssetContainers> ResourceManager::s_Container{ nullptr };
 
 }

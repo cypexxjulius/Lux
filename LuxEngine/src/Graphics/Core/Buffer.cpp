@@ -8,19 +8,19 @@
 namespace Lux
 {
 
-VertexBuffer* VertexBuffer::Create(void* data, u32 size)
+Ref<VertexBuffer> VertexBuffer::Create(void* data, u32 size)
 {
-    return new OpenGL::VertexBuffer(data, size);
+    return  create_ref<OpenGL::VertexBuffer>(data, size);
 }
 
-VertexBuffer* VertexBuffer::Create(u32 size)
+Ref<VertexBuffer> VertexBuffer::Create(u32 size)
 {
-    return new OpenGL::VertexBuffer(size);
+    return create_ref<OpenGL::VertexBuffer>(size);
 }
 
-IndexBuffer* IndexBuffer::Create(unsigned int* data, u32 count)
+Ref<IndexBuffer> IndexBuffer::Create(unsigned int* data, u32 count)
 {
-    return new OpenGL::IndexBuffer(data, count);
+    return create_ref<OpenGL::IndexBuffer>(data, count);
 }
 
 }

@@ -54,7 +54,7 @@ public:
 		u32 last_index = static_cast<u32>(m_Container.size() - 1);
 
 		// Switch the contents of the last component with the "deleted" component
-		std::swap(m_Container[index], m_Container[last_index]);
+		m_Container[index] = m_Container[last_index];
 		m_Container.pop_back();
 
 		// Remove the deleted element from the lookup and update the last element's position in the container
