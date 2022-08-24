@@ -69,7 +69,9 @@ void Renderer2D::DrawTexturedRect(const mat4& transform, const v4& color, const 
 {
     Verify(Data);
 
-    u32 TextureID = Data->rect_batch.register_texture(texture->bitmap());
+    u32 TextureID = 0;
+    if(texture)
+        u32 TextureID = Data->rect_batch.register_texture(texture->bitmap());
 
     Data->rect_batch.Push(transform, color, TextureID, tiling);
 }

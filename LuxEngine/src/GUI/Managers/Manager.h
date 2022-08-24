@@ -1,6 +1,6 @@
 #pragma once
 
-#include "GUI/ECS/Registry.h"
+#include "GUI/ECS/Core.h"
 
 
 #include "GUI/ECS/Components.h"

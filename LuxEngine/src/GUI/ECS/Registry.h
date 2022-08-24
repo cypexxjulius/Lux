@@ -2,14 +2,11 @@
 
 #include "Core/UUID.h"
 
-#include "ComponentArray.h"
-
-#include "View.h"
+#include "Core.h"
 
 namespace Lux::GUI::ECS
 {
 
-#define MAX_COMPONENTS 512
 
 class Registry
 {
@@ -18,7 +15,9 @@ public:
 
 	UUID create()
 	{
-		return {};
+		UUID id;
+		m_Elements.insert({ id, Signature {} });
+		return id;
 	}
 
 	void destroy(UUID id)
@@ -33,21 +32,25 @@ public:
 	template<typename ... Components>
 	inline const View& view()
 	{
-		std::initializer_list<size_t> hash_codes = {typeid(Components).hash_code()...};
+		std::initializer_list<u32> hash_codes = {static_cast<u32>(typeid(Components).hash_code())...};
 		
-		u32 hash_value = View::Hash(hash_codes);
-		if(map_contains(m_ViewContainer, hash_value))
-			return m_ViewContainer.at(hash_value);
-		
-		auto& view = m_ViewContainer.insert({hash_value, hash_codes}).second;
-		
-		for(auto [hash, manager]: m_ComponentArray)
-		{
-			if(!view.contains_hash(hash))
-				continue;
+		Signature signature;
+		for(u32 hash : hash_codes)
+			signature.set(m_Components.at(hash));
 
-			view.insert
+		if(m_ViewContainer.contains(signature))
+			return m_ViewContainer.at(signature);
+		
+		m_ViewContainer.insert({signature, signature}).second;
+		auto& view = m_ViewContainer.at(signature);
+		
+		for(auto& [id, element_signature]: m_Elements)
+		{
+			if((signature & element_signature) == element_signature)
+				view.insert(id);
 		}
+
+		return view;
 	}
 
 	template<typename T>
@@ -58,9 +61,10 @@ public:
 		
 		m_Elements.at(id).set(m_Components.at(get_hash<T>()));
 
-		for(auto& [view_id, view] : m_ViewContainer)
+		for(auto& [signature, view] : m_ViewContainer)
 		{
-			if(m_Elements.at(id).test(view_id))
+			auto& element_signature = m_Elements.at(id);
+			if((signature &element_signature)  == element_signature)
 				view.insert(id);
 		}
 
@@ -91,7 +95,19 @@ public:
 
 		Verify(element_contains_component<T>(id));
 		
+		auto old_signature = m_Elements.at(id);
+
+		m_Elements.at(id).flip(m_Components.at(get_hash<T>()));
 		
+		for(auto& [signature, view] : m_ViewContainer)
+		{
+			if(view.test(old_signature))
+			{
+				if(!view.test(m_Elements.at(id)))
+					view.erase(id);
+			}
+		}
+
 		auto m_Manager = get_manager<T>();
 		m_Manager->remove_component(id);
 	}
@@ -100,6 +116,7 @@ public:
 	inline void register_component()
 	{
 		Verify(!is_contained<T>());
+		Verify(m_ComponentCount + 1 < MAX_COMPONENTS);
 
 		INFO("Registering component {}", typeid(T).name());
 		m_ComponentArray.insert({get_hash<T>(), new ComponentArray<T>() });
@@ -180,7 +197,7 @@ private:
 	Container<UUID, Bitset<MAX_COMPONENTS>> m_Elements;
 	Container<u32, u32> m_Components;
 
-	Container<u32, View> m_ViewContainer;
+	Container<Signature, View> m_ViewContainer;
 	Container<u32, IComponentArray*> m_ComponentArray;
 };
 

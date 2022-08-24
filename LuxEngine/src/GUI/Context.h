@@ -3,7 +3,7 @@
 
 #include <type_traits>
 
-#include "GUI/ECS/Registry.h"
+#include "GUI/ECS/Core.h"
 
 #include "Interface/Interface.h"
 #include "Managers/Manager.h"
@@ -57,15 +57,24 @@ public:
 
 	void set_root(UUID id);
 
-	List<Pair<TransformComponent, RectComponent>>& get_rect_render_span();
+	void render_rects(std::function<void(const TransformComponent&, const RectComponent&)>);
 
+	void update_dimensions(float width, float height);
 
+	UUID get_root()
+	{
+		return m_RootElement;
+	}
+
+private:
+
+	void update();
 
 private:
 
 	UUID m_RootElement = 0;
 
-
+	float m_Width, m_Height;
 
 	ECS::Registry m_Registry;
 	

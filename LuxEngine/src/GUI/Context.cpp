@@ -11,7 +11,7 @@ namespace Lux::GUI
 
 Context::Context()
 {
-	m_Registry.register_component < ComponentGroup > ();
+	m_Registry.register_components < ComponentGroup > ();
 
 	Manager::Init(*this, m_Registry);
 
@@ -42,7 +42,50 @@ void Context::set_root(UUID id)
 	Verify(m_Registry.get_component<LayoutComponent>(id).parent == 0);
 
 	m_RootElement = id;
+
+	update();
 }
 
+void Context::render_rects(std::function<void(const TransformComponent&, const RectComponent&)> render_callback)
+{
+	auto& elements = m_Registry.view<TransformComponent, RectComponent>();
+
+	for(auto element : elements.get_elements())
+	{
+		render_callback(
+			m_Registry.get_component<TransformComponent>(element), 
+			m_Registry.get_component<RectComponent>(element)	
+		);
+	}
+}
+
+void Context::update()
+{
+	auto manager = get_manager<SectionManager>();
+
+	if(!m_RootElement)
+		return;
+
+	manager->set_dimensions(m_Width, m_Height);
+	manager->recalculate_dimensions( m_RootElement, { 0.0f, 0.0f }, m_Width, m_Height, 0);
+	
+}
+
+
+void Context::update_dimensions(float width, float height)
+{
+	m_Width = width;
+	m_Height = height;
+
+	update();
+
+	auto manager = get_manager<SectionManager>();
+
+	if(!m_RootElement)
+		return;
+
+	manager->set_dimensions(m_Width, m_Height);
+
+}
 
 }

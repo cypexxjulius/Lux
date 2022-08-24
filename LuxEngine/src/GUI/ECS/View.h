@@ -4,7 +4,9 @@
 
 #include "Core/UUID.h"
 
-#include "GUI/ECS/Registry.h"
+#include "Core.h"
+
+#include "Utils/Assert.h"
 
 namespace Lux::GUI::ECS
 {
@@ -12,7 +14,7 @@ namespace Lux::GUI::ECS
 class View
 {
 public:
-	View(Bitset<MAX_COMPONENTS>& signature)
+	View(Signature& signature)
 		:	m_Signature(signature)
 	{
 	}
@@ -22,9 +24,15 @@ public:
 		m_Elements.insert(id);
 	}
 
-	bool test()
+	inline bool test( Signature& test_case)
 	{
-		return m_TypeHashes.find(type_hash) != m_TypeHashes.end();
+		return (m_Signature & test_case) == test_case;
+	}
+
+	inline bool remove(Signature& test_case, UUID id)
+	{
+		Verify(m_Elements.contains(id));
+		m_Elements.erase(id);
 	}
 
 	const Set<UUID>& get_elements() const
@@ -48,7 +56,7 @@ public:
 
 private:
 
-	Bitset<MAX_COMPONENTS> m_Signature;
+	Signature m_Signature;
 	Set<UUID> m_Elements;
 };
 

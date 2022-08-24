@@ -12,13 +12,17 @@ namespace Lux::GUI
             return { -aspect_ratio, -1.0f, 0.0f };
         }
 
-        static inline v3 ToRenderSpace(float aspect_ratio, const v3& position)
+        static inline v3 ToRenderSpace(float aspect_ratio, v3 position)
         {
+            position.x /= 1000.0f;
+            position.y /= 1000.0f;
             return { (position.x * 2.0f * aspect_ratio) - aspect_ratio, (position.y * 2.0f - 1.0f), position.z * 0.5f };
         }
 
         static inline v3 ToRenderSpaceDelta(float aspect_ratio, v3 position)
         {
+            position.x /= 1000.0f;
+            position.y /= 1000.0f;
             return { position.x * 2.0f * aspect_ratio, position.y * 2.0f, position.z };
         }
 
