@@ -8,6 +8,8 @@
 #include "Interface/Interface.h"
 #include "Managers/Manager.h"
 
+#include <functional>
+
 namespace Lux::GUI
 {
 
@@ -55,9 +57,15 @@ public:
 
 	void set_root(UUID id);
 
+	List<Pair<TransformComponent, RectComponent>>& get_rect_render_span();
+
+
+
 private:
 
 	UUID m_RootElement = 0;
+
+
 
 	ECS::Registry m_Registry;
 	

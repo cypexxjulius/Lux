@@ -18,9 +18,9 @@ namespace Lux
 struct AssetContainers
 {
 
-    std::unordered_map<std::string, Ref<Font>>         FontContainer;
-    std::unordered_map<std::string, Ref<Shader>>       ShaderContainer;
-    std::unordered_map<std::string, Ref<Texture>>      TextureContainer;
+    Container<String, Ref<Font>>         FontContainer;
+    Container<String, Ref<Shader>>       ShaderContainer;
+    Container<String, Ref<Texture>>      TextureContainer;
 
 };
 
@@ -30,7 +30,7 @@ class ResourceManager
     static Scope<AssetContainers> s_Container;
 
     template<typename T>
-    static inline bool is_contained(const std::unordered_map<std::string, Ref<T>>& map, const std::string& name)
+    static inline bool is_contained(const Container<String, Ref<T>>& map, const String& name)
     { return map.find(name) != map.end(); }
     
 public:
@@ -49,15 +49,15 @@ public:
         s_Container = nullptr;
     }
 
-    static Ref<Shader> CreateShader(const std::string& name, Shader&& shader)
+    static Ref<Shader> CreateShader(const String& name, Shader&& shader)
     {
         Verify(!is_contained(s_Container->ShaderContainer, name));
 
-        s_Container->ShaderContainer.insert({ name, std::make_shared<Shader>(std::forward<Shader>(shader))});
+        s_Container->ShaderContainer.insert({ name, create_ref<Shader>(std::forward<Shader>(shader))});
 
         auto& new_shader = s_Container->ShaderContainer.at(name);
 
-        std::string_view error_message;
+        StringView error_message;
         auto error_id = new_shader->verify(error_message);
 
         if(error_id == ShaderError::NoError)
@@ -71,37 +71,37 @@ public:
         return nullptr;
     }
 
-    static Ref<Texture> CreateTexture(const std::string& name, Texture&& texture)
+    static Ref<Texture> CreateTexture(const String& name, Texture&& texture)
     {
         Verify(!is_contained(s_Container->TextureContainer, name));
 
-        s_Container->TextureContainer.insert({name, std::make_shared<Texture>(std::forward<Texture>(texture))});
+        s_Container->TextureContainer.insert({name, create_ref<Texture>(std::forward<Texture>(texture))});
         return s_Container->TextureContainer.at(name);
     }
 
-    static Ref<Font> CreateFont(const std::string& name, Font&& font)
+    static Ref<Font> CreateFont(const String& name, Font&& font)
     {
         Verify(!is_contained(s_Container->FontContainer, name));
 
-        s_Container->FontContainer.insert({ name, std::make_shared<Font>(std::forward<Font>(font))});
+        s_Container->FontContainer.insert({ name, create_ref<Font>(std::forward<Font>(font))});
         return s_Container->FontContainer.at(name);
     }
 
-    static Ref<Texture> GetTexture(const std::string& name)
+    static Ref<Texture> GetTexture(const String& name)
     {
         Verify(is_contained(s_Container->TextureContainer, name));
 
         return s_Container->TextureContainer.at(name);
     }
     
-    static Ref<Font> GetFont(const std::string& name)
+    static Ref<Font> GetFont(const String& name)
     {
         Verify(is_contained(s_Container->FontContainer, name));
 
         return s_Container->FontContainer.at(name);
     }
 
-    static Ref<Shader> GetShader(const std::string& name)
+    static Ref<Shader> GetShader(const String& name)
     {
         Verify(is_contained(s_Container->ShaderContainer, name));
 
@@ -109,21 +109,21 @@ public:
     }
 
     
-    static void DeleteTexture(const std::string& name)
+    static void DeleteTexture(const String& name)
     {
         Verify(is_contained(s_Container->TextureContainer, name));
 
         s_Container->TextureContainer.erase(name);
     }
 
-    static void DeleteShader(const std::string& name)
+    static void DeleteShader(const String& name)
     {
         Verify(is_contained(s_Container->ShaderContainer, name));
 
         s_Container->ShaderContainer.erase(name);
     }
 
-    static void DeleteFont(const std::string& name)
+    static void DeleteFont(const String& name)
     {
         Verify(is_contained(s_Container->FontContainer, name));
 

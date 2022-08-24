@@ -2,6 +2,9 @@
 
 #include "GUI/ECS/Registry.h"
 
+
+#include "GUI/ECS/Components.h"
+
 namespace Lux::GUI
 {
 
@@ -21,13 +24,20 @@ public:
 		on_shutdown();
 	}
 
-	UUID create();
+	UUID create(TypeComponent type);
 	
 	template<typename T>
 	inline T& add_component(UUID id)
 	{
 		return s_Registry->add_component<T>(id);
 	}
+
+	template<typename T, typename... Tail>
+	inline void add_components(UUID id)
+	{
+		return s_Registry->add_components<T, Tail...>(id);
+	}
+
 
 	template<typename T>
 	inline T& get_component(UUID id)

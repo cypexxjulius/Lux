@@ -12,6 +12,8 @@
 
 #include "GUI/Interface/Interface.h"
 
+#include "GUI/Types.h"
+
 namespace Lux::GUI
 {
 
@@ -39,55 +41,52 @@ struct GlyphComponent
 {
 	v4 color;
 	Ref<Font> font;
-	std::array<v2, 4> tex_coords;
+	Array<v2, 4> tex_coords;
 };
 
 struct TextComponent
 {
-	Ref<Font> font;
-	std::string text;
-	v4 color;
-	v2 position;
 	float linelength, lineheight;
 	float scale;
-
-	std::vector<UUID> glyphs;
-};
-
-struct LayoutInfo
-{
-	bool fixed = true;
-	float scale = 1.0f;
-	UUID id = 0;
-
-
-	bool operator==(LayoutInfo& other)
-	{
-		return other.id == id;
-	}
+	Ref<Font> font;
+	v2 position;
+	v4 color;
+	String text;
+	List<UUID> glyphs;
 };
 
 struct LayoutComponent
 {
-	bool fixed;
+	ScaleType scaling_type;
+	u32 scale;
 
-	LayoutSpacing spacing = LayoutSpacing::START;
-	LayoutOrientation orientation = LayoutOrientation::VERTICAL;
+	LayoutSpacing spacing;
+	LayoutOrientation orientation;
 
-	float scale = 1.0f;
-	u32 max_scale_compound = 0;
+	float	sum_fixed_scale;
+	u32		sum_relative_scale;
 
-	UUID parent = 0;
+	UUID parent;
 
-	std::vector<LayoutInfo> sections;
+	Set<UUID> sections;
 };
 
 struct SectionHeaderComponent
 {
 	UUID title_text;
 	UUID retractable_button;
+
 	LayoutComponent layout;
 };
 
+struct SectionStyleComponent
+{
+	u32 child_margin_x, child_margin_y;
+	u32 padding_x, padding_y;
+	v4 background_color;
+};
+
+
+#define ComponentGroup TypeComponent, TransformComponent, SectionStyleComponent, SectionHeaderComponent, LayoutComponent, TextComponent, GlyphComponent, RectComponent
 
 }

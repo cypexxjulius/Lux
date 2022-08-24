@@ -11,11 +11,13 @@ namespace Lux::GUI
 
 Context::Context()
 {
-	m_Registry.register_component < TransformComponent, TypeComponent, LayoutComponent, LayoutInfo, RectComponent, TextComponent, GlyphComponent > ();
+	m_Registry.register_component < ComponentGroup > ();
 
 	Manager::Init(*this, m_Registry);
 
 	register_manager<SectionManager>();
+	
+	auto& elements = m_Registry.view<TransformComponent, RectComponent>();
 }
 
 Context::~Context()
@@ -30,7 +32,7 @@ UUID Context::create_gui_element()
 {
 	UUID id = m_Registry.create();
 
-	m_Registry.add_components<TransformComponent, LayoutComponent, TypeComponent>(id);
+	m_Registry.add_components<TransformComponent, TypeComponent>(id);
 	return id;
 }
 
@@ -41,5 +43,6 @@ void Context::set_root(UUID id)
 
 	m_RootElement = id;
 }
+
 
 }

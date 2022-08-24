@@ -5,12 +5,13 @@
 #include <glm/gtc/matrix_transform.hpp>
 #pragma warning(default: 4201)
 
-#include <memory>
-#include <array>
-#include <vector>
-#include <unordered_map>
-#include <bitset>
+#include <map>
 #include <set>
+#include <array>
+#include <memory>
+#include <vector>
+#include <bitset>
+#include <unordered_map>
 
 namespace Lux
 {
@@ -29,6 +30,9 @@ using Array = std::array<T, count>;
 template<typename T, typename N>
 using Container = std::unordered_map<T, N>;
 
+template<typename T, typename N>
+using SortedContainer = std::map<T, N>;
+
 template<typename T>
 using List = std::vector<T>;
 
@@ -37,6 +41,13 @@ using Bitset = std::bitset<T>;
 
 template<typename T>
 using Set = std::set<T>;
+
+using String = std::string;
+
+using StringView = std::string_view;
+
+template<typename T, typename N>
+using Pair = std::pair<T, N>;
 
 using u64 = uint64_t;
 using u32 = uint32_t;
@@ -59,6 +70,13 @@ using v2 = glm::vec2;
 using v3 = glm::vec3;
 
 using v4 = glm::vec4;
+
+
+using iv2 = glm::ivec2;
+using iv3 = glm::ivec3;
+using iv4 = glm::ivec4;
+
+
 
 enum class DataType : u32
 {
@@ -95,9 +113,16 @@ constexpr Ref<T> create_ref(Args&& ... args)
 
 
 template<typename T, typename N>
+inline bool map_contains(Container<T, N>& map, T&& key)
+{
+    return map.find(key) != map.end();
+}
+
+template<typename T, typename N>
 inline bool map_contains(Container<T, N>& map, T& key)
 {
     return map.find(key) != map.end();
 }
+
 
 }

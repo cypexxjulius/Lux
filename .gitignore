@@ -1,22 +1,9 @@
-**.o
-**.a
+# Binaries
+**/bin/
+bin-int/
 
-**.obj
-**.lib
-
-**.exe 
-**.ilk
-**.pdb
-**.pch
-
+.vs/
 **.sln
 **.vcxproj
-**.vcxproj.**
-
-
-**/bin/**
-**/bin-int/**
-**/obj/**
-
-.vs/**
-*.png
+**.vcxproj.filters
+**.vcxproj.user

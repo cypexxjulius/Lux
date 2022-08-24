@@ -16,6 +16,8 @@ public:
 	virtual ~IComponentArray() {}
 
 	virtual void on_element_destruction(UUID element) = 0;
+
+	virtual const Set<UUID>& get_elements() = 0;
 };
 
 template<typename T>
@@ -29,6 +31,7 @@ public:
 
 	T& register_element(UUID id)
 	{
+		INFO("Registering {} to {}", id, typeid(T).name());
 		Verify(!map_contains(m_Lookup, id));
 
 		m_Container.emplace_back();
@@ -36,6 +39,8 @@ public:
 
 		m_Lookup.insert({id, index});
 		m_RevLookup.insert({index, id});
+
+		m_Elements.insert(id);
 
 		return m_Container.back();
 	}
@@ -59,6 +64,8 @@ public:
 		// Update the reverse lookup map
 		m_RevLookup.at(index) = id;
 		m_RevLookup.erase(last_index);
+
+		m_Elements.erase(id);
 	}
 
 	virtual void on_element_destruction(UUID element) override 
@@ -85,10 +92,18 @@ public:
 		return map_contains(m_Lookup, id);
 	}
 
+	inline const Set<UUID>& get_elements()
+	{
+		return m_Elements;
+	}
+
 private:
 
 
 private:
+
+	Set<UUID> m_Elements;
+
 	List<T> m_Container;
 	Container<UUID, u32> m_Lookup;
 	Container<u32, UUID> m_RevLookup;

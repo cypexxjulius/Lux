@@ -11,12 +11,6 @@
 #include <msdfgen-ext.h>
 #include <msdf-atlas-gen/msdf-atlas-gen.h>
 
-
-#define STBIWDEF inline
-#define STB_IMAGE_WRITE_STATIC
-#define STB_IMAGE_WRITE_IMPLEMENTATION
-#include <stb_image_write.h>
-
 using namespace msdf_atlas;
 
 namespace Lux
@@ -38,7 +32,7 @@ void Font::Shutdown()
 	msdfgen::deinitializeFreetype(static_cast<msdfgen::FreetypeHandle*>(s_FreetypeLibraryHandle));
 }
 
-Font::Font(const std::string& filepath)
+Font::Font(const String& filepath)
 : m_Bitmap(nullptr)
 {
 	Verify(s_FreetypeLibraryHandle);
@@ -50,7 +44,7 @@ Font::Font(const std::string& filepath)
 	if (!font)
 		ERROR("Failed to open font {}", filepath);
 
-	std::vector<GlyphGeometry> glyphs;
+	List<GlyphGeometry> glyphs;
 	FontGeometry fontGeometry(&glyphs);
 
 	fontGeometry.loadCharset(font, 1.0f, Charset::ASCII);
@@ -143,8 +137,8 @@ Font::Font(const std::string& filepath)
 		m_GlyphMetaData.insert({ 
 			cp, 
 			Glyph { 
-				glm::translate(glm::mat4(1.0f), { posx, posy, 0.0f }) * glm::scale(glm::mat4(1.0f), { width, height, 1.0f }), 
-				std::array<v2, 4> {
+				glm::translate(mat4(1.0f), { posx, posy, 0.0f }) * glm::scale(mat4(1.0f), { width, height, 1.0f }), 
+				Array<v2, 4> {
 					v2 { glyph_left,	glyph_bottom + glyph_height},
 					v2 { glyph_left + glyph_width,				glyph_bottom + glyph_height},
 					v2 { glyph_left + glyph_width,				glyph_bottom},

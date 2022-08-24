@@ -13,11 +13,11 @@ class ResourceManager;
 
 struct Glyph
 {
-	std::array<v2, 4> text_coords;
+	Array<v2, 4> text_coords;
 	mat4 transform;
 	double advance;
 
-	Glyph(mat4 arg_transform, std::array<v2, 4> arg_text_coords, double advance)
+	Glyph(mat4 arg_transform, Array<v2, 4> arg_text_coords, double advance)
 		:	text_coords(arg_text_coords),
 			transform(arg_transform),
 			advance(advance)
@@ -37,11 +37,11 @@ private:
 private:
 	void* m_FontHandle = nullptr;
 
-	std::unordered_map<char, const Glyph> m_GlyphMetaData;
+	Container<char, const Glyph> m_GlyphMetaData;
 
 public:
 
-	Font(const std::string& file_path);
+	Font(const String& file_path);
 
 	~Font();
 
