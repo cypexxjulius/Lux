@@ -10,6 +10,7 @@
 
 #include <functional>
 
+
 namespace Lux::GUI
 {
 
@@ -50,25 +51,36 @@ public:
 	inline Ref<MANAGER> get_manager()
 	{
 		type_hash hash = static_cast<type_hash>(typeid(MANAGER).hash_code());
-		return  std::dynamic_pointer_cast<MANAGER>(m_Managers.at(hash));
+
+		Verify(map_contains(m_Managers, hash));
+		return std::dynamic_pointer_cast<MANAGER>(m_Managers.at(hash));
 	}
 
-	UUID create_gui_element();
+	UUID create_gui_element(TypeComponent type, const std::string& name);
 
 	void set_root(UUID id);
 
+	void force_refresh();
+
 	void render_rects(std::function<void(const TransformComponent&, const RectComponent&)>);
 
+	void render_glyphs(std::function<void(const TransformComponent&, const GlyphComponent&)>);
+
 	void update_dimensions(float width, float height);
+
+	void refresh_section(UUID id);
 
 	UUID get_root()
 	{
 		return m_RootElement;
 	}
 
+	
 private:
 
-	void update();
+	void update(UUID id = 0);
+
+	void update_root();
 
 private:
 

@@ -8,13 +8,31 @@ namespace Lux::GUI
 {
 GUILayer* GUILayer::s_Instance = nullptr;
 
+static Ref<Bitmap> standard_color = nullptr;
+
 void GUILayer::on_attach()
 {
 	Verify(!s_Instance);
 	s_Instance = this;
 
     m_Context.update_dimensions(m_Width, m_Height);
+
+    BitmapSpec spec;
+
+    spec.type = ImageType::ALPHA;
+
+
+    standard_color = Bitmap::Create(spec, 4, 2);
+
+    u32* pure_color = new u32[2];
+
+    *pure_color = 1;
+
+    standard_color->set_data(pure_color, sizeof(u32) * 2);
+
+    delete[] pure_color;
 }
+
 void GUILayer::on_detach()
 {
 	s_Instance = nullptr;
@@ -39,6 +57,10 @@ bool GUILayer::on_key_press(const Event<EventType::KeyPressed>& event)
         m_MainCamera = &m_Camera;
         INFO("[GUILayer] switched to Camera2D");
     }
+    else if(event.key == Key::R)
+    {
+        m_Context.force_refresh();
+    }
     else
         return false;
 
@@ -53,6 +75,8 @@ void GUILayer::on_resize(const Event<EventType::WindowResize>& event)
 {
     m_Width = event.width;
     m_Height = event.height;
+    m_Camera3D.on_resize(event);
+    m_Camera.on_resize(event);
     m_Context.update_dimensions(m_Width, m_Height);
 }
 bool GUILayer::on_scroll(const Event<EventType::Scrolled>& event)
@@ -65,18 +89,32 @@ void GUILayer::on_update()
 
     float AspectRatio = m_Width / m_Height;
 
+    
 	m_Context.render_rects([&](const TransformComponent& transform, const RectComponent& rect){
 
-        v3 scale = GUISpace::ToRenderSpaceDelta(AspectRatio, transform.scale);
-	    v3 position = GUISpace::ToRenderSpace(AspectRatio, transform.position);
+        v3 scale = GUISpace::ToRenderSpaceDelta(AspectRatio, m_Width, m_Height, transform.scale);
+	    v3 position = GUISpace::ToRenderSpace(AspectRatio, m_Width, m_Height, transform.position);
 		
 
-		mat4 rect_transform = glm::translate(mat4{ 1.0f }, position) *
-                    glm::toMat4(glm::quat(transform.rotation)) *
-                    glm::scale(mat4{ 1.0f }, scale); 
+		mat4 rect_transform =   glm::translate(mat4{ 1.0f }, position) *
+                                glm::toMat4(glm::quat(transform.rotation)) *
+                                glm::scale(mat4{ 1.0f }, scale); 
 
 		Renderer2D::DrawTexturedRect(rect_transform, rect.color, rect.texture, rect.tiling);
 	});
+
+    m_Context.render_glyphs([&](const TransformComponent& transform, const GlyphComponent& glyph){
+       
+        v3 scale = GUISpace::ToRenderSpaceDelta(AspectRatio, m_Width, m_Height, transform.scale);
+	    v3 position = GUISpace::ToRenderSpace(AspectRatio, m_Width, m_Height, transform.position);
+		
+        mat4 glyph_transform =   glm::translate(mat4{ 1.0f }, position) *
+                                glm::toMat4(glm::quat(transform.rotation)) *
+                                glm::scale(mat4{ 1.0f }, scale); 
+
+        Renderer2D::DrawGlyph(glyph_transform, glyph.color, glyph.tex_coords, glyph.font);
+    });
+    
 
 	Renderer2D::EndScene();
 }

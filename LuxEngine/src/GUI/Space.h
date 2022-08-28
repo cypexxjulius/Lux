@@ -1,5 +1,6 @@
 #pragma once
-#pragma once
+
+#include "Context.h"
 
 namespace Lux::GUI
 {
@@ -12,18 +13,18 @@ namespace Lux::GUI
             return { -aspect_ratio, -1.0f, 0.0f };
         }
 
-        static inline v3 ToRenderSpace(float aspect_ratio, v3 position)
+        static inline v3 ToRenderSpace(float aspect_ratio, float width, float height, v3 position)
         {
-            position.x /= 1000.0f;
-            position.y /= 1000.0f;
-            return { (position.x * 2.0f * aspect_ratio) - aspect_ratio, (position.y * 2.0f - 1.0f), position.z * 0.5f };
+            position.x /= width;
+            position.y /= height;
+            return { (position.x * 2.0f * aspect_ratio) - aspect_ratio, (position.y * 2.0f), position.z };
         }
 
-        static inline v3 ToRenderSpaceDelta(float aspect_ratio, v3 position)
+        static inline v3 ToRenderSpaceDelta(float aspect_ratio, float width, float height, v3 position)
         {
-            position.x /= 1000.0f;
-            position.y /= 1000.0f;
-            return { position.x * 2.0f * aspect_ratio, position.y * 2.0f, position.z };
+            position.x /= width;
+            position.y /= height;
+            return  { position.x * 2.0f * aspect_ratio, position.y * 2.0f, position.z };
         }
 
         static inline float ToRenderSpaceX(float aspect_ratio, float x)
