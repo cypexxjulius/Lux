@@ -57,18 +57,19 @@ struct TextComponent
 
 struct LayoutComponent
 {
+	std::string name;
 	ScaleType scaling_type;
-	u32 scale;
+	float scale;
 
 	LayoutSpacing spacing;
 	LayoutOrientation orientation;
 
 	float	sum_fixed_scale;
-	u32		sum_relative_scale;
+	float	sum_relative_scale;
 
 	UUID parent;
 
-	Set<UUID> sections;
+	Set<Pair<u32, UUID>> sections;
 };
 
 struct SectionHeaderComponent
