@@ -92,7 +92,7 @@ Bitmap::Bitmap(const BitmapSpec& spec, u32 width, u32 height)
 
 void Bitmap::set_data(const void* data, u32 size)
 {
-    assert(size == (m_Width * m_Height * m_Channels));
+    Verify(size == (m_Width * m_Height * m_Channels));
     if(m_Spec.unpack_aligned)
         glPixelStorei(GL_UNPACK_ALIGNMENT, GL_TRUE);
     glTextureSubImage2D(m_ID, 0, 0, 0, m_Width, m_Height, LuxToGL::DataFormat(m_Spec.type), GL_UNSIGNED_BYTE, data);
