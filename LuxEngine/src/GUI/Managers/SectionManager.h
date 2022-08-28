@@ -8,48 +8,28 @@
 
 #include "GUI/ECS/Components.h"
 
-#include "GUI/Space.h"
-
 
 namespace Lux::GUI
 {
-
-#define MAX_FIXED_SCALE (1000)
-
 
 class SectionManager final : public Manager
 {
 public:
 
-	UUID create_new()
+	UUID create_new(const std::string& name)
 	{
-		UUID id =  create(TypeComponent::SECTION);
+		UUID id =  create(TypeComponent::SECTION, name);
 
 		static constexpr SectionStyleComponent DefaultStyle
 		{
-			.child_margin_x = 1,
-			.child_margin_y = 1,
-			.padding_x = 1,
-			.padding_y = 1,
+			.child_margin_x = 10,
+			.child_margin_y = 10,
+			.padding_x = 10,
+			.padding_y = 10,
 			.background_color = { 0.8, 0.4, 0.1, 1.0f}
 		};
 
 		add_component<SectionStyleComponent>(id) = DefaultStyle;
-
-		static const LayoutComponent DefaultLayout
-		{
-			.scaling_type = ScaleType::DYNAMIC,
-			.scale = 1,
-
-			.spacing = LayoutSpacing::START,
-			.orientation = LayoutOrientation::VERTICAL,
-
-			.sum_fixed_scale = 0.0f,
-			.sum_relative_scale = 0,
-			.parent = 0
-		};
-
-		add_component<LayoutComponent>(id) = DefaultLayout;
 	
 		std::srand(static_cast<unsigned int>(id));
 		float rand_num = ((float)(std::rand() % 100) / 100.0f);
@@ -66,7 +46,7 @@ public:
 		
 		rect_component = DefaultRect;
 		
-		rect_component.color = { rand_num, 1 - rand_num, 1.0f ,1.0f };
+		rect_component.color = { rand_num, 1 - rand_num, 1 - rand_num ,1.0f };
 		return id;
 	}
 
@@ -76,75 +56,8 @@ public:
 
 		layout.scaling_type = ScaleType::DYNAMIC;
 		layout.scale = 1;
-	}
 
-	void recalculate_dimensions(UUID id, v2 position, float width, float height, float depth)
-	{
-		auto& layout_component = get_component<LayoutComponent>(id);
-		auto& style = get_component<SectionStyleComponent>(id);
-
-		Verify(layout_component.sum_fixed_scale < MAX_FIXED_SCALE);
-
-		
-		update_transform_component(id, position, width, height, depth);
-
-		position.x += style.padding_x;
-		position.y += style.padding_y;
-
-		width -= 2 * style.padding_x;
-		height -= 2 * style.padding_y;
-
-
-
-		float relative_size = MAX_FIXED_SCALE - layout_component.sum_fixed_scale;
-		for(auto child_id  : layout_component.sections)
-		{
-			v2 new_position { 0 };
-			float new_width = 0.0, new_height = 0.0;
-
-			auto& child_layout = get_component<LayoutComponent>(id);
-
-			new_position = { position.x + style.child_margin_x, position.y - style.child_margin_y };
-
-			if(layout_component.orientation == LayoutOrientation::HORIZONTAL)
-			{
-				if(child_layout.scaling_type == ScaleType::DYNAMIC)
-				{
-					new_width = relative_size * ((float)child_layout.scale / (float)layout_component.sum_relative_scale);
-					relative_size -= new_width;
-				}
-				else 
-					new_width = static_cast<float>(child_layout.scale);
-				
-				position.x += new_width;
-
-				new_width -= 2 * style.child_margin_x;
-				new_height = height - 2 * style.child_margin_y;
-
-			}
-			else 
-			{
-				if(child_layout.scaling_type == ScaleType::DYNAMIC)
-				{
-					new_height = relative_size * ((float)child_layout.scale / (float)layout_component.sum_relative_scale);
-					relative_size -= new_height;
-				}	
-				else 
-					new_height	= static_cast<float>(child_layout.scale);
-				
-				position.y += new_height;
-				
-				new_height	-= 2 * style.child_margin_y;
-				new_width	= width - 2 * style.child_margin_x;
-			}
-			
-
-			
-
-			depth++;
-			recalculate_dimensions(child_id, new_position, new_width, new_height, depth);
-		}
-
+		refresh_section(id);
 	}
 
 	void make_retractable(UUID id) { }
@@ -155,15 +68,15 @@ public:
 
 		layout.orientation = orientation;
 
-		recalculate_section(id);
+		refresh_section(id);
 	}
 
 	void set_scale(UUID id, u32 rel_dim)
 	{
 		auto& layout = get_component<LayoutComponent>(id);
 
-		layout.scale = rel_dim;
-		recalculate_section(id);
+		layout.scale = (float)rel_dim;
+		refresh_section(id);
 	}
 
 	void attach(UUID id, UUID child) 
@@ -171,7 +84,7 @@ public:
 		auto& layout = get_component<LayoutComponent>(id);
 		auto& child_layout = get_component<LayoutComponent>(child);
 
-		layout.sections.insert(child);
+		layout.sections.insert({static_cast<u32>(layout.sections.size()), child});
 
 		child_layout.parent = id;
 
@@ -180,8 +93,7 @@ public:
 		else 
 			layout.sum_fixed_scale += child_layout.scale;
 
-		auto& transform = get_component<TransformComponent>(id);
-		recalculate_section(id);
+		refresh_section(id);
 	}
 
 	void detach(UUID id) 
@@ -192,7 +104,14 @@ public:
 		Verify(parent);
 
 		auto& parent_layout = get_component<LayoutComponent>(id);
-		parent_layout.sections.erase(id);
+		u32 index = 0;
+
+		for(auto& [child_index, child_id] : parent_layout.sections)
+		{
+			if(id == child_id)
+				index = child_index;
+		}
+		parent_layout.sections.erase({ index, id });
 
 		if(layout.scaling_type == ScaleType::DYNAMIC)
 			parent_layout.sum_relative_scale -= layout.scale;
@@ -201,38 +120,22 @@ public:
 
 		layout.parent = 0;
 		
-		recalculate_section(parent);
+		refresh_section(parent);
 	}
 
-	void update_transform_component(UUID id, v2 position, float width, float height, float depth)
+	void remove_padding(UUID id)
 	{
-		auto& transform = get_component<TransformComponent>(id);
+		auto& style = get_component<SectionStyleComponent>(id);
 
-		transform.position = { position.x, position.y, depth};
-		transform.scale = { width, height, 1.0f};
-	}
+		style.padding_x = style.padding_y = 0;
 
-	void set_dimensions(float width, float height)
-	{
-		m_Width = width;
-		m_Height = height;
-		m_AspectRatio = width / height;
-	}
-private:
-
-	void recalculate_section(UUID id)
-	{
-		auto& transform = get_component<TransformComponent>(id);
-		recalculate_dimensions(id, { transform.position.x, transform.position.y } , transform.scale.x, transform.scale.y, transform.position.z);
+		refresh_section(id);
 	}
 
 public:
 	
 	virtual void on_shutdown() override {}
 
-private:
-
-	float m_Width = 0.0f, m_Height = 0.0f, m_AspectRatio = 0.0f;
 };
 
 }

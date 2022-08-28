@@ -12,19 +12,40 @@ class Context;
 
 class Manager
 {
+
 public:
 
 	virtual ~Manager() {}
 
-
-	virtual void on_shutdown() = 0; 
-
+	
 	void shutdown()
 	{
 		on_shutdown();
 	}
+	
+	static void Init(Context& ctx, ECS::Registry& registry)
+	{
+		s_Registry = &registry;
+		s_Context = &ctx;
+	}
 
-	UUID create(TypeComponent type);
+
+	static void Shutdown()
+	{
+		s_Registry = nullptr;
+		s_Context = nullptr;
+	}
+
+public:
+
+	virtual void on_shutdown() = 0; 
+
+	UUID create(TypeComponent type, const std::string& name);
+
+	inline UUID create_plain()
+	{
+		s_Registry->create();
+	}
 	
 	template<typename T>
 	inline T& add_component(UUID id)
@@ -45,17 +66,8 @@ public:
 		return s_Registry->get_component<T>(id);
 	}
 
-	static void Init(Context& ctx, ECS::Registry& registry)
-	{
-		s_Registry = &registry;
-		s_Context = &ctx;
-	}
-
-	static void Shutdown()
-	{
-		s_Registry = nullptr;
-		s_Context = nullptr;
-	}
+	void refresh_section(UUID id);
+	
 
 private:
 
