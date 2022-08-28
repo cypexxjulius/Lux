@@ -56,8 +56,8 @@ public:
         set_projection(
             -aspect_ratio,
             aspect_ratio,
-            -1.0f,
-            1.0f
+            2.0f,
+            0.0f
         );
     }
 
@@ -66,8 +66,8 @@ private:
     void recalculate();
 
 private:
-    static constexpr float NEAR_VAL = -10.0f;
-    static constexpr float FAR_VAL = 100.0f;
+    static constexpr float NEAR_VAL = -100.0f;
+    static constexpr float FAR_VAL =  100.0f;
 
     float m_Rotation;
     float m_Width, m_Height;

@@ -11,8 +11,8 @@ Camera2D::Camera2D(float aspect_ratio)
         glm::ortho(
             -aspect_ratio,
             aspect_ratio,
-            -1.0f,
-            1.0f, 
+            2.0f, 
+            0.0f,
             NEAR_VAL, 
             FAR_VAL
         )
