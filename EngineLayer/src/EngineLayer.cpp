@@ -13,7 +13,7 @@ public:
     void on_attach() override
     {
         GUI::Section body = GUI::Section::Create("Body");
-        body.make_root();
+        body.remove_padding();
 
         body.set_orientation(GUI::LayoutOrientation::VERTICAL);
 
@@ -23,7 +23,7 @@ public:
         PageContent.scale(8);
 
 
-        body.attach({TopBar, PageContent});
+        body.attach({ TopBar, PageContent });
 
         GUI::Section LeftSection = GUI::Section::Create("LeftSection");
 
@@ -46,6 +46,9 @@ public:
         
 
         PageContent.attach({LeftSection, MiddleSection, RightSection});
+        
+        body.make_root();
+
     }
 
 
