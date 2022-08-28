@@ -51,6 +51,17 @@ void Section::attach(std::initializer_list<Section> sections)
 		s_Manager->attach(m_ID, section.m_ID);
 }
 
+void Section::remove_padding()
+{
+	s_Manager->remove_padding(m_ID);
+}
+
+void Section::attach(Section& section)
+{
+	s_Manager->attach(m_ID, section.m_ID);
+}
+
+
 void Section::detach()
 {
 	s_Manager->detach(m_ID);
@@ -63,7 +74,7 @@ void Section::make_root()
 
 Section Section::Create(const std::string& title)
 {
-	return Section{ s_Manager->create_new() };
+	return Section{ s_Manager->create_new(title) };
 }
 
 }

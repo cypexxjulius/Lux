@@ -23,6 +23,10 @@ public:
 	void set_orientation(LayoutOrientation orientation) const;
 
 	void attach(std::initializer_list<Section> sections);
+	
+	void attach(Section& id);
+
+	void remove_padding();
 
 	void detach();
 
