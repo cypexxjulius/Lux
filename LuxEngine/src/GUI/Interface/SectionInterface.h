@@ -4,27 +4,31 @@
 namespace Lux::GUI
 {
 
-class Context;
+class HSectionManager;
 
-class Section
+class GUIObject;
+
+class HSection
 {
-public:
-	Section(UUID id)
-		:	m_ID(id)
+private:
+	HSection(HSectionManager* manager)
+		: m_Manager(manager)
 	{
 	}
 
+public:
+
 	void make_scalable() const;
 
-	void make_retractable() const;
+	void enable_heading() const;
+
+	void disable_heading() const;
 
 	void scale(u32 rel_dim) const;
 
-	void set_orientation(LayoutOrientation orientation) const;
-
-	void attach(std::initializer_list<Section> sections);
+	void attach(std::initializer_list<GUIObject*> sections);
 	
-	void attach(Section& id);
+	void attach(GUIObject* id);
 
 	void remove_padding();
 
@@ -32,18 +36,58 @@ public:
 
 	void make_root();
 
+	operator GUIObject*();
 
 public:
 
-	static Section Create(const std::string& title);
+	static HSection Create(const std::string& title);
 
 private:
 
-	UUID m_ID;
+	HSectionManager* m_Manager = nullptr;
+
+};
+
+
+class VSectionManager;
+
+class VSection
+{
+private:
+	VSection(VSectionManager* manager)
+		: m_Manager(manager)
+	{
+	}
 
 public:
-	static void Init(Context& ctx);
 
-	static void Shutdown(Context& ctx);
+	void make_scalable() const;
+	
+	void enable_heading() const;
+
+	void disable_heading() const;
+
+	void scale(u32 rel_dim) const;
+
+	void attach(std::initializer_list<GUIObject*> sections);
+	
+	void attach(GUIObject* id);
+
+	void remove_padding();
+
+	void detach();
+
+	void make_root();
+
+	operator GUIObject*();
+
+public:
+
+	static VSection Create(const std::string& title);
+
+private:
+
+	VSectionManager* m_Manager = nullptr;
+
 };
 }

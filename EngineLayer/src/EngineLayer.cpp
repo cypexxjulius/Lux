@@ -12,34 +12,32 @@ public:
 
     void on_attach() override
     {
-        GUI::Section body = GUI::Section::Create("Body");
+        auto body = GUI::VSection::Create("Body");
         body.remove_padding();
 
-        body.set_orientation(GUI::LayoutOrientation::VERTICAL);
-
-        GUI::Section TopBar =  GUI::Section::Create("TopBar");
+        auto TopBar =  GUI::HSection::Create("TopBar");
+        TopBar.enable_heading();
         
-        GUI::Section PageContent = GUI::Section::Create("PageContent");
+        auto PageContent = GUI::HSection::Create("PageContent");
         PageContent.scale(8);
-
+        
 
         body.attach({ TopBar, PageContent });
 
-        GUI::Section LeftSection = GUI::Section::Create("LeftSection");
+        auto LeftSection = GUI::VSection::Create("LeftSection");
 
 
-        GUI::Section RightSection = GUI::Section::Create("RightSection");
+        auto RightSection = GUI::VSection::Create("RightSection");
 
 
-        GUI::Section MiddleSection = GUI::Section::Create("MiddleSection");
+        auto MiddleSection = GUI::VSection::Create("MiddleSection");
         MiddleSection.scale(3);
-        MiddleSection.set_orientation(GUI::LayoutOrientation::VERTICAL);
-
-        GUI::Section ViewPortSection = GUI::Section::Create("ViewPortSection");
+        
+        auto ViewPortSection = GUI::VSection::Create("ViewPortSection");
         ViewPortSection.scale(4);
         ViewPortSection.make_scalable();
 
-        GUI::Section UtilsSection = GUI::Section::Create("UtilsSection");
+        auto UtilsSection = GUI::VSection::Create("UtilsSection");
         UtilsSection.make_scalable();
 
         MiddleSection.attach({ ViewPortSection, UtilsSection });

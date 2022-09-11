@@ -1,12 +1,8 @@
 #pragma once
 
-
-#include <type_traits>
-
 #include "GUI/ECS/Core.h"
 
-#include "Interface/Interface.h"
-#include "Managers/Manager.h"
+#include "Objects/GUIObject.h"
 
 #include <functional>
 
@@ -14,53 +10,20 @@
 namespace Lux::GUI
 {
 
-template <typename T>
-concept IsManager = std::derived_from<T, Manager>;
-
-class Context;
-
-template<typename T, typename N>
-concept IsConnectable = requires(T, Context* ctx)
-{
-	T::Init(ctx);
-} && IsManager<N>;
 
 class Context
 {
 private:
 
 	using type_hash = u64;
+	
+	friend GUIObject;
 
 public:
 
 	Context();
 	~Context();
 
-	template<typename MANAGER>
-	requires std::derived_from<MANAGER,Manager> 
-	inline void register_manager()
-	{	
-		type_hash hash = static_cast<type_hash>(typeid(MANAGER).hash_code());
-		Verify(!map_contains(m_Managers, hash));
-
-		m_Managers.insert({hash,  std::dynamic_pointer_cast<Manager>(create_ref<MANAGER>())});
-	}
-
-	template<typename MANAGER>
-	requires std::derived_from<MANAGER, Manager> 
-	inline Ref<MANAGER> get_manager()
-	{
-		type_hash hash = static_cast<type_hash>(typeid(MANAGER).hash_code());
-
-		Verify(map_contains(m_Managers, hash));
-		return std::dynamic_pointer_cast<MANAGER>(m_Managers.at(hash));
-	}
-
-	UUID create_gui_element(TypeComponent type, const std::string& name);
-
-	void set_root(UUID id);
-
-	void force_refresh();
 
 	void render_rects(std::function<void(const TransformComponent&, const RectComponent&)>);
 
@@ -68,29 +31,34 @@ public:
 
 	void update_dimensions(float width, float height);
 
-	void refresh_section(UUID id);
+	void refresh();
 
-	UUID get_root()
+private:
+
+	void remove_element(UUID id);
+
+	void register_element(UUID id, GUIObject* obj);
+
+	void set_root(GUIObject* id);
+
+	GUIObject& get_object(UUID id);
+
+	const Ref<Font>& get_font()
 	{
-		return m_RootElement;
+		return m_Font;
 	}
 
-	
 private:
 
-	void update(UUID id = 0);
+	Container<UUID, GUIObject*> m_GUIElements;
 
-	void update_root();
+	GUIObject *m_RootElement = nullptr;
 
-private:
-
-	UUID m_RootElement = 0;
-
-	float m_Width, m_Height;
+	float m_Width = 0.0f, m_Height = 0.0f;
 
 	ECS::Registry m_Registry;
-	
-	Container<type_hash, Ref<Manager>> m_Managers;
+
+	Ref<Font> m_Font;
 };
 
 

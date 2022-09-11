@@ -48,8 +48,6 @@ public:
 
     virtual void on_update() override;
 
-    static void set_root(UUID id);
-
 private:
 
     static GUILayer* s_Instance;
@@ -62,6 +60,7 @@ private:
     Camera* m_MainCamera = nullptr;
 
     Ref<Font> m_UsedFont;
+    Ref<Texture> m_RectTexture;
     Context m_Context;
 
 

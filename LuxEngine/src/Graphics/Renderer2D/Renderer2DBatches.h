@@ -35,6 +35,7 @@ struct GlyphVertex
     v4 Color;
     v2 TexCoord;
     float FontSlot;
+    int useMSDF;
 };
 
 
@@ -306,7 +307,8 @@ public:
                 { "a_Position", DataType::FLOAT, 3 },
                 { "a_Color", DataType::FLOAT, 4},
                 { "a_TexCoord", DataType::FLOAT, 2},
-                { "a_FontID", DataType::FLOAT, 1}
+                { "a_FontID", DataType::FLOAT, 1},
+                { "a_UseMSDF", DataType::INT, 1}
             })
     {
 
@@ -338,7 +340,7 @@ public:
 
     }
 
-    inline void Push(const mat4& transform, const v4& color, const std::array<v2, 4>& texture_coords, u32 texture_id)
+    inline void Push(const mat4& transform, const v4& color, const std::array<v2, 4>& texture_coords, u32 texture_id, bool use_msdf)
     {
         if (index_count == MaxIndices)
             upload();
@@ -349,7 +351,8 @@ public:
                 transform * VertexPositions[i],
                 color,
                 texture_coords[i],
-                static_cast<float>(texture_id)
+                static_cast<float>(texture_id),
+                use_msdf
             });
         }
 

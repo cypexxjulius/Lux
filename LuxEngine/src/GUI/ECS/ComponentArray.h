@@ -29,12 +29,17 @@ private:
 
 public:
 
-	T& register_element(UUID id)
+	ComponentArray()
+	{
+		m_TypeName = typeid(T).name();
+	}
+
+	T& register_element(UUID id, T&& component)
 	{
 		INFO("Registering {} to {}", id, typeid(T).name());
 		Verify(!map_contains(m_Lookup, id));
 
-		m_Container.emplace_back();
+		m_Container.emplace_back(std::forward<T>(component));
 		u32 index = static_cast<u32>(m_Container.size() - 1);
 
 		m_Lookup.insert({id, index});
@@ -101,6 +106,8 @@ private:
 
 
 private:
+
+	std::string m_TypeName;
 
 	Set<UUID> m_Elements;
 

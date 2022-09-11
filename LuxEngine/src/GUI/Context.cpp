@@ -2,14 +2,7 @@
 
 #include "ECS/Components.h"
 
-
-#include "Managers/LayoutManager.h"
-#include "Managers/SectionManager.h"
-#include "Managers/TextManager.h"
-
-
-#include "Interface/SectionInterface.h"
-
+#include "Assets/AssetManager.h"
 
 namespace Lux::GUI
 {
@@ -19,45 +12,26 @@ Context::Context()
 {
 	m_Registry.register_components < ComponentGroup > ();
 
-	Manager::Init(*this, m_Registry);
-
-	register_manager<SectionManager>();
-	
-	register_manager<LayoutManager>();
-
-	register_manager<TextManager>();
+	GUIObject::Init(*this, m_Registry);
 	
 	auto& elements = m_Registry.view<TransformComponent, RectComponent>();
+
+	m_Font = ResourceManager::CreateFont("GUIStandardFont", { "res/fonts/Roboto-Bold.ttf" });
 }
 
 Context::~Context()
 {
-	for(auto& manager : m_Managers)
-		manager.second->shutdown();
+	m_RootElement->shutdown();
 
-	Manager::Shutdown();
+	// Todo simple Hack for cleaning up the gui elements ;>)
+	while(!m_GUIElements.empty())
+	{
+		m_GUIElements.begin()->second->shutdown();	
+	}
+
+	GUIObject::Shutdown();
 }
 
-UUID Context::create_gui_element(TypeComponent type, const std::string& name)
-{
-	UUID id = m_Registry.create();
-
-	m_Registry.add_component<TransformComponent>(id);
-	m_Registry.add_component<TypeComponent>(id) = type;
-	m_Registry.add_component<LayoutComponent>(id) = LayoutManager::Default(name);
-
-	return id;
-}
-
-void Context::set_root(UUID id)
-{
-	Verify(m_Registry.get_component<TypeComponent>(id) == TypeComponent::SECTION);
-	Verify(m_Registry.get_component<LayoutComponent>(id).parent == 0);
-
-	m_RootElement = id;
-
-	update_root();
-}
 
 void Context::render_rects(std::function<void(const TransformComponent&, const RectComponent&)> render_callback)
 {
@@ -90,46 +64,48 @@ void Context::update_dimensions(float width, float height)
 	m_Width = width;
 	m_Height = height;
 
-	
-	auto manager = get_manager<LayoutManager>();
-	manager->set_dimensions(m_Width, m_Height);
+	GUIObject::SetDimension(width, height);
 
+	refresh();
+}
+
+void Context::set_root(GUIObject* root)
+{
+	Verify(root);
+	Verify(root->get<TypeComponent>() == TypeComponent::SECTION);
+	Verify(root->get<LayoutComponent>().parent == 0);
+
+	m_RootElement = root;
+
+	refresh();
+}
+
+void Context::remove_element(UUID id)
+{
+	m_GUIElements.erase(id);
+}
+
+void Context::register_element(UUID id, GUIObject* obj)
+{
+	Verify(!map_contains(m_GUIElements, id))
+
+	m_GUIElements.insert({id, obj});
+}
+
+
+GUIObject& Context::get_object(UUID id)
+{
+	Verify(map_contains(m_GUIElements, id));
+
+	return *m_GUIElements.at(id);
+}
+
+void Context::refresh()
+{
 	if(!m_RootElement)
 		return;
 
-	update_root();
-}
-
-void Context::force_refresh()
-{
-	update();		
-}
-
-
-void Context::refresh_section(UUID id)
-{
-	auto manager = get_manager<LayoutManager>();
-
-	
-	update(id);	
-}
-
-void Context::update(UUID id)
-{
-	auto manager = get_manager<LayoutManager>();
-
-	if(!id)
-		id = m_RootElement;
-
-	manager->recalculate_section(id);	
-	
-}
-
-void Context::update_root()
-{
-	auto manager = get_manager<LayoutManager>();
-
-	manager->recalculate_root(m_RootElement);	
+	m_RootElement->refresh({ 0.0f , 0.0f}, m_Width, m_Height, 0);
 }
 
 }

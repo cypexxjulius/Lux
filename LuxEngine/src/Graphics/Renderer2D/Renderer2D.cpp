@@ -31,11 +31,10 @@ void Renderer2D::Init()
 
     Renderer::get_api().enable_debug();
 
-    Renderer::get_api().enable(RenderingOption::BLEND);
-    Renderer::get_api().set_blend_function(BlendFunc::SRC_ALPHA, BlendFunc::ONE_MINUS_SRC_ALPHA);
+    //Renderer::get_api().enable(RenderingOption::BLEND);
+    //Renderer::get_api().set_blend_function(BlendFunc::SRC_ALPHA, BlendFunc::ONE_MINUS_SRC_ALPHA);
 
     Renderer::get_api().enable(RenderingOption::DEPTH_TEST);
-    Renderer::get_api().enable(RenderingOption::MULTISAMPLE);
 
 }
 
@@ -71,7 +70,7 @@ void Renderer2D::DrawTexturedRect(const mat4& transform, const v4& color, const 
 
     u32 TextureID = 0;
     if(texture)
-        u32 TextureID = Data->rect_batch.register_texture(texture->bitmap());
+        TextureID = Data->rect_batch.register_texture(texture->bitmap());
 
     Data->rect_batch.Push(transform, color, TextureID, tiling);
 }
@@ -97,7 +96,7 @@ void Renderer2D::DrawGlyph(const mat4& transform, const v4& color, const std::ar
     Verify(Data);
     u32 TextureID = Data->glyph_batch.register_texture(font->bitmap());
     
-    Data->glyph_batch.Push(transform, color, tex_coords, TextureID);
+    Data->glyph_batch.Push(transform, color, tex_coords, TextureID, false);
 }
 
 void Renderer2D::DrawText(std::string_view text, const mat4& transform, const v4& color, Ref<Font>& font)
@@ -114,7 +113,7 @@ void Renderer2D::DrawText(std::string_view text, const mat4& transform, const v4
             
 
         if (character != ' ')
-            Data->glyph_batch.Push(transform * glm::translate(glm::mat4(1.0f), { linelength, 0.0f, 0.0f }) * glyph.transform, color, glyph.text_coords, TextureID);
+            Data->glyph_batch.Push(transform * glm::translate(glm::mat4(1.0f), { linelength, 0.0f, 0.0f }) * glyph.transform, color, glyph.text_coords, TextureID, false);
         
         linelength += glyph.advance;
 

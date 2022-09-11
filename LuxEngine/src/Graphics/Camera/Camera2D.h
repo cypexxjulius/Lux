@@ -54,9 +54,9 @@ public:
         float aspect_ratio = (float)event.width / (float)event.height;
 
         set_projection(
-            -aspect_ratio,
+            0.0f,
             aspect_ratio,
-            2.0f,
+            1.0f,
             0.0f
         );
     }

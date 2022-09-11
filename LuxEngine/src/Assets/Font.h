@@ -66,15 +66,19 @@ public:
 		return m_LineHeight;
 	}
 
-	inline float em_size()
+	inline float ascender()
 	{
-		return m_EmSize;
+		return m_AscenderY;
+	}
+
+	inline float descender()
+	{
+		return m_DecenderY;
 	}
 
 private:
 
 	float m_LineHeight;
-	float m_EmSize;
 	float m_AscenderY;
 	float m_DecenderY;
 	float m_UnderlineThickness;

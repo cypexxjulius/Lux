@@ -24,6 +24,8 @@ void GUILayer::on_attach()
 
     standard_color = Bitmap::Create(spec, 4, 2);
 
+    m_RectTexture = ResourceManager::CreateTexture("Logo", { "res/textures/logo.png"});
+
     u32* pure_color = new u32[2];
 
     *pure_color = 1;
@@ -59,7 +61,7 @@ bool GUILayer::on_key_press(const Event<EventType::KeyPressed>& event)
     }
     else if(event.key == Key::R)
     {
-        m_Context.force_refresh();
+        m_Context.refresh();
     }
     else
         return false;
@@ -89,6 +91,16 @@ void GUILayer::on_update()
 
     float AspectRatio = m_Width / m_Height;
 
+    v3 test_scale = {1.0f, 1.0f, 1.0f};
+	v3 test_position = { 0.0f, 0.0f, 0.9f};
+		
+
+	mat4 test_rect_transform =   glm::translate(mat4{ 1.0f }, test_position) *
+                            glm::scale(mat4{ 1.0f }, test_scale);
+
+
+    Renderer2D::DrawTexturedRect(test_rect_transform, {1.0f, 1.0f, 1.0f, 1.0f}, m_RectTexture, 1.0f);
+
     
 	m_Context.render_rects([&](const TransformComponent& transform, const RectComponent& rect){
 
@@ -108,9 +120,11 @@ void GUILayer::on_update()
         v3 scale = GUISpace::ToRenderSpaceDelta(AspectRatio, m_Width, m_Height, transform.scale);
 	    v3 position = GUISpace::ToRenderSpace(AspectRatio, m_Width, m_Height, transform.position);
 		
-        mat4 glyph_transform =   glm::translate(mat4{ 1.0f }, position) *
+        mat4 glyph_transform =  glm::translate(mat4{ 1.0f }, position) *
                                 glm::toMat4(glm::quat(transform.rotation)) *
                                 glm::scale(mat4{ 1.0f }, scale); 
+
+        glyph_transform *= glyph.char_transform;
 
         Renderer2D::DrawGlyph(glyph_transform, glyph.color, glyph.tex_coords, glyph.font);
     });
@@ -119,8 +133,4 @@ void GUILayer::on_update()
 	Renderer2D::EndScene();
 }
 
-void GUILayer::set_root(UUID id)
-{
-	s_Instance->m_Context.set_root(id);
-}
 }

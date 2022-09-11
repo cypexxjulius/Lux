@@ -9,9 +9,9 @@ namespace Lux
 Camera2D::Camera2D(float aspect_ratio)
     : m_ProjMat(
         glm::ortho(
-            -aspect_ratio,
+            0.0f,
             aspect_ratio,
-            2.0f, 
+            1.0f, 
             0.0f,
             NEAR_VAL, 
             FAR_VAL

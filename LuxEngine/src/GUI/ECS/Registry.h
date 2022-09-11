@@ -46,7 +46,7 @@ public:
 		
 		for(auto& [id, element_signature]: m_Elements)
 		{
-			if((signature & element_signature) == element_signature)
+			if((element_signature & signature) == signature)
 				view.insert(id);
 		}
 
@@ -54,7 +54,7 @@ public:
 	}
 
 	template<typename T>
-	inline T& add_component(UUID id)
+	inline T& add_component(UUID id, T&& component = {})
 	{			
 		Verify(is_contained<T>());
 		Verify(is_contained(id));
@@ -64,12 +64,12 @@ public:
 		for(auto& [signature, view] : m_ViewContainer)
 		{
 			auto& element_signature = m_Elements.at(id);
-			if((signature &element_signature)  == element_signature)
+			if((element_signature & signature)  == signature)
 				view.insert(id);
 		}
 
 		auto m_Manager = get_manager<T>();
-		return m_Manager->register_element(id);
+		return m_Manager->register_element(id, std::forward<T>(component));
 	}
 
 	template<typename T, typename ...Tail>
@@ -151,7 +151,17 @@ public:
 		auto m_Manager = get_manager<T>();
 		return m_Manager->get_component(id);
 	}
-	
+
+	template<typename T>
+	inline bool has_component(UUID id)
+	{
+		Verify(is_contained<T>());
+		Verify(is_contained(id));
+
+		return m_Elements.at(id).test(static_cast<size_t>(m_Components.at(get_hash<T>())));
+	}
+
+
 	~Registry()
 	{
 		for(auto& managers : m_ComponentArray)

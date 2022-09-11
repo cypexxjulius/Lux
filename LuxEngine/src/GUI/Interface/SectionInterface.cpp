@@ -1,7 +1,7 @@
 #include "Interface.h"
 #include "SectionInterface.h"
 
-#include "GUI/Managers/SectionManager.h"
+#include "GUI/Objects/SectionManager.h"
 
 #include "GUI/Context.h"
 
@@ -10,71 +10,122 @@
 namespace Lux::GUI
 {
 
-Ref<SectionManager> s_Manager = nullptr;
-
-
-
-void Section::Init(Context& ctx)
+void HSection::make_scalable() const
 {
-
-	s_Manager = ctx.get_manager<SectionManager>();
-}
-
-void Section::Shutdown(Context& ctx)
-{
-	s_Manager = nullptr;
-}
-
-void Section::make_scalable() const
-{
-	s_Manager->make_scalable(m_ID);
-}
-
-void Section::make_retractable() const
-{
-	s_Manager->make_retractable(m_ID);
-}
-
-void Section::set_orientation(LayoutOrientation orientation) const
-{
-	s_Manager->set_orientation(m_ID, orientation);
-}
-
-void Section::scale(u32 rel_dim) const
-{
-	s_Manager->set_scale(m_ID, rel_dim);
-}
-
-void Section::attach(std::initializer_list<Section> sections)
-{
-	for(auto& section : sections)
-		s_Manager->attach(m_ID, section.m_ID);
-}
-
-void Section::remove_padding()
-{
-	s_Manager->remove_padding(m_ID);
-}
-
-void Section::attach(Section& section)
-{
-	s_Manager->attach(m_ID, section.m_ID);
+	m_Manager->make_scalable();
 }
 
 
-void Section::detach()
+void HSection::scale(u32 rel_dim) const
 {
-	s_Manager->detach(m_ID);
+	m_Manager->set_scale((float)rel_dim);
 }
 
-void Section::make_root()
+void HSection::attach(std::initializer_list<GUIObject*> HSections)
 {
-	GUILayer::set_root(m_ID);
+	for(auto& HSection : HSections)
+		m_Manager->attach(HSection);
 }
 
-Section Section::Create(const std::string& title)
+void HSection::remove_padding()
 {
-	return Section{ s_Manager->create_new(title) };
+	m_Manager->remove_padding();
+}
+
+void HSection::attach(GUIObject* HSection)
+{
+	m_Manager->attach(HSection);
+}
+
+
+void HSection::detach()
+{
+	m_Manager->detach();
+}
+
+void HSection::make_root()
+{
+	m_Manager->set_root();
+}
+
+HSection HSection::Create(const std::string& title)
+{
+	return { new HSectionManager(title) };
+}
+
+
+HSection::operator GUIObject*()
+{
+	return dynamic_cast<GUIObject*>(m_Manager);
+}
+
+void VSection::make_scalable() const
+{
+	m_Manager->make_scalable();
+}
+
+
+void VSection::scale(u32 rel_dim) const
+{
+	m_Manager->set_scale((float)rel_dim);
+}
+
+void VSection::attach(std::initializer_list<GUIObject*> HSections)
+{
+	for(auto HSection : HSections)
+		m_Manager->attach(HSection);
+}
+
+void VSection::remove_padding()
+{
+	m_Manager->remove_padding();
+}
+
+void VSection::attach(GUIObject* HSection)
+{
+	m_Manager->attach(HSection);
+}
+
+
+void VSection::detach()
+{
+	m_Manager->detach();
+}
+
+void VSection::make_root()
+{
+	m_Manager->set_root();
+}
+
+VSection VSection::Create(const std::string& title)
+{
+	return { new VSectionManager(title) };
+}
+
+VSection::operator GUIObject*()
+{
+	return dynamic_cast<GUIObject*>(m_Manager);
+}
+
+
+void VSection::enable_heading() const
+{
+	m_Manager->add_decoration();
+}
+
+void VSection::disable_heading() const
+{
+	m_Manager->remove_decoration();
+}
+
+void HSection::enable_heading() const
+{
+	m_Manager->add_decoration();
+}
+
+void HSection::disable_heading() const
+{
+	m_Manager->remove_decoration();
 }
 
 }
