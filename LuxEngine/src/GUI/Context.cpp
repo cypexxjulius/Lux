@@ -10,7 +10,7 @@ namespace Lux::GUI
 
 Context::Context()
 {
-	m_Registry.register_components<Components::Types>();
+	m_Registry.register_component_group(AllComponents);
 
 	GUIObject::Init(*this, m_Registry);
 	

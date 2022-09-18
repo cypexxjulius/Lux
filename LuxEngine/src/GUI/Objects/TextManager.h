@@ -2,6 +2,8 @@
 
 #include "GUIObject.h"
 
+#include "GlyphObject.h"
+
 namespace Lux::GUI
 {
 
@@ -13,9 +15,6 @@ public:
 		:	GUIObject(TypeComponent::TEXT)
 	{
 		auto& text = attach_component<TextComponent>();
-		auto& rect = attach_component<RectComponent>();
-
-		rect.color = { 0.0f, 0.0f, 0.0f, 1.0f};
 
 		text.text = text_str;
 		text.font = font;
@@ -108,6 +107,7 @@ public:
 		auto& text = get<TextComponent>();
 
 		text.glyphs.reserve(text.text.size());
+
 		text.linelength = 0.0;
 
 		float lineheight = text.font->lineheight() * text.scale;
@@ -127,37 +127,44 @@ public:
 				UUID glyph_id = 0;
 				if(text.glyphs.size() == index)
 				{
-					text.glyphs.emplace_back(CreatePlain());
-					glyph_id = text.glyphs.back();
-					AttachComponent<TransformComponent>(glyph_id);
-					AttachComponent<GlyphComponent>(glyph_id);
+					text.glyphs.emplace_back(CreateObject<GlyphObject>());
 
 				}
 				glyph_id = text.glyphs[index++];
 
-				auto& transform = Get<TransformComponent>(glyph_id);
-				auto& glyph_component = Get<GlyphComponent>(glyph_id);
+
+				GlyphObject& glyph_obj = GetObject<GlyphObject>(glyph_id);
 				
+				GlyphComponent& glyph_component = glyph_obj.get_glyph_component();
+
+
 
 				glyph_component.color = text.color;
 				glyph_component.font = text.font;
 				glyph_component.tex_coords = glyph.text_coords;
 				glyph_component.glyph = character;
-
-				
-
-				transform = { 
-					.position = position, 
-					.rotation = { 0.0f, 0.0f, 0.0f},
-					.scale = {  scale, scale, 1.0f} 
-				};
-
 				glyph_component.char_transform = glyph.transform;
+
+				TransformComponent& transform = glyph_obj.get_transform_component();
+				
+				transform.position = position;
+				transform.scale = { scale, scale, 1.0f };
+				
+				index++;
 			}
 
 			text.linelength += (float)glyph.advance * scale;
 			position.x += (float)glyph.advance * scale;
+		
 		}
+
+		while (text.glyphs.size() + 1 > index)
+		{
+			delete &GetObject(text.glyphs.back());
+			text.glyphs.pop_back();
+		}
+
+
 	}
 
 	void destroy(UUID id)

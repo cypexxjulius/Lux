@@ -10,26 +10,23 @@
 namespace Lux::GUI
 {
 
-class SectionManager : public GUIObject
-{
-private:
-
-	static constexpr Array<v4, 4> ColorPallet = {
+static constexpr Array<v4, 4> ColorPallet = {
 		v4{ 0.12f, 0.12f, 0.12f, 1.0f},
 		v4{ 0.28f, 0.28f, 0.28f, 1.0f},
 		v4{ 0.17f, 0.52f, 0.75f, 1.0f},
 		v4{0.43f, 0.68f, 0.85f, 1.0f}
-	};
+};
 
-protected:
+class SectionManager : public GUIObject
+{
+public:
 
 	SectionManager()
 		: GUIObject(TypeComponent::SECTION)
 	{
-		auto& rect_component = attach_component<RectComponent>();
 		auto& section = attach_component<SectionComponent>();
 		auto& style = attach_component<SectionStyleComponent>();
-		auto& layout = get<LayoutComponent>();
+		auto& layout = attach_component<LayoutComponent>();
 
 		
 		layout = section_default_layout();
@@ -47,7 +44,14 @@ protected:
 		GetObject<RectObject>(section.top_section).set_color(ColorPallet[2]);
 	}
 
-public:
+	virtual ~SectionManager()
+	{
+		auto& section = get<SectionComponent>();
+		GetObject(section.background).shutdown();
+		GetObject(section.outline).shutdown();
+		GetObject(section.top_section).shutdown();
+
+	}
 
 	static LayoutComponent section_default_layout() 
 	{
@@ -68,7 +72,8 @@ public:
 		return {
 			.top_section_height = 40.0f,
 			.bottom_section_height = 0.0f,
-			.outline_width = 2.0f,
+			.outline_width = 5.0f,
+			.body_padding = 5.0f,
 
 			.top_section_bg_color = ColorPallet[2],
 			.bottom_section_bg_color = ColorPallet[2],
@@ -127,7 +132,7 @@ public:
 		if(!layout.parent)
 			return refresh_this();
 		
-		auto& parent_obj = GetObject(layout.parent);
+		auto& parent_obj = GetObject<SectionManager>(layout.parent);
 		auto& parent_layout = parent_obj.get<LayoutComponent>();
 		if(layout.scaling_type == ScaleType::DYNAMIC)
 			parent_layout.sum_relative_scale += rel_dim - old_scale;
@@ -196,7 +201,7 @@ public:
 		section.depth = depth;
 
 		// Outline Rect
-		GetObject<RectObject>(section.outline).refresh(position, width, height, depth);
+		GetObject<RectObject>(section.outline).refresh(position, width, height, depth++);
 
 		position.x += style.outline_width;
 		position.y += style.outline_width;
@@ -205,8 +210,18 @@ public:
 		height -= style.outline_width * 2;
 
 		// Body Rect
-		GetObject<RectObject>(section.background).refresh(position, width, height, depth);
+		GetObject<RectObject>(section.background).refresh(position, width, height, depth++);
+
+		position.x += style.body_padding;
+		position.y += style.body_padding;
+
+		width -= style.body_padding * 2.0f;
+		height -= style.body_padding * 2.0f;
+
+		refresh_body(position, width, height, depth);
 	}
+
+	virtual void refresh_body(v2 position, float width, float height, float depth) = 0;
 
 	void refresh_this()
 	{
@@ -227,7 +242,7 @@ public:
 };
 
 
-class HSectionManager final : public SectionManager
+class HSectionManager : public SectionManager
 {
 public:
 
@@ -237,28 +252,20 @@ public:
 		section.name = title;
 	}
 
-	/*
-	virtual void refresh(v2 position, float width, float height, float depth) override
+	~HSectionManager() = default;
+	
+	virtual void refresh_body(v2 position, float width, float height, float depth) override
 	{
+		auto& layout = get<LayoutComponent>();
+		auto& section = get<SectionComponent>();
 
-		update_transform(position, width, height, depth);
+		float relative_size = width - layout.sum_fixed_scale;
 
-		v2 child_position = { position.x + layout.padding.x, position.y + layout.padding.y};
-		float child_width = width - 2 * layout.padding.x;
-		float child_height = height - 2 * layout.padding.y - section.reserved_bottom - section.reserved_top;
-
-		refresh_header(child_position, child_width, header.header_height, depth + 1);
-
-		child_position.y += section.reserved_top;
-
-		float relative_size = child_width - layout.sum_fixed_scale;
-		
-		depth++;
 		for(auto& [index, child_id]  : layout.sections)
 		{
 			auto& child_layout = Get<LayoutComponent>(child_id);
 
-			v2 new_position {  child_position.x + layout.child_margin.x, child_position.y + layout.child_margin.y }; 
+			v2 new_position {  position.x + layout.child_margin.x, position.y + layout.child_margin.y }; 
 			float new_width = 0.0f, new_height = 0.0f;
 
 
@@ -269,9 +276,9 @@ public:
 			else 
 				new_width = child_layout.scale;
 				
-			child_position.x += new_width;
+			position.x += new_width;
 
-			new_height = child_height;
+			new_height = height;
 			
 
 			new_width  -= 2 * layout.child_margin.x;
@@ -280,7 +287,6 @@ public:
 			GetObject(child_id).refresh(new_position, new_width, new_height, depth);
 		}
 	}
-	*/
 };
 
 
@@ -295,33 +301,20 @@ public:
 		section.name = title;
 	}
 
-	/*
-	virtual void refresh(v2 position, float width, float height, float depth) override
+	
+	virtual void refresh_body(v2 position, float width, float height, float depth) override
 	{
 		auto& layout = get<LayoutComponent>();
 		auto& section = get<SectionComponent>();
-		
-		auto& header = get<SectionHeaderComponent>();
 
-		
-		update_transform(position, width, height, depth);
-
-		v2 child_position = { position.x + layout.padding.x, position.y + layout.padding.y };
-		float child_width = width - 2 * layout.padding.x;
-		float child_height = height - 2 * layout.padding.y - section.reserved_bottom - section.reserved_top;
-
-		refresh_header(child_position, width, header.header_height, depth + 1);
-
-		child_position.y += section.reserved_top;
-
-		float relative_size = child_height - layout.sum_fixed_scale;
+		float relative_size = height - layout.sum_fixed_scale;
 		
 		depth++;
 		for(auto& [index, child_id]  : layout.sections)
 		{
 			auto& child_layout = Get<LayoutComponent>(child_id);
 
-			v2 new_position {  child_position.x + layout.child_margin.x, child_position.y + layout.child_margin.y }; 
+			v2 new_position {  position.x + layout.child_margin.x, position.y + layout.child_margin.y }; 
 			float new_width = 0.0f, new_height = 0.0f;
 
 
@@ -333,9 +326,9 @@ public:
 			else 
 				new_height = child_layout.scale;
 				
-			child_position.y += new_height;
+			position.y += new_height;
 				
-			new_width = child_width;
+			new_width = width;
 
 			new_width  -= 2 * layout.child_margin.x;
 			new_height -= 2 * layout.child_margin.y;
@@ -343,7 +336,6 @@ public:
 			GetObject(child_id).refresh(new_position, new_width, new_height, depth);
 		}
 	}
-	*/
 
 };
 

@@ -98,14 +98,15 @@ public:
 	requires std::derived_from<T, GUIObject>
 	static T& GetObject(UUID id)
 	{
-		return *std::static_pointer_cast<T*>(GetObject(id));
+		return *static_cast<T*>(&GetObject(id));
 	}
 
 	template<typename T>
 	requires std::derived_from<T, GUIObject>
-	static UUID CreateObject(T&& args = {})
+	static UUID CreateObject()
 	{
-		(new T(std::forward<T>(args)))->get_id();
+		T* temp = new T();
+		return temp->get_id();
 	}
 	static void DestroyPlain(UUID id)
 	{

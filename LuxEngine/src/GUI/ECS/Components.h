@@ -8,11 +8,9 @@
 
 #include "Core/UUID.h"
 
-#include "Registry.h"
-
-#include "GUI/Interface/Interface.h"
-
 #include "GUI/Types.h"
+
+#include "Registry.h"
 
 namespace Lux::GUI
 {
@@ -28,9 +26,11 @@ enum TypeComponent
 {
 	SECTION,
 	TEXT,
+	GLYPH,
 	RECT,
 	SECTION_TOP,
 	SECTION_BOTTOM,
+
 };
 
 
@@ -88,6 +88,7 @@ struct SectionStyleComponent
 	float bottom_section_height;
 	
 	float outline_width;
+	float body_padding;
 
 	v4 top_section_bg_color;
 	v4 bottom_section_bg_color;
@@ -111,16 +112,15 @@ struct SectionComponent
 };
 
 
-template<typename... Types>
-struct ComponentGroup{};
 
-ComponentGroup <
+static ECS::ComponentGroup <
 	TypeComponent, 
 	SectionComponent, 
+	SectionStyleComponent,
 	TransformComponent, 
 	LayoutComponent, 
 	TextComponent, 
 	GlyphComponent, 
 	RectComponent
-> Components{};
+> AllComponents;
 }

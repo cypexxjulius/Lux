@@ -15,7 +15,7 @@ namespace Lux::GUI
 
         static inline v3 ToRenderSpace(float aspect_ratio, float width, float height, v3 position)
         {
-            return { position.x * aspect_ratio / width, position.y / height, position.z / 200 };
+            return { position.x * aspect_ratio / width, position.y / height, position.z };
         }
 
         static inline v3 ToRenderSpaceDelta(float aspect_ratio, float width, float height, v3 position)

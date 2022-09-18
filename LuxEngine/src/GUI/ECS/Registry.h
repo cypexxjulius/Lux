@@ -6,7 +6,10 @@
 
 namespace Lux::GUI::ECS
 {
-
+template<typename ...Types>
+struct ComponentGroup
+{
+};
 
 class Registry
 {
@@ -138,6 +141,12 @@ public:
 		register_component<T>();
 
 		register_components<VAR_ARGS...>();
+	}
+
+	template<typename ...Types>
+	inline void register_component_group(ComponentGroup<Types...> group)
+	{
+		register_components<Types...>();
 	}
 
 	template<typename T>
