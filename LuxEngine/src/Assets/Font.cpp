@@ -11,6 +11,8 @@
 #include <msdfgen-ext.h>
 #include <msdf-atlas-gen/msdf-atlas-gen.h>
 
+#include <stb_rect_pack.h>
+
 using namespace msdf_atlas;
 
 namespace Lux

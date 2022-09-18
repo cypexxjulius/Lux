@@ -27,7 +27,10 @@ struct TransformComponent
 enum TypeComponent
 {
 	SECTION,
-	TEXT
+	TEXT,
+	RECT,
+	SECTION_TOP,
+	SECTION_BOTTOM,
 };
 
 
@@ -79,24 +82,45 @@ struct LayoutComponent
 	SortedContainer<u32, UUID> sections;
 };
 
-struct SectionHeaderComponent
+struct SectionStyleComponent
 {
-	UUID title_text;
-	UUID retractable_button;
+	float top_section_height;
+	float bottom_section_height;
+	
+	float outline_width;
 
-	float header_height;
-	LayoutComponent layout;
+	v4 top_section_bg_color;
+	v4 bottom_section_bg_color;
+	v4 background_color;
+	v4 outline_color;
+
+	v4 title_color;
 };
 
 struct SectionComponent
 {
 	std::string name;
-	float reserved_top;
-	float reserved_bottom;
+
+	UUID outline;
+	UUID background;
+	UUID top_section;
+	UUID bottom_section;
+
+	v2 position;
+	float width, height, depth;
 };
 
 
+template<typename... Types>
+struct ComponentGroup{};
 
-#define ComponentGroup TypeComponent, SectionComponent, TransformComponent, SectionHeaderComponent, LayoutComponent, TextComponent, GlyphComponent, RectComponent
-
+ComponentGroup <
+	TypeComponent, 
+	SectionComponent, 
+	TransformComponent, 
+	LayoutComponent, 
+	TextComponent, 
+	GlyphComponent, 
+	RectComponent
+> Components{};
 }

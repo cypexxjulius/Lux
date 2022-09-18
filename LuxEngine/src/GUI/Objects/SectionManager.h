@@ -4,48 +4,52 @@
 
 #include "TextManager.h"
 
+#include "RectObject.h"
+
 
 namespace Lux::GUI
 {
 
 class SectionManager : public GUIObject
 {
+private:
+
+	static constexpr Array<v4, 4> ColorPallet = {
+		v4{ 0.12f, 0.12f, 0.12f, 1.0f},
+		v4{ 0.28f, 0.28f, 0.28f, 1.0f},
+		v4{ 0.17f, 0.52f, 0.75f, 1.0f},
+		v4{0.43f, 0.68f, 0.85f, 1.0f}
+	};
+
 protected:
 
 	SectionManager()
 		: GUIObject(TypeComponent::SECTION)
 	{
 		auto& rect_component = attach_component<RectComponent>();
-		auto& header = attach_component<SectionHeaderComponent>();
+		auto& section = attach_component<SectionComponent>();
+		auto& style = attach_component<SectionStyleComponent>();
 		auto& layout = get<LayoutComponent>();
 
-
-		header.title_text = 0;
 		
 		layout = section_default_layout();
-		attach_component<SectionComponent>();
+		style = section_default_style();
 
-		std::srand(static_cast<unsigned int>(get_id()));
-		float rand_num = ((float)(std::rand() % 100) / 100.0f);
-
-		INFO("Random Number {}", rand_num);
-		static const RectComponent DefaultRect
-		{
-			.tiling = 1.0f,
-			.texture = nullptr,
-			.color = { 1.0f, 1.0f, 1.0f, 1.0f },
-		};
+		section.background = CreateObject<RectObject>();
+		GetObject<RectObject>(section.background).set_color(ColorPallet[0]);
 
 
-		
-		rect_component = DefaultRect;
-		
-		rect_component.color = { rand_num, 1 - rand_num, 1 - rand_num ,1.0f };
+		section.outline = CreateObject<RectObject>();
+		GetObject<RectObject>(section.outline).set_color(ColorPallet[1]);
+
+
+		section.top_section = CreateObject<RectObject>();
+		GetObject<RectObject>(section.top_section).set_color(ColorPallet[2]);
 	}
 
 public:
 
-	LayoutComponent section_default_layout() 
+	static LayoutComponent section_default_layout() 
 	{
 		return {
 			.scaling_type = ScaleType::DYNAMIC,
@@ -59,6 +63,20 @@ public:
 		};
 	}
 
+	static SectionStyleComponent section_default_style()
+	{
+		return {
+			.top_section_height = 40.0f,
+			.bottom_section_height = 0.0f,
+			.outline_width = 2.0f,
+
+			.top_section_bg_color = ColorPallet[2],
+			.bottom_section_bg_color = ColorPallet[2],
+			.background_color = ColorPallet[0],
+			.outline_color = ColorPallet[1],
+			.title_color = ColorPallet[0]
+		};
+	}		 
 	void make_scalable() 
 	{ 
 		auto& layout = get<LayoutComponent>();
@@ -69,6 +87,7 @@ public:
 
 	void add_decoration()
 	{
+		/*
 		auto& section = get<SectionComponent>();
 		auto& transform = get<TransformComponent>();
 		auto& header = get<SectionHeaderComponent>();
@@ -81,10 +100,12 @@ public:
 		section.reserved_top += header.header_height;
 
 		text_manager->fit_to_bbox(transform.scale.x, header.header_height);
+		*/
 	}
 
 	void remove_decoration()
 	{
+		/*
 		auto& header = get<SectionHeaderComponent>();
 		auto& section = get<SectionComponent>();
 
@@ -92,6 +113,7 @@ public:
 
 		GetObject(header.title_text).shutdown();
 		header.title_text = 0;
+		*/
 	}
 
 
@@ -163,13 +185,34 @@ public:
 		refresh_this();
 	}
 
-	void refresh_header(v2 position, float width, float height, float depth)
+	virtual void refresh(v2 position, float width, float height, float depth) override
 	{
-		auto& header = get<SectionHeaderComponent>();
-		if(!header.title_text)
-			return;
+		auto& section = get<SectionComponent>();
+		auto& style = get<SectionStyleComponent>();
 
-		GetObject(header.title_text).refresh(position, width, height, depth);
+		section.position = position;
+		section.width = width;
+		section.height = height;
+		section.depth = depth;
+
+		// Outline Rect
+		GetObject<RectObject>(section.outline).refresh(position, width, height, depth);
+
+		position.x += style.outline_width;
+		position.y += style.outline_width;
+
+		width -= style.outline_width * 2;
+		height -= style.outline_width * 2;
+
+		// Body Rect
+		GetObject<RectObject>(section.background).refresh(position, width, height, depth);
+	}
+
+	void refresh_this()
+	{
+		auto& section = get<SectionComponent>();
+
+		refresh(section.position, section.width, section.height, section.depth);
 	}
 
 	void remove_padding()
@@ -194,11 +237,9 @@ public:
 		section.name = title;
 	}
 
+	/*
 	virtual void refresh(v2 position, float width, float height, float depth) override
 	{
-		auto& layout = get<LayoutComponent>();
-		auto& section = get<SectionComponent>();
-		auto& header = get<SectionHeaderComponent>();
 
 		update_transform(position, width, height, depth);
 
@@ -239,6 +280,7 @@ public:
 			GetObject(child_id).refresh(new_position, new_width, new_height, depth);
 		}
 	}
+	*/
 };
 
 
@@ -253,6 +295,7 @@ public:
 		section.name = title;
 	}
 
+	/*
 	virtual void refresh(v2 position, float width, float height, float depth) override
 	{
 		auto& layout = get<LayoutComponent>();
@@ -300,6 +343,7 @@ public:
 			GetObject(child_id).refresh(new_position, new_width, new_height, depth);
 		}
 	}
+	*/
 
 };
 

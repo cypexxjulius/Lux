@@ -32,24 +32,6 @@ public:
 		delete this;
 	}
 
-	inline LayoutComponent default_layout()
-	{
-		return {
-			.scaling_type = ScaleType::DYNAMIC,
-			.scale = 1,
-
-			.child_margin = { 0, 0},
-			.padding = { 0, 0 },
-
-			.spacing = LayoutSpacing::START,
-
-			.sum_fixed_scale = 0,
-			.sum_relative_scale = 0,
-
-			.parent = 0,
-		};
-	}
-
 	template<typename T>
 	inline T& attach_component()
 	{
@@ -73,17 +55,6 @@ public:
 
 		transform.position = { position.x, position.y, depth};
 		transform.scale = { width, height, 1.0f};
-	}
-
-	inline void refresh_this()
-	{
-		auto& transform = get<TransformComponent>();
-		auto& layout = get<LayoutComponent>();
-
-		return;
-
-
-		refresh(transform.position, transform.scale.x, transform.scale.y, transform.position.z);
 	}
 
 	inline void set_parent(UUID id)
@@ -123,11 +94,19 @@ public:
 
 	static GUIObject& GetObject(UUID id);
 
-	static UUID CreatePlain()
+	template<typename T>
+	requires std::derived_from<T, GUIObject>
+	static T& GetObject(UUID id)
 	{
-		return s_Registry->create();
+		return *std::static_pointer_cast<T*>(GetObject(id));
 	}
 
+	template<typename T>
+	requires std::derived_from<T, GUIObject>
+	static UUID CreateObject(T&& args = {})
+	{
+		(new T(std::forward<T>(args)))->get_id();
+	}
 	static void DestroyPlain(UUID id)
 	{
 		s_Registry->destroy(id);

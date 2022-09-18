@@ -90,17 +90,6 @@ void GUILayer::on_update()
 	Renderer2D::BeginScene(m_MainCamera->projection());
 
     float AspectRatio = m_Width / m_Height;
-
-    v3 test_scale = {1.0f, 1.0f, 1.0f};
-	v3 test_position = { 0.0f, 0.0f, 0.9f};
-		
-
-	mat4 test_rect_transform =   glm::translate(mat4{ 1.0f }, test_position) *
-                            glm::scale(mat4{ 1.0f }, test_scale);
-
-
-    Renderer2D::DrawTexturedRect(test_rect_transform, {1.0f, 1.0f, 1.0f, 1.0f}, m_RectTexture, 1.0f);
-
     
 	m_Context.render_rects([&](const TransformComponent& transform, const RectComponent& rect){
 

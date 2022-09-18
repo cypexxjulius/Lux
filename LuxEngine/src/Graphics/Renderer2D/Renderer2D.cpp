@@ -96,7 +96,7 @@ void Renderer2D::DrawGlyph(const mat4& transform, const v4& color, const std::ar
     Verify(Data);
     u32 TextureID = Data->glyph_batch.register_texture(font->bitmap());
     
-    Data->glyph_batch.Push(transform, color, tex_coords, TextureID, false);
+    Data->glyph_batch.Push(transform, color, tex_coords, TextureID, true);
 }
 
 void Renderer2D::DrawText(std::string_view text, const mat4& transform, const v4& color, Ref<Font>& font)

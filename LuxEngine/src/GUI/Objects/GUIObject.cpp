@@ -20,9 +20,6 @@ GUIObject::GUIObject(TypeComponent type)
 {
 	s_Context->register_element(m_ID, this);
 
-
-	attach_component<TransformComponent>();
-	attach_component<LayoutComponent>() = default_layout();
 	attach_component<TypeComponent>() = type;
 }
 

@@ -10,13 +10,13 @@ namespace Lux::GUI
 
 Context::Context()
 {
-	m_Registry.register_components < ComponentGroup > ();
+	m_Registry.register_components<Components::Types>();
 
 	GUIObject::Init(*this, m_Registry);
 	
 	auto& elements = m_Registry.view<TransformComponent, RectComponent>();
 
-	m_Font = ResourceManager::CreateFont("GUIStandardFont", { "res/fonts/Roboto-Bold.ttf" });
+	m_Font = ResourceManager::CreateFont("GUIStandardFont", { "res/fonts/Roboto-Regular.ttf" });
 }
 
 Context::~Context()
