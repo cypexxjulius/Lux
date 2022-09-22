@@ -30,6 +30,7 @@ enum TypeComponent
 	RECT,
 	SECTION_TOP,
 	SECTION_BOTTOM,
+	TEXT_WIDGET
 
 };
 
@@ -106,9 +107,21 @@ struct SectionComponent
 	UUID background;
 	UUID top_section;
 	UUID bottom_section;
+	UUID title;
 
 	v2 position;
 	float width, height, depth;
+};
+
+struct TextWidgetComponent
+{
+	bool shortened;
+	float max_width;
+	float scale;
+	std::string text;
+	Ref<Font> font;
+
+	UUID text_obj;
 };
 
 
@@ -121,6 +134,7 @@ static ECS::ComponentGroup <
 	LayoutComponent, 
 	TextComponent, 
 	GlyphComponent, 
-	RectComponent
+	RectComponent,
+	TextWidgetComponent
 > AllComponents;
 }

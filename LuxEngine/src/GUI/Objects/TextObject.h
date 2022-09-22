@@ -7,21 +7,18 @@
 namespace Lux::GUI
 {
 
-class TextManager final : public GUIObject 
+class TextObject final : public GUIObject 
 {
 public:
 
-	TextManager(const std::string& text_str, const Ref<Font>& font, const v3& position, const v4& color)
+	TextObject(const std::string& string, const Ref<Font>& font, float scale)
 		:	GUIObject(TypeComponent::TEXT)
 	{
 		auto& text = attach_component<TextComponent>();
-
-		text.text = text_str;
+		text.text = string;
 		text.font = font;
-		text.position = position;
-		text.color = color;
+		text.scale = scale;
 
-		recalculate();
 	}
 
 	void set_text(std::string_view comp_text)
@@ -32,8 +29,6 @@ public:
 			return;
 
 		text.text = comp_text;
-		
-		recalculate();
 	}
 
 	void set_position(const v3& position)
@@ -41,8 +36,6 @@ public:
 		auto& text = get<TextComponent>();
 
 		text.position = position;
-
-		recalculate();
 	}
 
 	void set_font(const Ref<Font>& font)
@@ -53,8 +46,6 @@ public:
 			return;
 
 		text.font = font;
-		
-		recalculate();
 	}
 	
 	void set_color(const v4& color)
@@ -81,24 +72,18 @@ public:
 			scale = std::min(width_scale, scale);
 		}
 
-		INFO("Setting text scale to {}", scale);
-
 		text.scale = scale;
-		recalculate();
 	}
 
 	virtual void refresh(v2 position, float width, float height, float depth) override
 	{
 		auto& text = get<TextComponent>();
-		auto& transform = get<TransformComponent>();
 
-
-		transform.position = text.position = { position.x, position.y, depth };
-		transform.scale = { width, height, 1.0f};
-
-		transform.position.z -= 0.1f;
-
-		fit_to_bbox(width, height);
+		text.position = { position, depth };
+		if(height > text.font->lineheight() || width > text.linelength)
+			fit_to_bbox(width, height);
+		
+		recalculate();
 	}
 
 
@@ -106,7 +91,22 @@ public:
 	{
 		auto& text = get<TextComponent>();
 
-		text.glyphs.reserve(text.text.size());
+		u32 actual_char_count = 0;
+		for (auto character : text.text)
+			actual_char_count += (character != ' ');
+
+		text.glyphs.reserve(actual_char_count);
+		while (text.glyphs.size() < actual_char_count)
+		{
+			text.glyphs.emplace_back(CreateObject<GlyphObject>());
+		}
+
+		while (text.glyphs.size() > actual_char_count)
+		{
+			delete& GetObject(text.glyphs.back());
+			text.glyphs.pop_back();
+		}
+
 
 		text.linelength = 0.0;
 
@@ -124,14 +124,7 @@ public:
 
 			if (character != ' ')
 			{
-				UUID glyph_id = 0;
-				if(text.glyphs.size() == index)
-				{
-					text.glyphs.emplace_back(CreateObject<GlyphObject>());
-
-				}
-				glyph_id = text.glyphs[index++];
-
+				UUID glyph_id = text.glyphs[index++];
 
 				GlyphObject& glyph_obj = GetObject<GlyphObject>(glyph_id);
 				
@@ -149,22 +142,12 @@ public:
 				
 				transform.position = position;
 				transform.scale = { scale, scale, 1.0f };
-				
-				index++;
 			}
 
 			text.linelength += (float)glyph.advance * scale;
 			position.x += (float)glyph.advance * scale;
 		
 		}
-
-		while (text.glyphs.size() + 1 > index)
-		{
-			delete &GetObject(text.glyphs.back());
-			text.glyphs.pop_back();
-		}
-
-
 	}
 
 	void destroy(UUID id)
@@ -173,6 +156,47 @@ public:
 
 		for (auto& glyph : text.glyphs)
 			DestroyPlain(glyph);
+	}
+
+	void replace_ending(const std::string& new_ending, float max_width)
+	{
+		auto& text = get<TextComponent>();
+		float ending_width = 0.0f;
+		for (char character : new_ending)
+		{
+			auto& glyph = text.font->getGlyph(character);
+			ending_width += (float)glyph.advance * text.scale;
+		}
+
+		u32 index = 0;
+		for (char character : text.text)
+		{
+			auto& glyph = text.font->getGlyph(character);
+			max_width -= (float)glyph.advance * text.scale;
+
+			if (max_width <= 0)
+				break;
+
+			index++;
+		}
+		
+		text.text = text.text.substr(index) + new_ending;
+	}
+
+
+	float get_width()
+	{
+		auto& text = get<TextComponent>();
+
+		float linelength = 0.0f;
+		
+		for (char character : text.text)
+		{
+			auto& glyph = text.font->getGlyph(character);
+			linelength += (float)glyph.advance * text.scale;
+		}
+		
+		return linelength;
 	}
 	
 };

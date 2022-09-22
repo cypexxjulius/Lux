@@ -12,33 +12,39 @@ public:
 
     void on_attach() override
     {
-        auto body = GUI::VSection::Create("Body");
+        GUI::VSection body("Body");
         body.remove_padding();
 
-        auto TopBar =  GUI::HSection::Create("TopBar");
+        GUI::HSection TopBar("TopBar");
         TopBar.enable_heading();
         
-        auto PageContent = GUI::HSection::Create("PageContent");
+        GUI::HSection PageContent("PageContent");
         PageContent.scale(8);
         
 
         body.attach({ TopBar, PageContent });
 
-        auto LeftSection = GUI::VSection::Create("LeftSection");
+        GUI::VSection LeftSection("LeftSection");
 
 
-        auto RightSection = GUI::VSection::Create("RightSection");
+        GUI::VSection RightSection("RightSection");
 
 
-        auto MiddleSection = GUI::VSection::Create("MiddleSection");
+        GUI::VSection MiddleSection("MiddleSection");
         MiddleSection.scale(3);
         
-        auto ViewPortSection = GUI::VSection::Create("ViewPortSection");
+        GUI::VSection ViewPortSection("ViewPortSection");
         ViewPortSection.scale(4);
         ViewPortSection.make_scalable();
 
-        auto UtilsSection = GUI::VSection::Create("UtilsSection");
+        GUI::VSection UtilsSection("UtilsSection");
         UtilsSection.make_scalable();
+
+        GUI::TextWidget Text("abcdefghijklmnopqrstuvwxyz");
+
+
+        GUI::TextWidget Text2("Hello World this is not a thrill");
+        UtilsSection.attach({ Text, Text2 });
 
         MiddleSection.attach({ ViewPortSection, UtilsSection });
         

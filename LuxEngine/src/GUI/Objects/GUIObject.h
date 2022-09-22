@@ -101,11 +101,11 @@ public:
 		return *static_cast<T*>(&GetObject(id));
 	}
 
-	template<typename T>
+	template<typename T, typename...Args>
 	requires std::derived_from<T, GUIObject>
-	static UUID CreateObject()
+	static UUID CreateObject(Args&&... args)
 	{
-		T* temp = new T();
+		T* temp = new T(std::forward<Args>(args)...);
 		return temp->get_id();
 	}
 	static void DestroyPlain(UUID id)

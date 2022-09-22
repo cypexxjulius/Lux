@@ -71,7 +71,7 @@ Font::Font(const String& filepath)
 		TightAtlasPacker packer;
 
 		packer.setDimensionsConstraint(TightAtlasPacker::DimensionsConstraint::SQUARE);
-		packer.setMinimumScale(64.0);
+		packer.setMinimumScale(32.0);
 
 		packer.setPixelRange(2.0);
 		packer.setMiterLimit(1.0);

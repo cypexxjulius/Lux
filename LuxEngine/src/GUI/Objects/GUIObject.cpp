@@ -29,7 +29,6 @@ GUIObject& GUIObject::GetObject(UUID id)
 	return s_Context->get_object(id);
 }
 
-
 void GUIObject::set_root()
 {
 	return s_Context->set_root(this);

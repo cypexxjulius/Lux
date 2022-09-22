@@ -2,7 +2,7 @@
 
 #include "GUIObject.h"
 
-#include "TextManager.h"
+#include "TextObject.h"
 
 #include "RectObject.h"
 
@@ -17,18 +17,18 @@ static constexpr Array<v4, 4> ColorPallet = {
 		v4{0.43f, 0.68f, 0.85f, 1.0f}
 };
 
-class SectionManager : public GUIObject
+class SectionObject : public GUIObject
 {
 public:
 
-	SectionManager()
+	SectionObject()
 		: GUIObject(TypeComponent::SECTION)
 	{
 		auto& section = attach_component<SectionComponent>();
 		auto& style = attach_component<SectionStyleComponent>();
 		auto& layout = attach_component<LayoutComponent>();
 
-		
+
 		layout = section_default_layout();
 		style = section_default_style();
 
@@ -41,10 +41,14 @@ public:
 
 
 		section.top_section = CreateObject<RectObject>();
-		GetObject<RectObject>(section.top_section).set_color(ColorPallet[2]);
+		GetObject<RectObject>(section.top_section).set_color(ColorPallet[1]);
+
+		section.title = CreateObject<TextObject>(section.name, GetFont(), 1.0f);
+		GetObject<TextObject>(section.title).set_color({ 1.0f,1.0f,1.0f,1.0f });
+
 	}
 
-	virtual ~SectionManager()
+	virtual ~SectionObject()
 	{
 		auto& section = get<SectionComponent>();
 		GetObject(section.background).shutdown();
@@ -59,8 +63,8 @@ public:
 			.scaling_type = ScaleType::DYNAMIC,
 			.scale = 1,
 
-			.child_margin = { 10.0f, 10.0f},
-			.padding = { 10.0f, 10.0f },
+			.child_margin = { 3.0f, 3.0f},
+			.padding = { 3.0f, 3.0f },
 
 			.spacing = LayoutSpacing::START,
 			.parent = 0,
@@ -70,9 +74,9 @@ public:
 	static SectionStyleComponent section_default_style()
 	{
 		return {
-			.top_section_height = 40.0f,
+			.top_section_height = 20.0f,
 			.bottom_section_height = 0.0f,
-			.outline_width = 5.0f,
+			.outline_width = 2.0f,
 			.body_padding = 5.0f,
 
 			.top_section_bg_color = ColorPallet[2],
@@ -97,7 +101,7 @@ public:
 		auto& transform = get<TransformComponent>();
 		auto& header = get<SectionHeaderComponent>();
 
-		auto text_manager = new TextManager(section.name, GetFont(), transform.position, { 1.0f, 1.0f, 1.0f, 1.0f});
+		auto text_manager = new TextObject(section.name, GetFont(), transform.position, { 1.0f, 1.0f, 1.0f, 1.0f});
 		
 		header.header_height = 20.0f;
 
@@ -132,7 +136,7 @@ public:
 		if(!layout.parent)
 			return refresh_this();
 		
-		auto& parent_obj = GetObject<SectionManager>(layout.parent);
+		auto& parent_obj = GetObject<SectionObject>(layout.parent);
 		auto& parent_layout = parent_obj.get<LayoutComponent>();
 		if(layout.scaling_type == ScaleType::DYNAMIC)
 			parent_layout.sum_relative_scale += rel_dim - old_scale;
@@ -145,7 +149,6 @@ public:
 	void attach(GUIObject* child) 
 	{ 
 		auto& layout		= get<LayoutComponent>();
-		auto& name			= child->get<SectionComponent>();
 		auto& child_layout	= child->get<LayoutComponent>();
 
 		layout.sections.insert({static_cast<u32>(layout.sections.size()), child->get_id()});
@@ -209,6 +212,14 @@ public:
 		width -= style.outline_width * 2;
 		height -= style.outline_width * 2;
 
+
+		GetObject<RectObject>(section.top_section).refresh(position, width, style.top_section_height, depth++);
+		GetObject<TextObject>(section.title).refresh(position, width, style.top_section_height, depth);
+
+		position.y += style.top_section_height;
+		height -= style.top_section_height;
+
+
 		// Body Rect
 		GetObject<RectObject>(section.background).refresh(position, width, height, depth++);
 
@@ -227,6 +238,9 @@ public:
 	{
 		auto& section = get<SectionComponent>();
 
+		if (section.width == 0 && section.height == 0)
+			return;
+
 		refresh(section.position, section.width, section.height, section.depth);
 	}
 
@@ -238,21 +252,22 @@ public:
 
 		refresh_this();
 	}
-
 };
 
 
-class HSectionManager : public SectionManager
+class HSectionObject : public SectionObject
 {
 public:
 
-	HSectionManager(const std::string& title)
+	HSectionObject(const std::string& title)
 	{
 		auto& section = get<SectionComponent>();
 		section.name = title;
+
+		GetObject<TextObject>(section.title).set_text(title);
 	}
 
-	~HSectionManager() = default;
+	~HSectionObject() = default;
 	
 	virtual void refresh_body(v2 position, float width, float height, float depth) override
 	{
@@ -290,15 +305,18 @@ public:
 };
 
 
-class VSectionManager : public SectionManager
+class VSectionObject : public SectionObject
 {
 public:
 
-	VSectionManager(const std::string& title)
+	VSectionObject(const std::string& title)
 	{
 		auto& section = get<SectionComponent>();
 
 		section.name = title;
+
+
+		GetObject<TextObject>(section.title).set_text(title);
 	}
 
 	
@@ -308,7 +326,7 @@ public:
 		auto& section = get<SectionComponent>();
 
 		float relative_size = height - layout.sum_fixed_scale;
-		
+
 		depth++;
 		for(auto& [index, child_id]  : layout.sections)
 		{
