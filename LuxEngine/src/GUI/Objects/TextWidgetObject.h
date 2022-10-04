@@ -1,13 +1,13 @@
 #include "WidgetObject.h"
 
 #include "TextObject.h"
-
-#include "GUI/ECS/Components.h"
+#include "GUIGroup.h"
 
 namespace Lux::GUI
 {
 
-class TextWidgetObject : public WidgetObject
+
+class TextWidgetObject : public GUIGroup
 {
 private:
 
@@ -16,55 +16,48 @@ private:
 public:
 
 TextWidgetObject(const std::string& string, const Ref<Font>& font, float scale)
-	: WidgetObject(TypeComponent::TEXT_WIDGET)
-{
+		: GUIGroup(Element(100.0_rel, &m_TextObj), scale * height, ScaleType::FIXED),
+		m_Shortened(false),
+		m_MaxWidth(0.0f),
+		m_Scale(scale * height),
+		m_Text(string),
+		m_TextObj(string, font, 1.0f)
+{	
 
-	auto& text = attach_component<TextWidgetComponent>();
-	text.text = string;
-	text.font = font;
-	text.scale = scale * height;
-	text.shortened = false;
-	text.text_obj = CreateObject<TextObject>(string, font, scale);
-
-	auto& layout = get<LayoutComponent>();
-
-	layout.scale = height * scale;
-	layout.scaling_type = ScaleType::FIXED;
 	
+	m_TextObj.set_color({ 1.0f, 1.0f,1.0f,1.0f });
 
-	auto& text_obj = GetObject<TextObject>(text.text_obj);
-
-	text_obj.set_color({ 1.0f, 1.0f,1.0f,1.0f });
-
-	text.max_width = text_obj.get_width();
+	m_MaxWidth = m_TextObj.get_width();
 }
 
 
-virtual void refresh(v2 position, float width, float height, float depth) override
+virtual void refresh(v3 position, float width, float height) override
 {
-	auto& text = get<TextWidgetComponent>();
-
-	auto& text_obj = GetObject<TextObject>(text.text_obj);
-
-	if (text.max_width > width)
+	if (m_MaxWidth > width)
 	{
-		text_obj.replace_ending("...", width);
-		text.shortened = true;
+		m_TextObj.replace_ending("...", width);
+		m_Shortened = true;
 	}
 
-	if (width >= text.max_width && text.shortened)
-		text_obj.set_text(text.text);
+	if (width >= m_MaxWidth && m_Shortened)
+		m_TextObj.set_text(m_Text);
 	
-	text_obj.refresh(position, width, height, depth);
+	m_TextObj.refresh(position, width, height);
 }
 
 
 void set_text(const std::string& text)
 {
-	auto& text_component = attach_component<TextWidgetComponent>();
-	text_component.text = text;
+	m_Text = text;
 }
+private:
 
+	bool m_Shortened;
+	float m_MaxWidth;
+	float m_Scale;
+	std::string m_Text;
+
+	TextObject m_TextObj;
 };
 
 }

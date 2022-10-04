@@ -7,6 +7,7 @@
 
 #include <map>
 #include <set>
+#include <list>
 #include <array>
 #include <memory>
 #include <vector>
@@ -41,6 +42,9 @@ using Bitset = std::bitset<T>;
 
 template<typename T>
 using Set = std::set<T>;
+
+template<typename T>
+using LinkedList = std::list<T>;
 
 using String = std::string;
 

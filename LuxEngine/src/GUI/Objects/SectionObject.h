@@ -10,6 +10,15 @@
 namespace Lux::GUI
 {
 
+struct SectionStyle
+{
+	float top_section_height;
+	float bottom_section_height;
+
+	float outline_width;
+	float body_padding;
+};
+
 static constexpr Array<v4, 4> ColorPallet = {
 		v4{ 0.12f, 0.12f, 0.12f, 1.0f},
 		v4{ 0.28f, 0.28f, 0.28f, 1.0f},
@@ -17,43 +26,32 @@ static constexpr Array<v4, 4> ColorPallet = {
 		v4{0.43f, 0.68f, 0.85f, 1.0f}
 };
 
-class SectionObject : public GUIObject
+class SectionObject : public GUIParent
 {
+private:
+
+	static constexpr SectionStyle DefaultStyle = {
+		.top_section_height = 20.0f,
+		.bottom_section_height = 0.0f,
+		.outline_width = 2.0f,
+		.body_padding = 5.0f,
+	};
+
 public:
 
-	SectionObject()
-		: GUIObject(TypeComponent::SECTION)
+	SectionObject(const std::string& title)
+		:	GUIObject(TypeComponent::SECTION),
+			m_Title(title),
+			m_Outline(ColorPallet[1]),
+			m_Background(ColorPallet[0]),
+			m_TopSection(ColorPallet[1]),
+			m_TitleText(title, GetFont(), 1.0f)
+			m_Style(&DefaultStyle)
 	{
-		auto& section = attach_component<SectionComponent>();
+
+
 		auto& style = attach_component<SectionStyleComponent>();
 		auto& layout = attach_component<LayoutComponent>();
-
-
-		layout = section_default_layout();
-		style = section_default_style();
-
-		section.background = CreateObject<RectObject>();
-		GetObject<RectObject>(section.background).set_color(ColorPallet[0]);
-
-
-		section.outline = CreateObject<RectObject>();
-		GetObject<RectObject>(section.outline).set_color(ColorPallet[1]);
-
-
-		section.top_section = CreateObject<RectObject>();
-		GetObject<RectObject>(section.top_section).set_color(ColorPallet[1]);
-
-		section.title = CreateObject<TextObject>(section.name, GetFont(), 1.0f);
-		GetObject<TextObject>(section.title).set_color({ 1.0f,1.0f,1.0f,1.0f });
-
-	}
-
-	virtual ~SectionObject()
-	{
-		auto& section = get<SectionComponent>();
-		GetObject(section.background).shutdown();
-		GetObject(section.outline).shutdown();
-		GetObject(section.top_section).shutdown();
 
 	}
 
@@ -70,22 +68,7 @@ public:
 			.parent = 0,
 		};
 	}
-
-	static SectionStyleComponent section_default_style()
-	{
-		return {
-			.top_section_height = 20.0f,
-			.bottom_section_height = 0.0f,
-			.outline_width = 2.0f,
-			.body_padding = 5.0f,
-
-			.top_section_bg_color = ColorPallet[2],
-			.bottom_section_bg_color = ColorPallet[2],
-			.background_color = ColorPallet[0],
-			.outline_color = ColorPallet[1],
-			.title_color = ColorPallet[0]
-		};
-	}		 
+ 
 	void make_scalable() 
 	{ 
 		auto& layout = get<LayoutComponent>();
@@ -252,6 +235,18 @@ public:
 
 		refresh_this();
 	}
+
+
+private:
+
+	std::string m_Title;
+
+	RectObject m_Outline;
+	RectObject m_Background;
+	RectObject m_TopSection;
+	TextObject m_TitleText;
+
+	SectionStyle* m_Style;
 };
 
 

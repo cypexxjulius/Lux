@@ -11,6 +11,8 @@ namespace Lux {
 
 class ResourceManager;
 
+
+// TODO remove mat4 from glyph 
 struct Glyph
 {
 	Array<v2, 4> text_coords;

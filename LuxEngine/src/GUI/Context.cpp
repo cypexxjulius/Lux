@@ -4,57 +4,52 @@
 
 #include "Assets/AssetManager.h"
 
+#include "Objects/LayoutObject.h"
+
 namespace Lux::GUI
 {
 
 
 Context::Context()
 {
-	m_Registry.register_component_group(AllComponents);
-
-	GUIObject::Init(*this, m_Registry);
+	GUIObject::Init(*this);
 	
-	auto& elements = m_Registry.view<TransformComponent, RectComponent>();
 
 	m_Font = ResourceManager::CreateFont("GUIStandardFont", { "res/fonts/Roboto-Regular.ttf" });
 }
 
 Context::~Context()
 {
-	m_RootElement->shutdown();
+	delete m_RootElement;
 
 	// Todo simple Hack for cleaning up the gui elements ;>)
 	while(!m_GUIElements.empty())
 	{
-		m_GUIElements.begin()->second->shutdown();	
+		delete m_GUIElements.begin()->second;	
 	}
 
 	GUIObject::Shutdown();
 }
 
 
-void Context::render_rects(std::function<void(const TransformComponent&, const RectComponent&)> render_callback)
+void Context::render_rects(std::function<void(const Transform&, const Rect&)> render_callback)
 {
-	auto& elements = m_Registry.view<TransformComponent, RectComponent>();
-
-	for(auto element : elements.get_elements())
+	for(auto element : m_RectComponents)
 	{
 		render_callback(
-			m_Registry.get_component<TransformComponent>(element), 
-			m_Registry.get_component<RectComponent>(element)	
+			*element.second.first, 
+			*element.second.second	
 		);
 	}
 }
 
-void Context::render_glyphs(std::function<void(const TransformComponent&, const GlyphComponent&)> render_callback)
+void Context::render_glyphs(std::function<void(const Transform&, const Glyph&)> render_callback)
 {
-	auto& elements = m_Registry.view<TransformComponent, GlyphComponent>();
-
-	for(auto element : elements.get_elements())
+	for(auto element : m_GlyphComponents)
 	{
 		render_callback(
-			m_Registry.get_component<TransformComponent>(element), 
-			m_Registry.get_component<GlyphComponent>(element)	
+			*element.second.first,
+			*element.second.second
 		);
 	}
 }
@@ -69,13 +64,13 @@ void Context::update_dimensions(float width, float height)
 	refresh();
 }
 
-void Context::set_root(GUIObject* root)
+void Context::set_root(UUID id)
 {
-	Verify(root);
-	Verify(root->get<TypeComponent>() == TypeComponent::SECTION);
-	Verify(root->get<LayoutComponent>().parent == 0);
+	Verify(m_GUIElements.find(id) != m_GUIElements.end());
 
-	m_RootElement = root;
+
+
+	m_RootElement = static_cast<GUIChild*>(m_GUIElements.at(id));
 
 	refresh();
 }

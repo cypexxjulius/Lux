@@ -3,30 +3,42 @@
 
 #include "GUIObject.h"
 
+#include "GUI/GUIRenderComponents.h"
+
 namespace Lux::GUI
 {
+
+
 
 class GlyphObject final : public GUIObject
 {
 public:
 	GlyphObject()
-		:	GUIObject(TypeComponent::GLYPH)
+		:	GUIObject(GUIType::GLYPH)
 	{
-		attach_component<GlyphComponent>();
-		attach_component<TransformComponent>();
+		register_glyph(&m_TransformComponent, &m_GlyphComponent);
 	}
 
-	virtual void refresh(v2 position, float width, float height, float depth) override {};
-
-	GlyphComponent& get_glyph_component()
+	~GlyphObject()
 	{
-		return get<GlyphComponent>();
+		unregister_glyph();
 	}
 
-	TransformComponent& get_transform_component()
+	Glyph& get_glyph_component()
 	{
-		return get<TransformComponent>();
+		return m_GlyphComponent;
 	}
+
+	Transform& get_transform_component()
+	{
+		return m_TransformComponent;
+	}
+
+private:
+
+	Glyph m_GlyphComponent;
+
+	Transform m_TransformComponent;
 
 
 };

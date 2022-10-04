@@ -15,6 +15,14 @@ public:
 		attach_component<RectComponent>();
 	}
 
+	RectObject(const v4& color)
+		: GUIObject(TypeComponent::RECT)
+	{
+		attach_component<TransformComponent>();
+		attach_component<RectComponent>().color = color;
+	}
+
+
 	void set_position(const v3& position)
 	{
 		auto& transform = get<TransformComponent>();
