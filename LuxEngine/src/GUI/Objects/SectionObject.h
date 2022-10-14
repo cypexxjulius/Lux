@@ -6,6 +6,8 @@
 
 #include "RectObject.h"
 
+#include "GUIParent.h"
+
 
 namespace Lux::GUI
 {
@@ -30,7 +32,7 @@ class SectionObject : public GUIParent
 {
 private:
 
-	static constexpr SectionStyle DefaultStyle = {
+	static constexpr SectionStyle DefaultStyle {
 		.top_section_height = 20.0f,
 		.bottom_section_height = 0.0f,
 		.outline_width = 2.0f,
@@ -39,73 +41,27 @@ private:
 
 public:
 
-	SectionObject(const std::string& title)
-		:	GUIObject(TypeComponent::SECTION),
-			m_Title(title),
-			m_Outline(ColorPallet[1]),
-			m_Background(ColorPallet[0]),
-			m_TopSection(ColorPallet[1]),
-			m_TitleText(title, GetFont(), 1.0f)
-			m_Style(&DefaultStyle)
+	SectionObject(const std::string& title, LayoutView&& layout)
+		:		GUIParent(std::forward<LayoutView>(layout)),
+				m_Title(title),
+				m_Outline(ColorPallet[1]),
+				m_Background(ColorPallet[0]),
+				m_TopSection(ColorPallet[1]),
+				m_TitleText(title, GetFont(), 1.0f),
+				m_Style(&DefaultStyle)
 	{
-
-
-		auto& style = attach_component<SectionStyleComponent>();
-		auto& layout = attach_component<LayoutComponent>();
-
-	}
-
-	static LayoutComponent section_default_layout() 
-	{
-		return {
-			.scaling_type = ScaleType::DYNAMIC,
-			.scale = 1,
-
-			.child_margin = { 3.0f, 3.0f},
-			.padding = { 3.0f, 3.0f },
-
-			.spacing = LayoutSpacing::START,
-			.parent = 0,
-		};
 	}
  
 	void make_scalable() 
-	{ 
-		auto& layout = get<LayoutComponent>();
-
-		layout.scaling_type = ScaleType::DYNAMIC;
-		refresh_this();
+	{
 	}
 
 	void add_decoration()
 	{
-		/*
-		auto& section = get<SectionComponent>();
-		auto& transform = get<TransformComponent>();
-		auto& header = get<SectionHeaderComponent>();
-
-		auto text_manager = new TextObject(section.name, GetFont(), transform.position, { 1.0f, 1.0f, 1.0f, 1.0f});
-		
-		header.header_height = 20.0f;
-
-		header.title_text = text_manager->get_id();
-		section.reserved_top += header.header_height;
-
-		text_manager->fit_to_bbox(transform.scale.x, header.header_height);
-		*/
 	}
 
 	void remove_decoration()
 	{
-		/*
-		auto& header = get<SectionHeaderComponent>();
-		auto& section = get<SectionComponent>();
-
-		section.reserved_top -= header.header_height;
-
-		GetObject(header.title_text).shutdown();
-		header.title_text = 0;
-		*/
 	}
 
 
@@ -246,7 +202,7 @@ private:
 	RectObject m_TopSection;
 	TextObject m_TitleText;
 
-	SectionStyle* m_Style;
+	const SectionStyle* m_Style;
 };
 
 

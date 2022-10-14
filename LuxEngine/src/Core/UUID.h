@@ -26,6 +26,12 @@ public:
 	{
 	}
 
+	UUID(UUID&& id)
+		: m_UUID(id)
+	{
+		id.m_UUID = 0;
+	}
+
 	~UUID()
 	{
 

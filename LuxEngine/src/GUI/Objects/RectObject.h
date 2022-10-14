@@ -2,54 +2,55 @@
 
 #include "GUIObject.h"
 
+#include "GUI/GUIRenderComponents.h"
+
 namespace Lux::GUI
 {
 
-class RectObject final : public GUIObject
+class RectObject : GUIObject
 {
 public:
 	RectObject()
-		: GUIObject(TypeComponent::RECT)
+		: GUIObject(GUIType::RECT)
 	{
-		attach_component<TransformComponent>();
-		attach_component<RectComponent>();
+		register_rect(&m_Transform, &m_RectComponent);
 	}
 
 	RectObject(const v4& color)
-		: GUIObject(TypeComponent::RECT)
+		: GUIObject(GUIType::RECT)
 	{
-		attach_component<TransformComponent>();
-		attach_component<RectComponent>().color = color;
+		m_RectComponent.color = color;
+		register_rect(&m_Transform, &m_RectComponent);
 	}
 
+	~RectObject()
+	{
+		unregister_rect();
+	}
 
 	void set_position(const v3& position)
 	{
-		auto& transform = get<TransformComponent>();
-
-		transform.position = position;
+		m_Transform.position = position;
 	}
 
 	void set_scale(const v3& scale)
 	{
-		auto& transform = get<TransformComponent>();
-
-		transform.scale = scale;
+		m_Transform.scale = scale;
 	}
 
 	void set_color(const v4& color)
 	{
-		auto& rect = get<RectComponent>();
-		rect.color = color;
+		m_RectComponent.color = color;
 	}
 
-	virtual void refresh(v2 position, float width, float height, float depth) override
+	void refresh(v3 position, float width, float height)
 	{
-		auto& transform = get<TransformComponent>();
-
-		transform.position = { position, depth };
-		transform.scale = { width, height, 1.0f };
+		m_Transform.position = position;
+		m_Transform.scale = { width, height, 1.0f };
 	}
+
+	Rect m_RectComponent {};
+	TransformComponent m_Transform {};
 
 };
 

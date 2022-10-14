@@ -29,12 +29,12 @@ void GUIObject::SetRoot(UUID id)
 	s_Context->set_root(id);
 }
 
-void GUIObject::register_glyph(Transform* transform, Glyph* glyph)
+void GUIObject::register_glyph(TransformComponent* transform, Glyph* glyph)
 {
 	s_Context->add_to_render_queue(m_ID, transform, glyph);
 }
 
-void GUIObject::register_rect(Transform* transform, Rect* rect)
+void GUIObject::register_rect(TransformComponent* transform, Rect* rect)
 {
 	s_Context->add_to_render_queue(m_ID, transform, rect);
 }

@@ -2,6 +2,8 @@
 
 #include "GUIObject.h"
 
+#include "GUI/Types.h"
+
 namespace Lux::GUI
 {
 
@@ -61,9 +63,9 @@ private:
 	float m_Scale;
 	ScaleType m_ScaleType;
 
-	v2 m_Margin;
-	v2 m_Padding;
-	v2 m_Border;
+	v2 m_Margin { 0.0f, 0.0f };
+	v2 m_Padding { 0.0f, 0.0f };
+	v2 m_Border { 0.0f, 0.0f };
 };
 
 }

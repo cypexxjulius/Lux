@@ -1,6 +1,6 @@
 #pragma once
 
-#include "GUIObject.h"
+#include "GUIChild.h"
 
 #include "GlyphObject.h"
 
@@ -67,7 +67,7 @@ public:
 		m_Scale = scale;
 	}
 
-	virtual void refresh(v3 position, float width, float height) override
+	void refresh(v3 position, float width, float height) override
 	{
 		m_Position = position;
 		
@@ -134,7 +134,7 @@ public:
 				glyph_component.glyph = character;
 				glyph_component.char_transform = glyph.transform;
 
-				Transform& transform = glyph_obj.get_transform_component();
+				TransformComponent& transform = glyph_obj.get_transform_component();
 				
 				transform.position = position;
 				transform.scale = { scale, scale, 1.0f };

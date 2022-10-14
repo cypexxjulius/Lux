@@ -1,7 +1,5 @@
 #pragma once
 
-#include "GUI/ECS/Core.h"
-
 #include "Objects/GUIObject.h"
 
 #include <functional>
@@ -29,9 +27,9 @@ public:
 	~Context();
 
 
-	void render_rects(std::function<void(const Transform&, const Rect&)>);
+	void render_rects(std::function<void(const TransformComponent&, const Rect&)>);
 
-	void render_glyphs(std::function<void(const Transform&, const Glyph&)>);
+	void render_glyphs(std::function<void(const TransformComponent&, const Glyph&)>);
 
 	void update_dimensions(float width, float height);
 
@@ -53,19 +51,19 @@ private:
 	}
 
 	template<typename T>
-	void add_to_render_queue(UUID id, Transform* transform, T* rect)
+	void add_to_render_queue(UUID id, TransformComponent* transform, T* rect)
 	{
 		TODO();
 	}
 
 	template<>
-	void add_to_render_queue<Rect>(UUID id, Transform* transform, Rect* rect)
+	void add_to_render_queue<Rect>(UUID id, TransformComponent* transform, Rect* rect)
 	{
 		m_RectComponents.insert({ id, {transform, rect} });
 	}
 
 	template<>
-	void add_to_render_queue<Glyph>(UUID id, Transform* transform, Glyph* glyph)
+	void add_to_render_queue<Glyph>(UUID id, TransformComponent* transform, Glyph* glyph)
 	{
 		m_GlyphComponents.insert({ id, {transform, glyph} });
 	}
@@ -97,8 +95,8 @@ private:
 
 	float m_Width = 0.0f, m_Height = 0.0f;
 
-	Container<UUID, Pair<Transform*, Rect*>> m_RectComponents;
-	Container<UUID, Pair<Transform*, Glyph*>> m_GlyphComponents;
+	Container<UUID, Pair<TransformComponent*, Rect*>> m_RectComponents;
+	Container<UUID, Pair<TransformComponent*, Glyph*>> m_GlyphComponents;
 
 	Ref<Font> m_Font;
 };

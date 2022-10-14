@@ -43,7 +43,7 @@ Scale operator "" _px(long double scale)
 {
 	return {
 		scale,
-		ScaleType::ABSOLUTE
+		ScaleType::FIXED
 	};
 }
 
@@ -51,7 +51,7 @@ Scale operator "" _rel(long double scale)
 {
 	return {
 		scale,
-		ScaleType::ABSOLUTE
+		ScaleType::RELATIVE
 	};
 }
 

@@ -10,7 +10,7 @@
 namespace Lux::GUI
 {
 
-struct Transform
+struct TransformComponent
 {
 	v3 position;
 	v3 scale;

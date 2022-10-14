@@ -4,6 +4,8 @@
 
 #include "Assets/Font.h"
 
+#include "GUI/GUIRenderComponents.h"
+
 namespace Lux::GUI
 {
 
@@ -40,9 +42,9 @@ public:
 		return m_ID;
 	}
 	
-	void register_glyph(Transform* transform, Glyph* rect);
+	void register_glyph(TransformComponent* transform, Glyph* rect);
 
-	void register_rect(Transform* transform, Rect* rect);
+	void register_rect(TransformComponent* transform, Rect* rect);
 
 	void unregister_glyph();
 

@@ -29,7 +29,7 @@ public:
 		return m_GlyphComponent;
 	}
 
-	Transform& get_transform_component()
+	TransformComponent& get_transform_component()
 	{
 		return m_TransformComponent;
 	}
@@ -38,7 +38,7 @@ private:
 
 	Glyph m_GlyphComponent;
 
-	Transform m_TransformComponent;
+	TransformComponent m_TransformComponent;
 
 
 };
